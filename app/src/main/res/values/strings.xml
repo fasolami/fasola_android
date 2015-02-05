@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">FaSoLa Minutes</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="tab_leaders">Leaders</string>
+    <string name="tab_songs">Songs</string>
+    <string name="tab_singings">Singings</string>
+    <string name="title_activity_leader">Leader</string>
+    <string name="title_activity_song">Song</string>
+    <string name="title_activity_singing">Singing</string>
+    <string name="song_label">Songs</string>
+    <string name="singing_label">Singings</string>
+    <string name="search_hint">Search songs</string>
+
+    <plurals name="timesLed">
+        <item quantity="one">%d Time</item>
+        <item quantity="other">%d Times</item>
+    </plurals>
+    <plurals name="songsLed">
+        <item quantity="one">%d Song</item>
+        <item quantity="other">%d Songs</item>
+    </plurals>
+    <plurals name="leaders">
+        <item quantity="one">%d Leader</item>
+        <item quantity="other">%d Leaders</item>
+    </plurals>
+    <plurals name="singingsAttended">
+        <item quantity="one">%d Singing</item>
+        <item quantity="other">%d Singings</item>
+    </plurals>
+
+    <string name="title_activity_searchable">SearchableActivity</string>
+
+</resources>
