@@ -12,8 +12,12 @@ DATABASE_PATH = r'app/src/main/assets/databases/minutes.db'
 
 # ('Description', 'pattern', 'replace")
 STEPS = (
+    ('Uppercase I -> Lowercase L',
+        r'(\S)I', r'\1l'),
     ('Lowercase',
-        '', ''),
+        '.*', lambda match: match.group().lower()),
+    ('Add space after "." for abbreviations',
+        r'\.(\S)', r'. \1'),
     ('Smart apostrophes -> straight apostrophes',
         u'\u2019', "'"),
     ('Hyphens -> spaces',
@@ -69,7 +73,6 @@ def process_name(name, step=-1):
     
     If step is given, apply just that step, otherwise apply all steps.
     """
-    name = name.lower()
     if step == -1:
         # Do all of the levels
         for desc, pat, replace in STEPS:
@@ -89,6 +92,7 @@ def get_nonascii(name):
 
 if __name__ == '__main__':
     name_dict = get_names()
+    total_changes = 0
     for step in xrange(len(STEPS)):
         name_list = name_dict.values()
         name_dict = {}
@@ -103,6 +107,7 @@ if __name__ == '__main__':
                 changes += 1
             except KeyError:
                 name_dict[node.key] = node
+        total_changes += changes
         # Print any changes
         print('Pass %d: %s' % (step + 1, STEPS[step][0]))
         print('=' * 60)
@@ -113,3 +118,5 @@ if __name__ == '__main__':
         print('%d changes' % changes if changes > 0 else '[No changes]')
         raw_input('Press any key to continue...')
         print()
+    print('Done')
+    print('Total changes: %d' % total_changes)
