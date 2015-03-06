@@ -1,0 +1,31 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="org.fasola.fasolaminutes.MainActivity">
+
+    <item android:id="@+id/menu_leader_sort"
+        android:title="@string/menu_leader_sort"
+        android:icon="@drawable/ic_action_sort_by_size"
+        app:showAsAction="ifRoom">
+
+        <menu>
+        <group android:id="@+id/menu_group_leader_sort"
+            android:checkableBehavior="single">
+
+            <item android:id="@+id/menu_leader_sort_name"
+                android:title="@string/menu_leader_sort_name"
+                app:showAsAction="never" />
+
+            <item android:id="@+id/menu_leader_sort_count"
+                android:title="@string/menu_leader_sort_count"
+                app:showAsAction="never" />
+
+            <item android:id="@+id/menu_leader_sort_entropy"
+                android:title="@string/menu_leader_sort_entropy"
+                app:showAsAction="never" />
+
+        </group>
+        </menu>
+
+    </item>
+</menu>

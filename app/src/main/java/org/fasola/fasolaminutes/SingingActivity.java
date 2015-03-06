@@ -1,18 +1,11 @@
 package org.fasola.fasolaminutes;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.ListFragment;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 
@@ -55,10 +48,12 @@ public class SingingActivity extends SimpleTabActivity {
             mItemLayoutId = android.R.layout.simple_list_item_2;
             mIntentClass = SongActivity.class;
         }
+
         @Override
-        public Cursor getCursor() {
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
             long singingId = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            return getDb().query(MinutesDb.SINGING_LEADER_LIST_QUERY, new String[]{String.valueOf(singingId)});
+            setQuery(MinutesDb.SINGING_LEADER_LIST_QUERY, new String[]{String.valueOf(singingId)});
         }
     }
 

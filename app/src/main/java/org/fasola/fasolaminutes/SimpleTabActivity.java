@@ -116,7 +116,7 @@ public class SimpleTabActivity extends ActionBarActivity implements ActionBar.Ta
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.menu_settings) {
             return true;
         }
 
@@ -152,7 +152,7 @@ public class SimpleTabActivity extends ActionBarActivity implements ActionBar.Ta
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
-            mTabs = new ArrayList<Pair<String, Class<? extends Fragment>>>();
+            mTabs = new ArrayList<>();
         }
 
         @Override

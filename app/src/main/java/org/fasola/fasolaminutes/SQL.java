@@ -3,11 +3,8 @@ package org.fasola.fasolaminutes;
 import android.text.TextUtils;
 import android.util.Pair;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * A namespace class with SQL helpers
@@ -25,7 +22,7 @@ public class SQL {
         protected StringBuilder SQL_COLUMNS;
 
         public static Map<Pair<BaseTable, BaseTable>, Pair<Column, Column>> joinMap =
-                new HashMap<Pair<BaseTable, BaseTable>, Pair<Column, Column>>();
+                new HashMap<>();
 
         protected BaseTable(String tableName) {
             TABLE_NAME = tableName;
@@ -111,21 +108,21 @@ public class SQL {
         }
 
         public String count(boolean distinct) {
-            return aggregate("COUNT", distinct);
+            return func("COUNT", distinct);
         }
 
-        // Generic aggregate functions
-        public String aggregate(String funcName) {
-            return aggregate(funcName, false);
+        // Generic functions
+        public String func(String funcName) {
+            return func(funcName, false);
         }
 
-        public String aggregate(String funcName, boolean distinct) {
+        public String func(String funcName, boolean distinct) {
             return funcName + "(" + (distinct ? "DISTINCT " : "") + fullName + ")";
         }
 
         // Extra argument aggregates cannot use DISTINCT
-        public String aggregate(String funcName, String... args) {
-            return funcName + "(" + fullName + TextUtils.join(", ", args) + ")";
+        public String func(String funcName, String... args) {
+            return funcName + "(" + fullName + ", " + TextUtils.join(", ", args) + ")";
         }
     }
 
@@ -246,21 +243,27 @@ public class SQL {
             return append(" GROUP BY ").append(", ", cols);
         }
 
-        boolean mHasOrder; // default false
-
-        public Query order(Object... args) {
-            if (!mHasOrder) {
-                mHasOrder = true;
-                return append(" ORDER BY ").append(args);
-            } else {
-                return append(", ").append(args);
-            }
-        }
-
         public Query having(Object... args) {
             return append(" HAVING ").append(args);
         }
 
+        protected StringBuilder qOrder; // ORDER BY is kept separate
+        // NB: Each call will replace the previous ORDER BY clause
+        public Query order(Object... args) {
+            qOrder = new StringBuilder("");
+            for (int i = 0; i < args.length; i+=2) {
+                if (i != 0)
+                    qOrder.append(", ");
+                // Column
+                qOrder.append(args[i].toString()).append(" ");
+                // ASC/DESC.  Assume ASC if there are an odd number of args
+                if (args.length > i+1)
+                    qOrder.append(args[i+1].toString());
+                else
+                    qOrder.append("ASC");
+            }
+            return this;
+        }
 
         // append overloads
         public Query append(Object str) {
@@ -281,7 +284,10 @@ public class SQL {
 
         // Data access
         public String toString() {
-            return q.toString();
+            if (qOrder != null)
+                return q.toString() + " ORDER BY " + qOrder.toString();
+            else
+                return q.toString();
         }
     }
 }

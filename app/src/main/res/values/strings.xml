@@ -2,14 +2,21 @@
 <resources>
 
     <string name="app_name">FaSoLa Minutes</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_leader_sort">Sort</string>
+    <string name="menu_leader_sort_name">By last name</string>
+    <string name="menu_leader_sort_count">By lead count</string>
+    <string name="menu_leader_sort_entropy">By entropy score</string>
+
     <string name="tab_leaders">Leaders</string>
     <string name="tab_songs">Songs</string>
     <string name="tab_singings">Singings</string>
+
     <string name="title_activity_leader">Leader</string>
     <string name="title_activity_song">Song</string>
     <string name="title_activity_singing">Singing</string>
+    <string name="title_activity_searchable">SearchableActivity</string>
+
     <string name="song_label">Songs</string>
     <string name="singing_label">Singings</string>
     <string name="search_hint">Search songs</string>
@@ -30,7 +37,5 @@
         <item quantity="one">%d Singing</item>
         <item quantity="other">%d Singings</item>
     </plurals>
-
-    <string name="title_activity_searchable">SearchableActivity</string>
 
 </resources>

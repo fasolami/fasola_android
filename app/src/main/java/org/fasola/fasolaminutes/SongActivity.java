@@ -70,9 +70,10 @@ public class SongActivity extends SimpleTabActivity {
         }
 
         @Override
-        public Cursor getCursor() {
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
             long songId = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            return getDb().query(MinutesDb.SONG_LEADER_LIST_QUERY, new String[]{String.valueOf(songId)});
+            setQuery(MinutesDb.SONG_LEADER_LIST_QUERY, new String[]{String.valueOf(songId)});
         }
     }
 
@@ -124,15 +125,15 @@ public class SongActivity extends SimpleTabActivity {
             // Query
             long songId = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
             MinutesDb db = MinutesDb.getInstance(getActivity());
-            String query = SQL.select(C.SongStats.YEAR, C.SongStats.TIMES_LED, C.SongStats.RANK)
+            String query = SQL.select(C.SongStats.YEAR, C.SongStats.LEAD_COUNT, C.SongStats.RANK)
                                 .from(C.SongStats)
                                 .whereEq(C.SongStats.SONG_ID)
                                 .order(C.SongStats.YEAR, "ASC").toString();
             Cursor cursor = db.query(query, new String[]{String.valueOf(songId)});
             // Get data
-            ArrayList<String> xVals = new ArrayList<String>();
-            ArrayList<Entry> rankVals = new ArrayList<Entry>();
-            ArrayList<Entry> countVals = new ArrayList<Entry>();
+            ArrayList<String> xVals = new ArrayList<>();
+            ArrayList<Entry> rankVals = new ArrayList<>();
+            ArrayList<Entry> countVals = new ArrayList<>();
             while (cursor.moveToNext()) {
                 xVals.add(cursor.getString(0));
                 countVals.add(new Entry(cursor.getInt(1), xVals.size()));
@@ -144,7 +145,7 @@ public class SongActivity extends SimpleTabActivity {
             countSet.setColor(Color.BLUE);
             LineDataSet rankSet = new LineDataSet(rankVals, "Rank");
             rankSet.setColor(Color.GRAY);
-            ArrayList<LineDataSet> dataSets = new ArrayList<LineDataSet>();
+            ArrayList<LineDataSet> dataSets = new ArrayList<>();
             dataSets.add(countSet);
             dataSets.add(rankSet);
             // Set chart data

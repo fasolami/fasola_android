@@ -1,11 +1,5 @@
 package org.fasola.fasolaminutes;
 
-import android.database.sqlite.SQLiteDatabase;
-import android.util.Pair;
-
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * FaSoLa database
  */
@@ -46,10 +40,10 @@ public class MinutesContract {
             super("song_stats");
             SONG_ID = joinColumn(Song, "song_id");
             YEAR = column("year", "TEXT");
-            TIMES_LED = column("lead_count", "INTEGER");
+            LEAD_COUNT = column("lead_count", "INTEGER");
             RANK = column("rank", "INTEGER");
         }
-        public SQL.Column SONG_ID, YEAR, TIMES_LED, RANK;
+        public SQL.Column SONG_ID, YEAR, LEAD_COUNT, RANK;
     }
     public static SongStatsContract SongStats = new SongStatsContract();
 
@@ -57,17 +51,13 @@ public class MinutesContract {
     public static final class LeaderContract extends SQL.BaseTable {
         private LeaderContract() {
             super("leaders");
-/*
-            // instr doesn't exist in the SQLite version android uses
-            FIRST_NAME = "substr(name, 1, instr(name, ' '))";
-            LAST_NAME = "substr(substr(name, instr(name, ' ') + 1), instr(substr(name, instr(name, ' ') + 1), ' ')+1)";
-*/
             FULL_NAME = column("name", "TEXT");
-            TIMES_LED = column("lead_count", "INTEGER");
-            SORT = FULL_NAME.fullName;
+            LAST_NAME = column("last_name", "TEXT"); // NB must use db altered from iPhone version
+            LEAD_COUNT = column("lead_count", "INTEGER");
+            ENTROPY = column("song_entropy", "INTEGER");
+            SORT = LAST_NAME.fullName;
         }
-        public SQL.Column FULL_NAME, TIMES_LED;
-        public String LAST_NAME, FIRST_NAME; // Query to return the full name
+        public SQL.Column FULL_NAME, LAST_NAME, LEAD_COUNT, ENTROPY;
         public String SORT; // Query to use for ordering
     }
     public static LeaderContract Leader = new LeaderContract();
@@ -79,9 +69,9 @@ public class MinutesContract {
             super("leader_song_stats");
             LEADER_ID = joinColumn(Leader, "leader_id");
             SONG_ID = joinColumn(Song, "song_id");
-            TIMES_LED = column("lead_count", "INTEGER");
+            LEAD_COUNT = column("lead_count", "INTEGER");
         }
-        public SQL.Column SONG_ID, LEADER_ID, TIMES_LED;
+        public SQL.Column SONG_ID, LEADER_ID, LEAD_COUNT;
     }
     public static LeaderStatsContract LeaderStats = new LeaderStatsContract();
 

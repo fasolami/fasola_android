@@ -1,16 +1,8 @@
 package org.fasola.fasolaminutes;
 
-import android.content.Intent;
 import android.database.Cursor;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v4.content.Loader;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 
@@ -55,27 +47,54 @@ public class LeaderActivity extends SimpleTabActivity {
         }
 
         @Override
-        public Cursor getCursor() {
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
             long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            return getDb().query(MinutesDb.LEADER_SONG_LIST_QUERY, new String[] {String.valueOf(id)});
+            setQuery(MinutesDb.LEADER_SONG_LIST_QUERY, new String[] {String.valueOf(id)});
         }
     }
 
-    static public class LeaderSingingFragment extends CursorListFragment {
+    static public class LeaderSingingFragment extends CursorStickyListFragment {
         public LeaderSingingFragment() {
             mItemLayoutId = android.R.layout.simple_list_item_2;
             mIntentClass = SingingActivity.class;
         }
 
         @Override
-        public Cursor getCursor() {
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
             String query =
-                SQL.select("DISTINCT " + C.Singing._ID, C.Singing.NAME, C.Singing.LOCATION)
+                SQL.select("DISTINCT " + C.Singing._ID)
+                    .select(C.Singing.NAME)
+                    .select(C.Singing.LOCATION)
+                    .select(C.Singing.YEAR).as(IndexedCursorAdapter.INDEX_COLUMN)
                     .from(C.SongLeader)
                     .join(C.SongLeader, C.Singing)
                     .whereEq(C.SongLeader.LEADER_ID).toString();
             long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            return getDb().query(query, new String[] {String.valueOf(id)});
+            setQuery(query, new String[] {String.valueOf(id)});
         }
+
+        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+            super.onLoadFinished(loader, cursor);
+            // Find the index column
+            IndexedCursorAdapter adapter = getListAdapter();
+            int indexColumn = adapter.getIndexColumn();
+            // Find the min and max values (assume sorted)
+            cursor.moveToFirst();
+            int min = cursor.getInt(indexColumn);
+            cursor.moveToLast();
+            int max = cursor.getInt(indexColumn);
+            cursor.moveToFirst();
+            // Create sections
+            String[] sections = new String[max-min+1];
+            for (int i = min; i <= max; i++)
+                sections[i-min] = Integer.toString(i);
+            // Set the indexer
+            setIndexer(new StringIndexer(cursor, indexColumn, sections));
+            // Must call this to update the view with new sections
+            //adapter.notifyDataSetChanged();
+        }
+
     }
 }

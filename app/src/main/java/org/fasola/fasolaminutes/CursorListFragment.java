@@ -8,50 +8,141 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.View;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 
 import junit.framework.Assert;
 
 /**
  * Simple framework for using queries as the base for a ListFragment
- * Must override getCursor() and return a Cursor
+ * Call setQuery() with a String or SQL.Query to update the list
  *      Query should have _ID as the first column, and display columns afterwards
- * Set mItemLayoutId to a custom layout
+ *      To use sections and fastScroll, name a column IndexedCursorAdapter.INDEX_COLUMN
+ * Call setIndexer/setAlphabet/setBins/setIntSections to initialize an Indexer
+ * Call setItemLayout() to use a custom layout for list items
  *      Layout should use R.id.text[1-n] to provide text views
  *      The number of TextViews must be >= the number of display columns
- * Set mIntentClass to provide an Activity that will be started when an item is clicked
- * In order to use an index and fastScroll, name a column IndexedCursorAdapter.INDEX_COLUMN
- *      This column will be excluded from display columns
- *      Set mAlphabet to use a custom alphabet
+ * Call setIntentActivity() to provide an Activity that will be started when an item is clicked
  */
-public abstract class CursorListFragment extends ListFragment
+public class CursorListFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
     protected int mItemLayoutId = android.R.layout.simple_list_item_1;
-    protected Class<?> mIntentClass = null;
-    protected String mAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    protected Class<?> mIntentClass;
+    protected String mQuery;
+    protected String[] mQueryParams;
 
-    // Override and return a Cursor
-    public abstract Cursor getCursor();
+    // Set the custom list item layout
+    public void setItemLayout(int layoutId) {
+        mItemLayoutId = layoutId;
+    }
 
-    // Shortcut to get the database
+    // Set an Activity to start when an list item is clicked
+    public void setIntentActivity(Class<?> cls) {
+        mIntentClass = cls;
+    }
+
+    // Set the query and restart the loader (if the query has changed)
+    public void setQuery(String query, String[] params) {
+        boolean restartLoader = mQuery != null && ! mQuery.equals(query);
+        mQuery = query;
+        mQueryParams = params;
+        if (restartLoader)
+            getLoaderManager().restartLoader(1, null, this);
+    }
+
+    public void setQuery(SQL.Query query, String[] params) {
+        setQuery(query.toString(), params);
+    }
+
+    // Set an indexer
+    public void setIndexer(LetterIndexer indexer) {
+        IndexedCursorAdapter adapter = ((IndexedCursorAdapter) getListAdapter());
+        adapter.setIndexer(indexer);
+        // Update fastscroll when the indexer changes
+        if (adapter.getCursor() != null)
+            setFastScrollEnabled(adapter.hasIndex() && adapter.hasIndexer());
+    }
+
+    // Indexer shortcuts
+    public void setAlphabet(CharSequence alphabet) {
+        setIndexer(new LetterIndexer(null, -1, alphabet));
+    }
+
+    public void setBins(int[] bins) {
+        setIndexer(new BinIndexer(null, -1, bins));
+    }
+
+    public void setBins(String[] sections) {
+        setIndexer(new StringIndexer(null, -1, sections));
+    }
+
+    // Get the minutes database
     public MinutesDb getDb() {
         return MinutesDb.getInstance(getActivity());
     }
 
-    public static boolean hasIndex(Cursor cursor) {
-        return cursor.getColumnIndex(IndexedCursorAdapter.INDEX_COLUMN) != -1;
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Create and attach an empty adapter
+        IndexedCursorAdapter adapter = new IndexedCursorAdapter(
+            getActivity(), mItemLayoutId, null, null, null, 0);
+        setListAdapter(adapter);
+        // Start loading the cursor in the background
+        getLoaderManager().initLoader(1, savedInstanceState, this);
     }
+
+    protected void setFastScrollEnabled(boolean enabled) {
+        getListView().setFastScrollEnabled(enabled);
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        if (mIntentClass != null) {
+            Intent intent = new Intent(getActivity(), mIntentClass);
+            intent.putExtra(MainActivity.EXTRA_ID, id);
+            startActivity(intent);
+        }
+    }
+
+    // LoaderCallbacks
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return new CursorLoader(getActivity()) {
+            @Override
+            public Cursor loadInBackground() {
+                return getDb().query(mQuery != null ? mQuery : "", mQueryParams);
+            }
+        };
+    }
+
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        // Setup the CursorAdapter
+        IndexedCursorAdapter adapter = (IndexedCursorAdapter) getListAdapter();
+        String[] from = getFrom(cursor);
+        int[] to = getTo(from.length);
+        adapter.changeCursorAndColumns(cursor, from, to);
+        // Set fastScroll if we have an index column
+        setFastScrollEnabled(adapter.hasIndex() && adapter.hasIndexer());
+    }
+
+    // For some reason this never gets called...
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        ((CursorAdapter)getListAdapter()).changeCursor(null);
+        setListAdapter(null);
+    }
+
+    // Static helper functions
 
     // Return an array of columns from the cursor (excluding the ID column)
     public static String[] getFrom(Cursor cursor) {
         // Assemble the column names based on query columns
         // Check for an index column, which is not included as a display column
-        String[] from = new String[cursor.getColumnCount() - (hasIndex(cursor) ? 2 : 1)];
+        String[] from = new String[cursor.getColumnCount() - (IndexedCursorAdapter.hasIndex(cursor) ? 2 : 1)];
         int fromIdx = 0;
         for (int i = 1; i < cursor.getColumnCount(); ++i) {
             String columnName = cursor.getColumnName(i);
-            if (!columnName.equals(IndexedCursorAdapter.INDEX_COLUMN))
+            if (! columnName.equals(IndexedCursorAdapter.INDEX_COLUMN))
                 from[fromIdx++] = columnName;
         }
         return from;
@@ -77,52 +168,5 @@ public abstract class CursorListFragment extends ListFragment
             }
         }
         return to;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        getLoaderManager().initLoader(1, savedInstanceState, this);
-    }
-
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        if (mIntentClass != null) {
-            Intent intent = intent = new Intent(getActivity(), mIntentClass);
-            intent.putExtra(MainActivity.EXTRA_ID, id);
-            startActivity(intent);
-        }
-    }
-
-    // LoaderCallbacks
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity()) {
-            @Override
-            public Cursor loadInBackground() {
-                return getCursor();
-            }
-        };
-    }
-
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        // Create the cursor adapter
-        String[] from = getFrom(cursor);
-        int[] to = getTo(from.length);
-        if (hasIndex(cursor)) {
-            IndexedCursorAdapter adapter = new IndexedCursorAdapter(
-                    getActivity(), mItemLayoutId, cursor, from, to, 0);
-            // Create the indexer
-            adapter.initIndexer(mAlphabet);
-            // Attach adapter to the list
-            setListAdapter(adapter);
-            getListView().setFastScrollEnabled(true);
-        } else {
-            setListAdapter(new SimpleCursorAdapter(
-                    getActivity(), mItemLayoutId, cursor, from, to, 0));
-        }
-    }
-
-    public void onLoaderReset(Loader<Cursor> loader) {
-        setListAdapter(null);
     }
 }

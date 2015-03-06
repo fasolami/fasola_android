@@ -1,22 +1,10 @@
 package org.fasola.fasolaminutes;
 
-import android.app.Activity;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.text.TextUtils;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 /**
  * The database class
@@ -87,13 +75,29 @@ public class MinutesDb {
             .from(C.Leader)
             .whereEq(C.Leader.FIRST_NAME, C.Leader.LAST_NAME).toString();
 */
-    public static final String LEADER_LIST_QUERY =
+    public static final SQL.Query LEADER_LIST_QUERY =
         SQL.select(C.Leader._ID)
-                .select(C.Leader.SORT).as(IndexedCursorAdapter.INDEX_COLUMN)
+                .select(C.Leader.LAST_NAME).as(IndexedCursorAdapter.INDEX_COLUMN)
                 .select(C.Leader.FULL_NAME)
-                .select("'(' || " + C.Leader.TIMES_LED + " || ')'")
+                .select("'(' || " + C.Leader.LEAD_COUNT + " || ')'")
             .from(C.Leader)
-            .order(C.Leader.SORT, "ASC").toString();
+            .order(C.Leader.LAST_NAME, "ASC");
+
+    public static final SQL.Query LEADER_LIST_QUERY_LEAD_COUNT =
+        SQL.select(C.Leader._ID)
+                .select(C.Leader.LEAD_COUNT + " / 100").as(IndexedCursorAdapter.INDEX_COLUMN)
+                .select(C.Leader.FULL_NAME)
+                .select("'(' || " + C.Leader.LEAD_COUNT + " || ')'")
+            .from(C.Leader)
+            .order(C.Leader.LEAD_COUNT, "DESC");
+
+    public static final SQL.Query LEADER_LIST_QUERY_ENTROPY =
+        SQL.select(C.Leader._ID)
+                .select(C.Leader.ENTROPY + " * 10").as(IndexedCursorAdapter.INDEX_COLUMN)
+                .select(C.Leader.FULL_NAME)
+                .select("'(' || " + C.Leader.ENTROPY.func("ROUND", "4") + " || ')'")
+            .from(C.Leader)
+            .order(C.Leader.ENTROPY, "DESC");
 
     public static final String LEADER_ACTIVITY_QUERY =
         SQL.select(C.Leader.FULL_NAME,
@@ -107,19 +111,18 @@ public class MinutesDb {
     public static final String LEADER_SONG_LIST_QUERY =
         SQL.select(C.Song._ID)
                 .select(C.Song.FULL_NAME)
-                .select("'(' || " + C.LeaderStats.TIMES_LED + " || ')'")
+                .select("'(' || " + C.LeaderStats.LEAD_COUNT + " || ')'")
             .from(C.LeaderStats)
             .join(C.LeaderStats, C.Song)
             .whereEq(C.LeaderStats.LEADER_ID)
-            .order(C.LeaderStats.TIMES_LED, "DESC")
-            .order(C.Song.SORT, "ASC").toString();
+            .order(C.LeaderStats.LEAD_COUNT, "DESC", C.Song.SORT, "ASC").toString();
 
     public static final String SONG_LIST_QUERY =
         SQL.select(C.Song._ID)
                 .select(C.Song.NUMBER)
                 .select(C.Song.TITLE)
-                .select(C.Song.NUMBER + "/100").as(IndexedCursorAdapter.INDEX_COLUMN)
-                .select("'(' || " + C.SongStats.TIMES_LED.aggregate("SUM") + " || ')'")
+                .select(C.Song.NUMBER + "*1").as(IndexedCursorAdapter.INDEX_COLUMN)
+                .select("'(' || " + C.SongStats.LEAD_COUNT.func("SUM") + " || ')'")
             .from(C.Song)
             .left_outer_join(C.Song, C.SongStats)
             .group(C.Song._ID)
@@ -143,17 +146,17 @@ public class MinutesDb {
     public static final String SONG_LEADER_LIST_QUERY =
         SQL.select(C.Leader._ID)
             .select(C.Leader.FULL_NAME)
-            .select("'(' || " + C.LeaderStats.TIMES_LED + " || ')'")
+            .select("'(' || " + C.LeaderStats.LEAD_COUNT + " || ')'")
         .from(C.LeaderStats)
         .join(C.LeaderStats, C.Leader)
         .whereEq(C.LeaderStats.SONG_ID)
-        .order(C.LeaderStats.TIMES_LED, "DESC")
-            .order(C.Leader.SORT, "ASC").toString();
+        .order(C.LeaderStats.LEAD_COUNT, "DESC", C.Leader.SORT, "ASC").toString();
 
     public static final String SINGING_LIST_QUERY =
         SQL.select(C.Singing._ID)
                 .select(C.Singing.NAME)
                 .select(C.Singing.LOCATION)
+                .select(C.Singing.YEAR).as(IndexedCursorAdapter.INDEX_COLUMN)
             .from(C.Singing).toString();
 
     public static final String SINGING_ACTIVITY_QUERY =
@@ -166,7 +169,7 @@ public class MinutesDb {
     public static final String SINGING_LEADER_LIST_QUERY =
         SQL.select(C.Song._ID,
                    C.Song.FULL_NAME,
-                   "group_concat(" + C.Leader.FULL_NAME + ", ', ')")
+                   C.Leader.FULL_NAME.func("group_concat", "', '"))
             .from(C.SongLeader)
             .join(C.SongLeader, C.Song)
             .join(C.SongLeader, C.Leader)
@@ -174,10 +177,10 @@ public class MinutesDb {
             .group(C.SongLeader.SONG_ID)
             .order(C.SongLeader.SINGING_ORDER, "ASC").toString();
 
-    public Cursor query(String sql, String[] args) {
-        return db.rawQuery(sql, args);
+    public Cursor query(Object sql, String[] args) {
+        return db.rawQuery(sql.toString(), args);
     }
-    public Cursor query(String sql) {
+    public Cursor query(Object sql) {
         return query(sql, new String[] {});
     }
 
