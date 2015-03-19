@@ -15,10 +15,10 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
  * A CursorAdapter and StickyListHeadersAdapter that implements SectionIndexer
  */
 public class IndexedCursorAdapter extends SimpleCursorAdapter implements SectionIndexer, StickyListHeadersAdapter {
-    public static final String INDEX_COLUMN = "indexer_column";
     protected LetterIndexer mIndexer;
     protected Object[] mSections;
     protected LayoutInflater mInflater;
+    boolean mAreHeadersVisible = true;
 
     public IndexedCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flag) {
         super(context, layout, c, from, to, flag);
@@ -44,7 +44,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
     }
 
     public static boolean hasIndex(Cursor cursor) {
-        return cursor != null && cursor.getColumnIndex(INDEX_COLUMN) != -1;
+        return cursor != null && cursor.getColumnIndex(SQL.INDEX_COLUMN) != -1;
     }
 
     // Find the index column
@@ -52,7 +52,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         Cursor cursor = getCursor();
         if (cursor == null)
             return -1;
-        int col = cursor.getColumnIndex(INDEX_COLUMN);
+        int col = cursor.getColumnIndex(SQL.INDEX_COLUMN);
         if (col != -1)
             return col;
         // Try first column
@@ -78,8 +78,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         int column = getIndexColumn();
         if (column != -1) {
             // Update the indexer cursor/columns
-            mIndexer.setCursor(cursor);
-            mIndexer.setColumnIndex(column);
+            mIndexer.setCursor(cursor, column);
         }
         else
             mIndexer.setCursor(null);
@@ -102,11 +101,18 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         return mIndexer.getSections();
     }
 
+    public void showHeaders(boolean show) {
+        mAreHeadersVisible = show;
+    }
+
     // StickyListHeadersAdapter overrides
     @Override
     public View getHeaderView(int position, View convertView, ViewGroup parent) {
+        if (! mAreHeadersVisible)
+            return new View(parent.getContext());
         // Create the view
-        if (convertView == null)
+        // If convertView is not a ViewGroup, it was created as an empty View above
+        if (convertView == null || ! (convertView instanceof ViewGroup))
             convertView = mInflater.inflate(R.layout.sticky_list_header, parent, false);
         // Set the text
         TextView text = (TextView) convertView.findViewById(android.R.id.text1);
@@ -115,6 +121,9 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
     }
 
     public long getHeaderId(int position) {
+        // Only create a single header (which will be empty) if headers are invisible
+        if (! mAreHeadersVisible)
+            return 0;
         return getSectionForPosition(position);
     }
 }

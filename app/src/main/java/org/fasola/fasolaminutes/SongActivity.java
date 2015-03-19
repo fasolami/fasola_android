@@ -23,7 +23,7 @@ import java.util.ArrayList;
 
 
 public class SongActivity extends SimpleTabActivity {
-    long mSongId;
+    MinutesContract.SongDAO mSong;
     @Override
     protected int getLayoutId() {
         return R.layout.activity_song;
@@ -38,17 +38,16 @@ public class SongActivity extends SimpleTabActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mSongId = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+        long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
         super.onCreate(savedInstanceState);
         // Query
-        MinutesDb db = MinutesDb.getInstance();
-        Cursor cursor = db.query(MinutesDb.SONG_ACTIVITY_QUERY, new String[]{String.valueOf(mSongId)});
-        if (cursor.moveToFirst()) {
-            String songName = cursor.getString(0);
-            String words = cursor.getString(1);
-            String tune = cursor.getString(2);
-            int nLeaders = cursor.getInt(3);
-            int nTimes = cursor.getInt(4);
+        mSong = C.Song.get(id);
+        if (mSong != null) {
+            String songName = mSong.fullName.getString();
+            String words = "PLACEHOLDER"; //mSong.POET.getString();
+            String tune = "PLACEHOLDER"; //mSong.COMPOSER.getString();
+            int nLeaders = mSong.leaderCount.getInt();
+            int nTimes = mSong.leadCount.getInt();
             if (words.endsWith(", "))
                 words = words.substring(0, words.length() - 2);
             if (tune.endsWith(", "))
@@ -60,7 +59,6 @@ public class SongActivity extends SimpleTabActivity {
             ((TextView) findViewById(R.id.tune)).setText(tune);
             ((TextView) findViewById(R.id.stats)).setText("Led " + timesLed + ", by " + leaders);
         }
-        cursor.close();
     }
 
     public static class SongLeaderListFragment extends CursorListFragment {
@@ -73,7 +71,12 @@ public class SongActivity extends SimpleTabActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             long songId = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            setQuery(MinutesDb.SONG_LEADER_LIST_QUERY, new String[]{String.valueOf(songId)});
+            SQL.Query query = C.Leader.selectList(C.Leader.fullName,
+                                C.LeaderStats.leadCount.format("'(' || {column} || ')'"))
+                            .whereEq(C.LeaderStats.songId)
+                            .order(C.LeaderStats.leadCount, "DESC", C.Leader.lastName, "ASC")
+                            .limit(20);
+            setQuery(query, String.valueOf(songId));
         }
     }
 
@@ -87,9 +90,7 @@ public class SongActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             // Query
-            long songId = ((SongActivity) getActivity()).mSongId;
-            MinutesDb db = MinutesDb.getInstance(getActivity());
-            String lyrics = db.queryString(MinutesDb.SONG_LYRICS_QUERY, new String[]{String.valueOf(songId)});
+            String lyrics = ((SongActivity) getActivity()).mSong.lyrics.getString();
             ((TextView) view.findViewById(R.id.lyrics)).setText(createIndentedText(lyrics, 0, 20));
             // Done
             super.onViewCreated(view, savedInstanceState);
@@ -125,11 +126,11 @@ public class SongActivity extends SimpleTabActivity {
             // Query
             long songId = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
             MinutesDb db = MinutesDb.getInstance(getActivity());
-            String query = SQL.select(C.SongStats.YEAR, C.SongStats.LEAD_COUNT, C.SongStats.RANK)
+            String query = SQL.select(C.SongStats.year, C.SongStats.leadCount, C.SongStats.rank)
                                 .from(C.SongStats)
-                                .whereEq(C.SongStats.SONG_ID)
-                                .order(C.SongStats.YEAR, "ASC").toString();
-            Cursor cursor = db.query(query, new String[]{String.valueOf(songId)});
+                                .whereEq(C.SongStats.songId)
+                                .order(C.SongStats.year, "ASC").toString();
+            Cursor cursor = db.query(query, String.valueOf(songId));
             // Get data
             ArrayList<String> xVals = new ArrayList<>();
             ArrayList<Entry> rankVals = new ArrayList<>();

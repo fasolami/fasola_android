@@ -49,17 +49,29 @@ public class MainActivity extends SimpleTabActivity {
         public void updateQuery() {
             switch(mSortId) {
                 case R.id.menu_leader_sort_count:
-                    setIndexer(new LetterIndexer(null, -1, "9876543210"));
-                    setQuery(MinutesDb.LEADER_LIST_QUERY_LEAD_COUNT, null);
+                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
+                                        .sectionIndex(C.Leader.leadCount, "DESC"));
+                    setBins(0, 10, 50, 100, 500, 1000);
+                    showHeaders(false);
                     break;
                 case R.id.menu_leader_sort_entropy:
-                    setIndexer(new LetterIndexer(null, -1, "9876543210"));
-                    setQuery(MinutesDb.LEADER_LIST_QUERY_ENTROPY, null);
+                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.entropy.format("'(' || ROUND({column}, 4) || ')'"))
+                                     .sectionIndex(C.Leader.entropy.format("CAST({column} * 100 AS INT)"), "DESC"));
+                    setBins(0,10,20,30,40,50,60,70,80,90);
+                    showHeaders(false);
+                    break;
+                case R.id.menu_leader_sort_first_name:
+                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
+                                  .sectionIndex(C.Leader.fullName, "ASC"));
+                    setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                    showHeaders(true);
                     break;
                 case R.id.menu_leader_sort_name:
                 default:
-                    setIndexer(new LetterIndexer(null, -1, "ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
-                    setQuery(MinutesDb.LEADER_LIST_QUERY, null);
+                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
+                                  .sectionIndex(C.Leader.lastName, "ASC"));
+                    setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                    showHeaders(true);
                     break;
             }
         }
@@ -103,17 +115,77 @@ public class MainActivity extends SimpleTabActivity {
     }
 
     public static class SongListFragment extends CursorStickyListFragment {
+        protected int mSortId;
+        protected final static String BUNDLE_SORT = "SORT_ID";
+
         public SongListFragment() {
             mIntentClass = SongActivity.class;
             mItemLayoutId = R.layout.song_list_item;
-            mQuery = MinutesDb.SONG_LIST_QUERY;
+        }
+
+        // Change query/index based on the selected sort column
+        public void updateQuery() {
+            switch(mSortId) {
+                case R.id.menu_song_sort_title:
+                    setQuery(C.Song.selectList(C.Song.number, C.Song.title,
+                                      C.SongStats.leadCount.sum().format("'(' || {column} || ')'"))
+                                .sectionIndex(C.Song.title, "ASC"));
+                    setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                    showHeaders(true);
+                    break;
+                case R.id.menu_song_sort_leads:
+                    setQuery(C.Song.selectList(C.Song.number, C.Song.title,
+                                      C.SongStats.leadCount.sum().format("'(' || {column} || ')'"))
+                                .sectionIndex(C.SongStats.leadCount.sum(), "DESC"));
+                    setBins(100, 500, 1000, 1500, 2000, 2500, 3000);
+                    showHeaders(false);
+                    break;
+                case R.id.menu_song_sort_page:
+                default:
+                    setQuery(C.Song.selectList(C.Song.number, C.Song.title,
+                                      C.SongStats.leadCount.sum().format("'(' || {column} || ')'"))
+                                .sectionIndex(C.Song.pageSort, "ASC"));
+                    setBins(0, 100, 200, 300, 400, 500);
+                    showHeaders(false);
+                    break;
+            }
         }
 
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            int[] bins = {0, 100, 200, 300, 400, 500};
-            setIndexer(new BinIndexer(null, -1, bins));
+            setHasOptionsMenu(true);
+            if (savedInstanceState != null)
+                mSortId = savedInstanceState.getInt(BUNDLE_SORT, R.id.menu_song_sort_page);
+            else
+                mSortId = R.id.menu_song_sort_page;
+            updateQuery();
+        }
+
+        @Override
+        public void onSaveInstanceState(final Bundle saveInstanceState) {
+            saveInstanceState.putSerializable(BUNDLE_SORT, mSortId);
+        }
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+            inflater.inflate(R.menu.menu_song_fragment, menu);
+            // Check the initial sort
+            MenuItem item = menu.findItem(mSortId);
+            if (item != null)
+                item.setChecked(true);
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            // Sort
+            if (item.getGroupId() == R.id.menu_group_song_sort) {
+                item.setChecked(true);
+                mSortId = item.getItemId();
+                updateQuery();
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -121,7 +193,8 @@ public class MainActivity extends SimpleTabActivity {
         public SingingListFragment() {
             mIntentClass = SingingActivity.class;
             mItemLayoutId = android.R.layout.simple_list_item_2;
-            mQuery = MinutesDb.SINGING_LIST_QUERY;
+            mQuery = C.Singing.selectList(C.Singing.name, C.Singing.location)
+                                .sectionIndex(C.Singing.year).toString();
         }
 
         public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
@@ -141,8 +214,6 @@ public class MainActivity extends SimpleTabActivity {
                 sections[i-min] = Integer.toString(i);
             // Set the indexer
             setIndexer(new StringIndexer(cursor, indexColumn, sections));
-            // Must call this to update the view with new sections
-            //adapter.notifyDataSetChanged();
         }
     }
 }

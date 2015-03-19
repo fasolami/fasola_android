@@ -16,6 +16,10 @@
                 android:title="@string/menu_leader_sort_name"
                 app:showAsAction="never" />
 
+            <item android:id="@+id/menu_leader_sort_first_name"
+                android:title="@string/menu_leader_sort_first_name"
+                app:showAsAction="never" />
+
             <item android:id="@+id/menu_leader_sort_count"
                 android:title="@string/menu_leader_sort_count"
                 app:showAsAction="never" />

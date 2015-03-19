@@ -34,11 +34,9 @@ public class BinIndexer extends StringIndexer {
     }
 
     @Override
-    protected int compare(String word, String letter) {
+    protected int compare(String word, int index) {
         // Word is an integer stored as a string
         int n = Integer.parseInt(word);
-        // letter is a unicode code point used as an index to mBins
-        int index = letter.codePointAt(0);
         // Using bins
         int low = mBins[index];
         int high = mBins[index + 1];

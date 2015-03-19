@@ -16,7 +16,7 @@ import junit.framework.Assert;
 /**
  * Simple framework for using queries as the base for a ListFragment
  * Call setQuery() with a String or SQL.Query to update the list
- *      Query should have _ID as the first column, and display columns afterwards
+ *      Query should have id as the first column, and display columns afterwards
  *      To use sections and fastScroll, name a column IndexedCursorAdapter.INDEX_COLUMN
  * Call setIndexer/setAlphabet/setBins/setIntSections to initialize an Indexer
  * Call setItemLayout() to use a custom layout for list items
@@ -42,7 +42,7 @@ public class CursorListFragment extends ListFragment
     }
 
     // Set the query and restart the loader (if the query has changed)
-    public void setQuery(String query, String[] params) {
+    public void setQuery(String query, String... params) {
         boolean restartLoader = mQuery != null && ! mQuery.equals(query);
         mQuery = query;
         mQueryParams = params;
@@ -50,7 +50,7 @@ public class CursorListFragment extends ListFragment
             getLoaderManager().restartLoader(1, null, this);
     }
 
-    public void setQuery(SQL.Query query, String[] params) {
+    public void setQuery(SQL.Query query, String... params) {
         setQuery(query.toString(), params);
     }
 
@@ -68,11 +68,11 @@ public class CursorListFragment extends ListFragment
         setIndexer(new LetterIndexer(null, -1, alphabet));
     }
 
-    public void setBins(int[] bins) {
+    public void setBins(int... bins) {
         setIndexer(new BinIndexer(null, -1, bins));
     }
 
-    public void setBins(String[] sections) {
+    public void setBins(String... sections) {
         setIndexer(new StringIndexer(null, -1, sections));
     }
 
@@ -142,7 +142,7 @@ public class CursorListFragment extends ListFragment
         int fromIdx = 0;
         for (int i = 1; i < cursor.getColumnCount(); ++i) {
             String columnName = cursor.getColumnName(i);
-            if (! columnName.equals(IndexedCursorAdapter.INDEX_COLUMN))
+            if (! columnName.equals(SQL.INDEX_COLUMN))
                 from[fromIdx++] = columnName;
         }
         return from;

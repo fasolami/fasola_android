@@ -1,5 +1,7 @@
 package org.fasola.fasolaminutes;
 
+import android.database.sqlite.SQLiteDatabase;
+
 /**
  * FaSoLa database
  */
@@ -11,97 +13,139 @@ public class MinutesContract {
     public static final int DB_VERSION = 1;
     public static final String DB_NAME = "minutes.db";
 
-    /* Song table */
-    public static final class SongContract extends SQL.BaseTable {
-        private SongContract() {
-            super("songs");
-            TITLE = column("Title", "TEXT");
-            NUMBER = column("PageNum", "TEXT");
-            SORT = _ID.fullName;
-/*
-            SORT = column("sort", "INTEGER");
-            COMPOSER = column("composer", "TEXT");
-            TUNE_YEAR = column("tune_year", "TEXT");
-            POET = column("poet", "TEXT");
-            WORDS_YEAR = column("words_year", "TEXT");
-*/
-            LYRICS = column("SongText", "TEXT");
+    // Contract classes (see below for definitions
+    public static SongDAO Song = new SongDAO();
+    public static SongStatsDAO SongStats = new SongStatsDAO();
+    public static LeaderDAO Leader = new LeaderDAO();
+    public static LeaderStatsDAO LeaderStats = new LeaderStatsDAO();
+    public static SingingDAO Singing = new SingingDAO();
+    public static SongLeaderDAO SongLeader = new SongLeaderDAO();
 
-            FULL_NAME = NUMBER + " || ' ' || " + TITLE;
-        }
-        public SQL.Column TITLE, NUMBER, COMPOSER, TUNE_YEAR, POET, WORDS_YEAR, LYRICS;
-        public String FULL_NAME, SORT; // Query to return the full tune name with page number
+    // Initialize joins and calculated columns
+    static {
+        SQL.BaseTable.join(Song.id, SongStats.songId);
+        SQL.BaseTable.join(Song.id, LeaderStats.songId);
+        SQL.BaseTable.join(Song.id, SongLeader.songId);
+        SQL.BaseTable.join(Leader.id, LeaderStats.leaderId);
+        SQL.BaseTable.join(Leader.id, SongLeader.leaderId);
+        SQL.BaseTable.join(Singing.id, SongLeader.singingId);
+        Song.onCreate();
+        SongStats.onCreate();
+        Leader.onCreate();
+        LeaderStats.onCreate();
+        SongLeader.onCreate();
     }
-    public static SongContract Song = new SongContract();
+
+    // Use as a base table class to provide a database for SQL.BaseTable
+    private static class MinutesBaseTable extends SQL.BaseTable {
+        protected MinutesBaseTable(String tableName) {
+            super(tableName);
+        }
+
+        @Override
+        protected SQLiteDatabase getDb() {
+            return MinutesDb.getInstance().getDb();
+        }
+    }
+
+    /* Song table */
+    public static final class SongDAO extends MinutesBaseTable {
+        protected SongDAO() {
+            super("songs");
+            title = column("Title");
+            number = column("PageNum");
+            lyrics = column("SongText");
+        }
+
+        @Override
+        protected void onCreate() {
+            pageSort = column(number.format("{column} * 1"));
+            fullName = concat(number, "' '", title);
+            leaderCount = column(LeaderStats.leaderId.countDistinct());
+            leadCount = column(LeaderStats.leadCount.sum());
+        }
+
+        public SQL.Column title, number, COMPOSER, TUNE_YEAR, POET, WORDS_YEAR, lyrics;
+        public SQL.Column fullName, leaderCount, leadCount, pageSort;
+    }
 
     /* SongStats table */
-    public static final class SongStatsContract extends SQL.BaseTable {
-        private SongStatsContract() {
+    public static final class SongStatsDAO extends MinutesBaseTable {
+        protected SongStatsDAO() {
             super("song_stats");
-            SONG_ID = joinColumn(Song, "song_id");
-            YEAR = column("year", "TEXT");
-            LEAD_COUNT = column("lead_count", "INTEGER");
-            RANK = column("rank", "INTEGER");
+            year = column("year");
+            leadCount = column("lead_count");
+            rank = column("rank");
+            songId = column("song_id");
         }
-        public SQL.Column SONG_ID, YEAR, LEAD_COUNT, RANK;
+
+        public SQL.Column songId, year, leadCount, rank;
     }
-    public static SongStatsContract SongStats = new SongStatsContract();
 
     /* Leader table */
-    public static final class LeaderContract extends SQL.BaseTable {
-        private LeaderContract() {
+    public static final class LeaderDAO extends MinutesBaseTable {
+        protected LeaderDAO() {
             super("leaders");
-            FULL_NAME = column("name", "TEXT");
-            LAST_NAME = column("last_name", "TEXT"); // NB must use db altered from iPhone version
-            LEAD_COUNT = column("lead_count", "INTEGER");
-            ENTROPY = column("song_entropy", "INTEGER");
-            SORT = LAST_NAME.fullName;
+            fullName = column("name");
+            lastName = column("last_name"); // NB must use db altered from iPhone version
+            leadCount = column("lead_count");
+            entropy = column("song_entropy");
         }
-        public SQL.Column FULL_NAME, LAST_NAME, LEAD_COUNT, ENTROPY;
-        public String SORT; // Query to use for ordering
-    }
-    public static LeaderContract Leader = new LeaderContract();
 
+        @Override
+        protected void onCreate() {
+            songCount = column(SongLeader.songId.countDistinct());
+            singingCount = column(SongLeader.singingId.countDistinct());
+        }
+
+        public SQL.Column fullName, lastName, leadCount, entropy, singingCount, songCount;
+    }
 
     /* LeaderStats table */
-    public static final class LeaderStatsContract extends SQL.BaseTable {
-        private LeaderStatsContract() {
+    public static final class LeaderStatsDAO extends MinutesBaseTable {
+        protected LeaderStatsDAO() {
             super("leader_song_stats");
-            LEADER_ID = joinColumn(Leader, "leader_id");
-            SONG_ID = joinColumn(Song, "song_id");
-            LEAD_COUNT = column("lead_count", "INTEGER");
+            leadCount = column("lead_count");
+            leaderId = column("leader_id");
+            songId = column("song_id");
         }
-        public SQL.Column SONG_ID, LEADER_ID, LEAD_COUNT;
+
+        public SQL.Column songId, leaderId, leadCount;
     }
-    public static LeaderStatsContract LeaderStats = new LeaderStatsContract();
 
     /* Singing table */
-    public static final class SingingContract extends SQL.BaseTable {
-        private SingingContract() {
+    public static final class SingingDAO extends MinutesBaseTable {
+        protected SingingDAO() {
             super("minutes");
-            NAME = column("Name", "TEXT");
-            START_DATE = column("Date", "TEXT");
-            LOCATION = column("Location", "TEXT");
-            FULL_TEXT = column("Minutes", "TEXT");
-            YEAR = column("Year", "TEXT");
+            name = column("Name");
+            startDate = column("Date");
+            location = column("Location");
+            fullText = column("Minutes");
+            year = column("Year");
         }
-        public SQL.Column NAME, START_DATE, LOCATION, FULL_TEXT, YEAR;
+
+        @Override
+        protected void onCreate() {
+            songCount = column(SongLeader.songId.countDistinct());
+            leaderCount = column(SongLeader.leaderId.countDistinct());
+        }
+
+        public SQL.Column name, startDate, location, fullText, year, songCount, leaderCount;
     }
-    public static SingingContract Singing = new SingingContract();
 
     /* Song-Singing-Leader join table table */
-    public static final class SongLeaderContract extends SQL.BaseTable {
-        private SongLeaderContract() {
+    public static final class SongLeaderDAO extends MinutesBaseTable {
+        protected SongLeaderDAO() {
             super("song_leader_joins");
-            SONG_ID = joinColumn(Song, "song_id");
-            SINGING_ID = joinColumn(Singing, "minutes_id");
-            LEADER_ID = joinColumn(Leader, "leader_id");
-            SINGING_ORDER = _ID.fullName;
+            singingOrder = id.name;
+            songId = column("song_id");
+            singingId = column("minutes_id");
+            leaderId = column("leader_id");
         }
-        public SQL.Column SONG_ID, SINGING_ID, LEADER_ID;
-        public String SINGING_ORDER;
+
+        public SQL.Column songId, singingId, leaderId;
+        public String singingOrder;
     }
-    public static SongLeaderContract SongLeader = new SongLeaderContract();
 }
 
 

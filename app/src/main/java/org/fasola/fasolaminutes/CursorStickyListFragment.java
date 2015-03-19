@@ -23,6 +23,13 @@ public abstract class CursorStickyListFragment extends CursorListFragment {
         return view;
     }
 
+    public void showHeaders(boolean show) {
+        IndexedCursorAdapter adapter = getListAdapter();
+        if (adapter != null)
+            adapter.showHeaders(show);
+        mStickyList.setAreHeadersSticky(show);
+    }
+
     // A few ListFragment Overrides to make StickyList work
     @Override
     public IndexedCursorAdapter getListAdapter() {

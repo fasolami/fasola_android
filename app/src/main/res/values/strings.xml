@@ -20,6 +20,10 @@
     <string name="song_label">Songs</string>
     <string name="singing_label">Singings</string>
     <string name="search_hint">Search songs</string>
+    <string name="menu_leader_sort_first_name">By first name</string>
+    <string name="menu_song_sort_page">By page number</string>
+    <string name="menu_song_sort_title">By title</string>
+    <string name="menu_song_sort_leads">By lead count</string>
 
     <plurals name="timesLed">
         <item quantity="one">%d Time</item>

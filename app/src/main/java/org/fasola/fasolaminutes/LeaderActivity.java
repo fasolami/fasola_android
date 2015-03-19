@@ -23,13 +23,12 @@ public class LeaderActivity extends SimpleTabActivity {
         super.onCreate(savedInstanceState);
         // Query for main data
         long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-        MinutesDb db = MinutesDb.getInstance();
-        Cursor cursor = db.query(MinutesDb.LEADER_ACTIVITY_QUERY, new String[] {String.valueOf(id)});
-        if (cursor.moveToFirst()) {
-            String songName = cursor.getString(0);
-            int nSongs = cursor.getInt(1);
-            int nTimes = cursor.getInt(2);
-            int nSingings = cursor.getInt(3);
+        MinutesContract.LeaderDAO leader = MinutesContract.Leader.get(id);
+        if (leader != null) {
+            String songName = leader.fullName.getString();
+            int nSongs = leader.songCount.getInt();
+            int nTimes = leader.leadCount.getInt();
+            int nSingings = leader.singingCount.getInt();
             String songsLed = getResources().getQuantityString(R.plurals.songsLed, nSongs, nSongs);
             String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
             String singings = getResources().getQuantityString(R.plurals.singingsAttended, nSingings, nSingings);
@@ -37,7 +36,6 @@ public class LeaderActivity extends SimpleTabActivity {
             ((TextView) findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
             ((TextView) findViewById(R.id.singings)).setText(singings);
         }
-        cursor.close();
     }
 
     static public class LeaderSongFragment extends CursorListFragment {
@@ -50,7 +48,12 @@ public class LeaderActivity extends SimpleTabActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            setQuery(MinutesDb.LEADER_SONG_LIST_QUERY, new String[] {String.valueOf(id)});
+            SQL.Query query = C.Song.selectList(C.Song.fullName,
+                                                C.LeaderStats.leadCount.format("'(' || {column} || ')'"))
+                                    .whereEq(C.LeaderStats.leaderId)
+                                    .order(C.LeaderStats.leadCount, "DESC", C.Song.pageSort, "ASC");
+
+            setQuery(query, String.valueOf(id));
         }
     }
 
@@ -64,15 +67,15 @@ public class LeaderActivity extends SimpleTabActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             String query =
-                SQL.select("DISTINCT " + C.Singing._ID)
-                    .select(C.Singing.NAME)
-                    .select(C.Singing.LOCATION)
-                    .select(C.Singing.YEAR).as(IndexedCursorAdapter.INDEX_COLUMN)
+                SQL.select("DISTINCT " + C.Singing.id)
+                    .select(C.Singing.name)
+                    .select(C.Singing.location)
+                    .sectionIndex(C.Singing.year)
                     .from(C.SongLeader)
                     .join(C.SongLeader, C.Singing)
-                    .whereEq(C.SongLeader.LEADER_ID).toString();
+                    .whereEq(C.SongLeader.leaderId).toString();
             long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            setQuery(query, new String[] {String.valueOf(id)});
+            setQuery(query, String.valueOf(id));
         }
 
         public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
@@ -92,8 +95,6 @@ public class LeaderActivity extends SimpleTabActivity {
                 sections[i-min] = Integer.toString(i);
             // Set the indexer
             setIndexer(new StringIndexer(cursor, indexColumn, sections));
-            // Must call this to update the view with new sections
-            //adapter.notifyDataSetChanged();
         }
 
     }

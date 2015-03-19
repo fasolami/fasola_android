@@ -1,6 +1,5 @@
 package org.fasola.fasolaminutes;
 
-import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,18 +9,19 @@ import android.widget.TextView;
 
 
 public class SingingActivity extends SimpleTabActivity {
+    public MinutesContract.SingingDAO mSinging;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
         super.onCreate(savedInstanceState);
         // Query
-        MinutesDb db = MinutesDb.getInstance();
-        Cursor cursor = db.query(MinutesDb.SINGING_ACTIVITY_QUERY, new String[]{String.valueOf(id)});
-        if (cursor.moveToFirst()) {
-            String name = cursor.getString(0);
-            String location = cursor.getString(1);
-            int nSongs = cursor.getInt(2);
-            int nLeaders = cursor.getInt(3);
+        mSinging = C.Singing.get(id);
+        if (mSinging != null) {
+            String name = mSinging.name.getString();
+            String location = mSinging.location.getString();
+            int nSongs = mSinging.songCount.getInt();
+            int nLeaders = mSinging.leaderCount.getInt();
             String songs = getResources().getQuantityString(R.plurals.songsLed, nSongs, nSongs);
             String leaders = getResources().getQuantityString(R.plurals.leaders, nLeaders, nLeaders);
             ((TextView) findViewById(R.id.title)).setText(name);
@@ -29,7 +29,6 @@ public class SingingActivity extends SimpleTabActivity {
             ((TextView) findViewById(R.id.songs)).setText(songs);
             ((TextView) findViewById(R.id.leaders)).setText(leaders);
         }
-        cursor.close();
     }
 
     @Override
@@ -53,7 +52,10 @@ public class SingingActivity extends SimpleTabActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             long singingId = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            setQuery(MinutesDb.SINGING_LEADER_LIST_QUERY, new String[]{String.valueOf(singingId)});
+            SQL.Query query = C.Song.selectList(C.Song.fullName, C.Leader.fullName.func("group_concat", "', '"))
+                                .whereEq(C.SongLeader.singingId)
+                                .order(C.SongLeader.singingOrder, "ASC");
+            setQuery(query, String.valueOf(singingId));
         }
     }
 
@@ -67,10 +69,7 @@ public class SingingActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             // Query
-            long singingId = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            MinutesDb db = MinutesDb.getInstance(getActivity());
-            String query = SQL.select(C.Singing.FULL_TEXT).from(C.Singing).whereEq(C.Singing._ID).toString();
-            String fullText = db.queryString(query, new String[]{String.valueOf(singingId)});
+            String fullText = ((SingingActivity) getActivity()).mSinging.fullText.getString();
             ((TextView) view.findViewById(R.id.full_text)).setText(fullText.replace("\n", "\n\n"));
             // Done
             super.onViewCreated(view, savedInstanceState);
