@@ -38,18 +38,20 @@ public class LetterIndexer extends AlphabetIndexer {
         super.setCursor(cursor);
         if (cursor != null) {
             // Find first and last values
-            int pos = cursor.getPosition();
-            cursor.moveToFirst();
-            String first = cursor.getString(mColumnIndex);
-            cursor.moveToLast();
-            String last = cursor.getString(mColumnIndex);
-            cursor.moveToPosition(pos);
-            // Try to compare first and last as integers first, then as strings
             boolean isDesc = false;
-            try {
-                isDesc = Integer.parseInt(first) > Integer.parseInt(last);
-            } catch (NumberFormatException e) {
-                isDesc = first.compareTo(last) > 0;
+            if (cursor.getCount() > 0) {
+                int pos = cursor.getPosition();
+                cursor.moveToFirst();
+                String first = cursor.getString(mColumnIndex);
+                cursor.moveToLast();
+                String last = cursor.getString(mColumnIndex);
+                cursor.moveToPosition(pos);
+                // Try to compare first and last as integers first, then as strings
+                try {
+                    isDesc = Integer.parseInt(first) > Integer.parseInt(last);
+                } catch (NumberFormatException e) {
+                    isDesc = first.compareTo(last) > 0;
+                }
             }
             // Reverse the appropriate arrays
             if (mIsDesc != isDesc) {
