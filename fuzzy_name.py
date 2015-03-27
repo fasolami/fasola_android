@@ -8,7 +8,7 @@ from __future__ import print_function
 import sqlite3
 import re, string
 
-DATABASE_PATH = r'app/src/main/assets/databases/minutes.db'
+DATABASE_PATH = r'app/src/main/assets_/databases/minutes.db'
 
 # ('Description', 'pattern', 'replace")
 STEPS = (
@@ -24,6 +24,10 @@ STEPS = (
         r'\-', r' '),
     ('Remove punctuation',
         '[' + re.escape(string.punctuation) + ']', ''),
+    ('Remove Trailing E and H',
+        r'[eh]\b', r''),
+    ('Remove Trailing ES',
+        r'es\b', r's'),
     ('Double letters -> single letters',
         r'(.)\1+', r'\1'),
     ('ey/ye -> y',
