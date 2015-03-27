@@ -35,6 +35,19 @@ public class SimpleTabActivity extends ActionBarActivity implements ActionBar.Ta
         mSectionsPagerAdapter.addTab(label, fragmentClass);
     }
 
+    public Fragment getFragmentByPosition(int index) {
+        String tag = "android:switcher:" + mViewPager.getId() + ":" + index;
+        return getSupportFragmentManager().findFragmentByTag(tag);
+    }
+
+    public Fragment getCurrentFragment() {
+        return getFragmentByPosition(mViewPager.getCurrentItem());
+    }
+
+    protected void removeTab(int index) {
+        mSectionsPagerAdapter.removeTab(index);
+    }
+
     /**
      * Call from onCreateTabs() to show tabs in the ActionBar
      * If you want a TabPagerStrip, you must add it to a custom layout and override getLayoutId()
@@ -62,7 +75,7 @@ public class SimpleTabActivity extends ActionBarActivity implements ActionBar.Ta
             // this tab is selected.
             actionBar.addTab(
                     actionBar.newTab()
-                            .setText(mSectionsPagerAdapter.getPageTitle(i))
+                            .setText(mSectionsPagerAdapter.getPageTitle(i).toString().toUpperCase())
                             .setTabListener(this));
         }
     }
@@ -93,18 +106,17 @@ public class SimpleTabActivity extends ActionBarActivity implements ActionBar.Ta
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        // Initialize tabs
-        onCreateTabs();
-
         // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+
+        // Initialize tabs
+        onCreateTabs();
+        mSectionsPagerAdapter.notifyDataSetChanged();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -150,6 +162,10 @@ public class SimpleTabActivity extends ActionBarActivity implements ActionBar.Ta
             mTabs.add(new Pair<String, Class<? extends Fragment>>(label, fragmentClass));
         }
 
+        public void removeTab(int index) {
+            mTabs.remove(index);
+        }
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
             mTabs = new ArrayList<>();
@@ -173,6 +189,14 @@ public class SimpleTabActivity extends ActionBarActivity implements ActionBar.Ta
         public CharSequence getPageTitle(int position) {
             try {
                 return mTabs.get(position).first;
+            } catch (IndexOutOfBoundsException ex) {
+                return null;
+            }
+        }
+
+        public Class<? extends Fragment> getFragmentClass(int position) {
+            try {
+                return mTabs.get(position).second;
             } catch (IndexOutOfBoundsException ex) {
                 return null;
             }

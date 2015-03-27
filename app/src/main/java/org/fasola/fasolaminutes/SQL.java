@@ -1,11 +1,13 @@
 package org.fasola.fasolaminutes;
 
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
 import android.util.Pair;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -310,23 +312,49 @@ public class SQL {
         return new Query("SELECT", args);
     }
 
+    // Different semantics for UNION
+    public static Query union(Query q, Query... queries) {
+        return q.union(queries);
+    }
+
     public static class Query {
         // Query elements
-        String queryType;
-        boolean isDistinct;
-        List<Pair<Object, String>> selectColumns = new ArrayList<>(); // Column, alias
-        BaseTable fromTable;
-        Map<String, String> joins = new LinkedHashMap<>(); // table name, join statment
+        protected String queryType;
+        protected boolean isDistinct;
+        protected List<Pair<Object, String>> selectColumns = new ArrayList<>(); // Column, alias
+        protected BaseTable fromTable;
+        protected Map<String, String> joins = new LinkedHashMap<>(); // table name, join statment
         protected QueryStringBuilder strGroup = new QueryStringBuilder(" GROUP BY");
-        protected QueryStringBuilder strHaving = new QueryStringBuilder( "HAVING");
-        protected QueryStringBuilder strWhere = new QueryStringBuilder(" WHERE");
+        protected QueryStringBuilder strHaving = new QueryStringBuilder(" HAVING");
+        protected List<QueryStringBuilder> whereList = new ArrayList<>();
         protected QueryStringBuilder strOrder = new QueryStringBuilder(" ORDER BY");
         protected Object limit;
         protected Object offset;
 
+        protected List<Query> union;
+        protected Query mParentQuery; // The parent of the query in the filter chain
+
         protected Query(String type, Object... args) {
             queryType = type;
             select(args);
+        }
+
+        protected Query(Query other) {
+            queryType = other.queryType;
+            isDistinct = other.isDistinct;
+            selectColumns = new ArrayList<>(other.selectColumns);
+            fromTable = other.fromTable;
+            joins = new LinkedHashMap<>(other.joins);
+            strGroup = new QueryStringBuilder(other.strGroup);
+            strHaving = new QueryStringBuilder(other.strHaving);
+            whereList = new ArrayList<>();
+            for (QueryStringBuilder q : other.whereList)
+                whereList.add(new QueryStringBuilder(q));
+            strOrder = new QueryStringBuilder(other.strOrder);
+            limit = other.limit;
+            offset = other.offset;
+            union = other.union; // Shouldn't need to change the other queries in the union
+            mParentQuery = other;
         }
 
         // SELECT
@@ -381,12 +409,32 @@ public class SQL {
 
         // JOIN
         // ----
+
+        // Join using defined relationships
         public Query join(BaseTable t1, BaseTable t2) {
+            return _join("JOIN", t1, t2);
+        }
+
+        public Query leftJoin(BaseTable t1, BaseTable t2) {
+            return _join("LEFT JOIN", t1, t2);
+        }
+
+        // Join on specified columns
+        public Query join(Object table, Column on1, Column on2) {
+            return _join("JOIN", table, on1, on2);
+        }
+
+        public Query leftJoin(Object table, Column on1, Column on2) {
+            return _join("LEFT JOIN", table, on1, on2);
+        }
+
+        // Search for a columns to complete this join
+        protected Query _join(String joinType, BaseTable t1, BaseTable t2) {
             if (joins.containsKey(t2.toString()))
                 return this;
             Pair<Column, Column> joinColumns = BaseTable.getJoin(t1, t2);
             if (joinColumns != null)
-                return join(t2, joinColumns.first, joinColumns.second);
+                return _join(joinType, t2, joinColumns.first, joinColumns.second);
             // Look for a many to many join path if we don't have a simple join
             Map<String, Pair<Column, Column>> map = BaseTable.joinMap.get(t1.TABLE_NAME);
             if (map == null)
@@ -396,42 +444,38 @@ public class SQL {
                 if (joinColumns != null) {
                     // Join to the intermediate table
                     Pair<Column, Column> firstJoin = BaseTable.getJoin(t1, other);
-                    join(other, firstJoin.first, firstJoin.second);
+                    _join(joinType, other, firstJoin.first, firstJoin.second);
                     // Join to the second table
-                    join(t2, joinColumns.first, joinColumns.second);
+                    _join(joinType, t2, joinColumns.first, joinColumns.second);
                     return this;
                 }
             }
             throw new JoinException(t1, t2);
         }
 
-        public Query join(Object table, Column on1, Column on2) {
-            if (! joins.containsKey(table.toString()))
-                joins.put(table.toString(), " JOIN " + table + " ON " + on1 + " = " + on2);
+        protected Query _join(String joinType, Object table, Column on1, Column on2) {
+            if (joins.containsKey(table.toString()))
+                return this;
+            joins.put(table.toString(), " " + joinType + " " + table + " ON " + on1 + " = " + on2);
             return this;
         }
 
         // WHERE
-        // ----
-        public Query where(Object... args) {
-            strWhere.append(" ").append(args);
-            if (args.length < 2)
-                strWhere.append(" = ?");
-            else if (args.length < 3)
-                strWhere.append(" ?");
-            return this;
+        // -----
+        public Query where(Object col, Object oper, Object val) {
+            // Don't use AND or OR before WHERE so there will be a valid QueryStringBuilder
+            // Don't add another QueryStringBuilder if the last one is empty
+            if (whereList.isEmpty() || ! whereList.get(whereList.size() - 1).isEmpty())
+                whereList.add(new QueryStringBuilder());
+            return _addWhere(col, oper, val);
         }
 
-        public Query and(Object... args) {
-            strWhere.append(" AND");
-            where(args);
-            return this;
+        public Query and(Object col, Object oper, Object val) {
+            return _addWhere(" AND", col, oper, val);
         }
 
-        public Query or(Object... args) {
-            strWhere.append(" OR");
-            where(args);
-            return this;
+        public Query or(Object col, Object oper, Object val) {
+            return _addWhere(" OR", col, oper, val);
         }
 
         // Better semantics for WHERE column = ? AND column = ? ...
@@ -442,17 +486,49 @@ public class SQL {
             return this;
         }
 
+        protected Query _addWhere(Object bool, Object col, Object oper, Object val) {
+            QueryStringBuilder q = whereList.get(whereList.size() - 1);
+            if (oper == null)
+                oper = "=";
+            if (val == null)
+                val = "?";
+            else if (val != "?")
+                val = DatabaseUtils.sqlEscapeString(val.toString());
+            q.append(bool, " ", col, oper, val);
+            return this;
+        }
+
+        protected Query _addWhere(Object col, Object oper, Object val) {
+            return _addWhere("", col, oper, val);
+        }
+
+        // Where can be used as a filter
+        public Query pushWhere() {
+            whereList.add(new QueryStringBuilder());
+            return this;
+        }
+
+        public Query pushWhere(Object col, Object oper, Object val) {
+            pushWhere();
+            return where(col, oper, val);
+        }
+
+        public Query popWhere() {
+            whereList.remove(whereList.size() - 1);
+            return this;
+        }
+
         // GROUP BY, HAVING, ORDER BY, LIMIT
         // ---------------------------------
         public Query group(Object... cols) {
-            if (strGroup.hasValue)
+            if (! strGroup.isEmpty())
                 strGroup.append(",");
             strGroup.append(" ").appendDelim(", ", cols);
             return this;
         }
 
         public Query having(Object... args) {
-            strHaving.append(" ").appendDelim(" AND ", args);
+            strHaving.append(" ").appendDelim(" ", args);
             return this;
         }
 
@@ -466,7 +542,7 @@ public class SQL {
 
         public Query order(Object... args) {
             for (int i = 0; i < args.length; i+=2) {
-                if (strOrder.hasValue)
+                if (! strOrder.isEmpty())
                     strOrder.append(", ");
                 else
                     strOrder.append(" ");
@@ -497,27 +573,66 @@ public class SQL {
             return this;
         }
 
+        // Union
+        public Query union(Query... other) {
+            if (union == null)
+                union = new ArrayList<>();
+            union.addAll(Arrays.asList(other));
+            return this;
+        }
+
+        // Filter: create a copy of the query to use as a filter
+        public Query pushFilter() {
+            return new Query(this);
+        }
+
+        public Query popFilter() {
+            if (mParentQuery == null)
+                return this;
+            return mParentQuery;
+        }
+
         // Assemble the query
         public String toString() {
             QueryStringBuilder q = new QueryStringBuilder("SELECT");
             if (isDistinct)
                 q.append(" DISTINCT");
             // Columns
-            String delim = " ";
-            for (Pair<Object, String> col : selectColumns) {
-                q.append(delim).append(col.first.toString()).append(" AS ").append(col.second);
-                // Check to see if we need a join
-                if (col.first instanceof Column)
-                    ((Column) col.first).addJoin(this, fromTable);
-                delim = ", ";
+            {
+                String delim = " ";
+                for (Pair<Object, String> col : selectColumns) {
+                    q.append(delim).append(col.first.toString()).append(" AS ").append(col.second);
+                    // Check to see if we need a join
+                    if (col.first instanceof Column)
+                        ((Column) col.first).addJoin(this, fromTable);
+                    delim = ", ";
+                }
             }
             // From
             q.append(" FROM ").append(fromTable);
             // Join
             for (String str : joins.values())
                 q.append(str);
-            // Where/Group By/Having/Order By
-            q.append(strWhere).append(strGroup).append(strHaving).append(strOrder);
+            // Where/Group By/Having
+            if (whereList.size() > 0) {
+                boolean hasWhere = false;
+                for (QueryStringBuilder where : whereList) {
+                    if (! where.isEmpty()) {
+                        // Make sure we actually have a where clause before adding "WHERE"
+                        if (! hasWhere)
+                            q.append(" WHERE");
+                        q.append(hasWhere ? " AND " : "",  "(", where, ")");
+                        hasWhere = true;
+                    }
+                }
+            }
+            q.append(strGroup).append(strHaving);
+            // Union
+            if (union != null)
+                for (Query other : union)
+                    q.append(" UNION ").append(other.toString());
+            // Order By
+            q.append(strOrder);
             // Limit/offset
             if (limit != null)
                 q.append(" LIMIT ").append(limit);
@@ -529,15 +644,23 @@ public class SQL {
         // Helper class that provides better append methods
         private static class QueryStringBuilder {
             public StringBuilder q;
-            public boolean hasValue;
+            public boolean mHasValue;
 
+            QueryStringBuilder() {
+                q = new StringBuilder();
+            }
             QueryStringBuilder(String initial) {
                 q = new StringBuilder(initial);
             }
 
+            protected QueryStringBuilder(QueryStringBuilder other) {
+                q = new StringBuilder(other.q.toString());
+                mHasValue = other.mHasValue;
+            }
+
             // append overloads
             public QueryStringBuilder append(Object str) {
-                hasValue = true;
+                mHasValue = true;
                 q.append(str.toString());
                 return this;
             }
@@ -553,10 +676,13 @@ public class SQL {
                 return this;
             }
 
+            public boolean isEmpty() {
+                return ! mHasValue;
+            }
+
             public String toString() {
-                return hasValue ? q.toString() : "";
+                return mHasValue ? q.toString() : "";
             }
         }
-
     }
 }

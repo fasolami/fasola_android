@@ -28,7 +28,8 @@ public class CursorListFragment extends ListFragment
         implements LoaderManager.LoaderCallbacks<Cursor> {
     protected int mItemLayoutId = android.R.layout.simple_list_item_1;
     protected Class<?> mIntentClass;
-    protected String mQuery;
+    protected SQL.Query mQuery;
+    protected String mSearchTerm = "";
     protected String[] mQueryParams;
 
     // Set the custom list item layout
@@ -42,16 +43,43 @@ public class CursorListFragment extends ListFragment
     }
 
     // Set the query and restart the loader (if the query has changed)
-    public void setQuery(String query, String... params) {
-        boolean restartLoader = mQuery != null && ! mQuery.equals(query);
+    public void setQuery(SQL.Query query, String... params) {
+        boolean restartLoader = mQuery != null;
         mQuery = query;
         mQueryParams = params;
-        if (restartLoader)
+        if (! mSearchTerm.isEmpty()) { // Apply the current search
+            String term = mSearchTerm;
+            mSearchTerm = ""; // Clear so setSearch knows we don't have an existing search
+            setSearch(term); // This will call restartLoader
+        }
+        else if (restartLoader)
             getLoaderManager().restartLoader(1, null, this);
+
     }
 
-    public void setQuery(SQL.Query query, String... params) {
-        setQuery(query.toString(), params);
+    // Override and change the query string
+    public void onSearch(String query) {
+    }
+
+    public void setSearch(String query) {
+        if (mQuery != null) {
+            if (! mSearchTerm.isEmpty())
+                mQuery = mQuery.popFilter();
+            if (! query.isEmpty()) {
+                mQuery = mQuery.pushFilter();
+                onSearch(query); // Update the query
+            }
+            mSearchTerm = query;
+            getLoaderManager().restartLoader(1, null, this);
+        }
+    }
+
+    public void clearSearch() {
+        setSearch("");
+    }
+
+    public SQL.Query getQuery() {
+        return mQuery;
     }
 
     // Set an indexer
@@ -118,6 +146,10 @@ public class CursorListFragment extends ListFragment
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         // Setup the CursorAdapter
         IndexedCursorAdapter adapter = (IndexedCursorAdapter) getListAdapter();
+        if (cursor.getColumnCount() == 0) {
+            adapter.changeCursor(null);
+            return;
+        }
         String[] from = getFrom(cursor);
         int[] to = getTo(from.length);
         adapter.changeCursorAndColumns(cursor, from, to);

@@ -105,10 +105,14 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         mAreHeadersVisible = show;
     }
 
+    public boolean areHeadersShown() {
+        return hasIndexer() && mAreHeadersVisible;
+    }
+
     // StickyListHeadersAdapter overrides
     @Override
     public View getHeaderView(int position, View convertView, ViewGroup parent) {
-        if (! mAreHeadersVisible)
+        if (! areHeadersShown())
             return new View(parent.getContext());
         // Create the view
         // If convertView is not a ViewGroup, it was created as an empty View above
@@ -122,8 +126,8 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
 
     public long getHeaderId(int position) {
         // Only create a single header (which will be empty) if headers are invisible
-        if (! mAreHeadersVisible)
-            return 0;
-        return getSectionForPosition(position);
+        if (areHeadersShown())
+            return getSectionForPosition(position);
+        return 0;
     }
 }

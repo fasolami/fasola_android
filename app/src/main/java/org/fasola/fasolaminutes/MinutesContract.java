@@ -17,6 +17,7 @@ public class MinutesContract {
     public static SongDAO Song = new SongDAO();
     public static SongStatsDAO SongStats = new SongStatsDAO();
     public static LeaderDAO Leader = new LeaderDAO();
+    public static LeaderAliasDAO LeaderAlias = new LeaderAliasDAO();
     public static LeaderStatsDAO LeaderStats = new LeaderStatsDAO();
     public static SingingDAO Singing = new SingingDAO();
     public static SongLeaderDAO SongLeader = new SongLeaderDAO();
@@ -28,10 +29,12 @@ public class MinutesContract {
         SQL.BaseTable.join(Song.id, SongLeader.songId);
         SQL.BaseTable.join(Leader.id, LeaderStats.leaderId);
         SQL.BaseTable.join(Leader.id, SongLeader.leaderId);
+        SQL.BaseTable.join(Leader.id, LeaderAlias.leaderId);
         SQL.BaseTable.join(Singing.id, SongLeader.singingId);
         Song.onCreate();
         SongStats.onCreate();
         Leader.onCreate();
+        LeaderAlias.onCreate();
         LeaderStats.onCreate();
         SongLeader.onCreate();
     }
@@ -99,6 +102,18 @@ public class MinutesContract {
         }
 
         public SQL.Column fullName, lastName, leadCount, entropy, singingCount, songCount;
+    }
+
+    /* LeaderNameAliases table */
+    public static final class LeaderAliasDAO extends MinutesBaseTable {
+        protected LeaderAliasDAO() {
+            super("leader_name_aliases");
+            leaderId = column("leader_id");
+            name = column("name");
+            alias = column("alias");
+        }
+
+        public SQL.Column leaderId, name, alias;
     }
 
     /* LeaderStats table */
