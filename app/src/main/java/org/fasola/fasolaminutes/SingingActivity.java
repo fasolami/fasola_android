@@ -16,9 +16,12 @@ public class SingingActivity extends SimpleTabActivity {
         long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
         super.onCreate(savedInstanceState);
         // Query
+        // TODO: query in a thread (all queries)
+        // This query really goes slowly when there is a long fullText (e.g. Camp)
         mSinging = C.Singing.get(id);
         if (mSinging != null) {
             String name = mSinging.name.getString();
+            setTitle(name);
             String location = mSinging.location.getString();
             int nSongs = mSinging.songCount.getInt();
             int nLeaders = mSinging.leaderCount.getInt();

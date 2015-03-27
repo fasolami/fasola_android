@@ -25,14 +25,15 @@ public class LeaderActivity extends SimpleTabActivity {
         long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
         MinutesContract.LeaderDAO leader = MinutesContract.Leader.get(id);
         if (leader != null) {
-            String songName = leader.fullName.getString();
+            String leaderName = leader.fullName.getString();
+            setTitle(leaderName);
             int nSongs = leader.songCount.getInt();
             int nTimes = leader.leadCount.getInt();
             int nSingings = leader.singingCount.getInt();
             String songsLed = getResources().getQuantityString(R.plurals.songsLed, nSongs, nSongs);
             String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
             String singings = getResources().getQuantityString(R.plurals.singingsAttended, nSingings, nSingings);
-            ((TextView) findViewById(R.id.leader_name)).setText(songName);
+            ((TextView) findViewById(R.id.leader_name)).setText(leaderName);
             ((TextView) findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
             ((TextView) findViewById(R.id.singings)).setText(singings);
         }
@@ -66,14 +67,14 @@ public class LeaderActivity extends SimpleTabActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            String query =
-                SQL.select("DISTINCT " + C.Singing.id)
+            SQL.Query query =
+                SQL.select(C.Singing.id).distinct()
                     .select(C.Singing.name)
                     .select(C.Singing.location)
                     .sectionIndex(C.Singing.year)
                     .from(C.SongLeader)
                     .join(C.SongLeader, C.Singing)
-                    .whereEq(C.SongLeader.leaderId).toString();
+                    .whereEq(C.SongLeader.leaderId);
             long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
             setQuery(query, String.valueOf(id));
         }

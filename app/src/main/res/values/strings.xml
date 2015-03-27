@@ -11,6 +11,7 @@
     <string name="tab_leaders">Leaders</string>
     <string name="tab_songs">Songs</string>
     <string name="tab_singings">Singings</string>
+    <string name="tab_search">Search</string>
 
     <string name="title_activity_leader">Leader</string>
     <string name="title_activity_song">Song</string>

@@ -44,6 +44,7 @@ public class SongActivity extends SimpleTabActivity {
         mSong = C.Song.get(id);
         if (mSong != null) {
             String songName = mSong.fullName.getString();
+            setTitle(songName);
             String words = "PLACEHOLDER"; //mSong.POET.getString();
             String tune = "PLACEHOLDER"; //mSong.COMPOSER.getString();
             int nLeaders = mSong.leaderCount.getInt();
