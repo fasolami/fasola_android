@@ -49,7 +49,10 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
 
     // Find the index column
     protected int getIndexColumn() {
-        Cursor cursor = getCursor();
+        return getIndexColumn(getCursor());
+    }
+
+    public static int getIndexColumn(Cursor cursor) {
         if (cursor == null)
             return -1;
         int col = cursor.getColumnIndex(SQL.INDEX_COLUMN);
@@ -75,7 +78,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         if (! hasIndexer())
             return;
         Cursor cursor = getCursor();
-        int column = getIndexColumn();
+        int column = getIndexColumn(cursor);
         if (column != -1) {
             // Update the indexer cursor/columns
             mIndexer.setCursor(cursor, column);
