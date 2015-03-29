@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
@@ -262,38 +261,20 @@ public class MainActivity extends SimpleTabActivity {
     }
 
     public static class SingingListFragment extends CursorStickyListFragment {
-        public SingingListFragment() {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
             mIntentClass = SingingActivity.class;
             mItemLayoutId = android.R.layout.simple_list_item_2;
             mQuery = C.Singing.selectList(C.Singing.name, C.Singing.location)
                                 .sectionIndex(C.Singing.year);
+            setRangeIndexer();
         }
 
         @Override
         public void onSearch(String query) {
             mQuery.where(C.Singing.name, "LIKE", "%" + query + "%")
                     .or(C.Singing.location, "LIKE", "%" + query + "%");
-        }
-
-        public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-            super.onLoadFinished(loader, cursor);
-            // Find the index column
-            IndexedCursorAdapter adapter = getListAdapter();
-            int indexColumn = adapter.getIndexColumn();
-            // Find the min and max values (assume sorted)
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                int min = cursor.getInt(indexColumn);
-                cursor.moveToLast();
-                int max = cursor.getInt(indexColumn);
-                cursor.moveToFirst();
-                // Create sections
-                String[] sections = new String[max - min + 1];
-                for (int i = min; i <= max; i++)
-                    sections[i - min] = Integer.toString(i);
-                // Set the indexer
-                setIndexer(new StringIndexer(cursor, indexColumn, sections));
-            }
         }
     }
 

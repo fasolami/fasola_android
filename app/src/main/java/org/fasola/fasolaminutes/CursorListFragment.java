@@ -31,6 +31,7 @@ public class CursorListFragment extends ListFragment
     protected SQL.Query mQuery;
     protected String mSearchTerm = "";
     protected String[] mQueryParams;
+    protected boolean mNeedsRangeIndexer;
 
     // Set the custom list item layout
     public void setItemLayout(int layoutId) {
@@ -84,6 +85,7 @@ public class CursorListFragment extends ListFragment
 
     // Set an indexer
     public void setIndexer(LetterIndexer indexer) {
+        mNeedsRangeIndexer = false;
         IndexedCursorAdapter adapter = ((IndexedCursorAdapter) getListAdapter());
         adapter.setIndexer(indexer);
         // Update fastscroll when the indexer changes
@@ -102,6 +104,16 @@ public class CursorListFragment extends ListFragment
 
     public void setBins(String... sections) {
         setIndexer(new StringIndexer(null, -1, sections));
+    }
+
+    // Set using a known range
+    public void setRangeIndexer(int min, int max) {
+        setIndexer(new RangeIndexer(null, -1, min, max));
+    }
+
+    // Delay until the query is performed and we can find a range
+    public void setRangeIndexer() {
+        mNeedsRangeIndexer = true;
     }
 
     // Get the minutes database
@@ -144,6 +156,11 @@ public class CursorListFragment extends ListFragment
     }
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        // Setup any deferred section indexers
+        if (mNeedsRangeIndexer) {
+            setIndexer(new RangeIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor)));
+            mNeedsRangeIndexer = true; // setIndexer sets this to false
+        }
         // Setup the CursorAdapter
         IndexedCursorAdapter adapter = (IndexedCursorAdapter) getListAdapter();
         if (cursor.getColumnCount() == 0) {
