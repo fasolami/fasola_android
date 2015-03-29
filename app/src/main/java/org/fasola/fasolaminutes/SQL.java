@@ -30,6 +30,28 @@ public class SQL {
         }
     }
 
+    private static class JoinEntry {
+        JoinEntry(String text, boolean isLeft) {
+            this.text = text;
+            this.isLeft = isLeft;
+        }
+        String text;
+        boolean isLeft;
+    }
+
+    private static class JoinMap extends HashMap<String, Map<String, JoinEntry>> {
+        public JoinEntry put(Object t1, Object t2, String text, boolean isLeft) {
+            String key1 = t1.toString();
+            String key2 = t2.toString();
+            Map<String, JoinEntry> map = get(key1);
+            if (map == null) {
+                map = new HashMap<>();
+                super.put(key1, map);
+            }
+            return map.put(key2, new JoinEntry(text, isLeft));
+        }
+    }
+
     /**
      * Base class for SQL table contracts
      * Provides automatic TABLE_NAME and id fields
@@ -39,19 +61,6 @@ public class SQL {
         public String TABLE_NAME;
         public Column id;
         protected Map<String, Column> _columns;
-
-        private static class JoinMap extends HashMap<String, Map<String, Pair<Column, Column>>> {
-            public Pair<Column, Column> put(Column col1, Column col2) {
-                String key1 = col1.table.toString();
-                String key2 = col2.table.toString();
-                Map<String, Pair<Column, Column>> map = get(key1);
-                if (map == null) {
-                    map = new HashMap<>();
-                    super.put(key1, map);
-                }
-                return map.put(key2, Pair.create(col1, col2));
-            }
-        }
         protected static JoinMap joinMap = new JoinMap();
 
         protected BaseTable(String tableName) {
@@ -94,15 +103,22 @@ public class SQL {
         }
 
         // Add an entry to the joinMap, joining two tables by their columns
-        // Called from joinColumn
         public static void join(Column col1, Column col2) {
-            joinMap.put(col1, col2);
-            joinMap.put(col2, col1);
+            join(col1, col2, false);
         }
 
-        // Get a pair of columns used to join two tables
-        protected static Pair<Column, Column> getJoin(Object t1, Object t2) {
-            Map<String, Pair<Column, Column>> map = joinMap.get(t1.toString());
+        public static void join(Column col1, Column col2, boolean isLeft) {
+            join(col1.table, col2.table, col1 + " = " + col2, isLeft);
+        }
+
+        public static void join(BaseTable t1, BaseTable t2, String text, boolean isLeft) {
+            joinMap.put(t1, t2, text, isLeft);
+            joinMap.put(t2, t1, text, isLeft);
+        }
+
+        // Get the JoinEntry used to join two tables
+        protected static JoinEntry getJoin(Object t1, Object t2) {
+            Map<String, JoinEntry> map = joinMap.get(t1.toString());
             if (map == null)
                 return null;
             return map.get(t2.toString());
@@ -412,51 +428,52 @@ public class SQL {
 
         // Join using defined relationships
         public Query join(BaseTable t1, BaseTable t2) {
-            return _join("JOIN", t1, t2);
+            return _join(t1, t2, false);
         }
 
         public Query leftJoin(BaseTable t1, BaseTable t2) {
-            return _join("LEFT JOIN", t1, t2);
+            return _join(t1, t2, true);
         }
 
         // Join on specified columns
         public Query join(Object table, Column on1, Column on2) {
-            return _join("JOIN", table, on1, on2);
+            return _join(table, on1 + " = " + on2, false);
         }
 
         public Query leftJoin(Object table, Column on1, Column on2) {
-            return _join("LEFT JOIN", table, on1, on2);
+            return _join(table, on1 + " = " + on2, true);
         }
 
         // Search for a columns to complete this join
-        protected Query _join(String joinType, BaseTable t1, BaseTable t2) {
+        protected Query _join(BaseTable t1, BaseTable t2, boolean isLeft) {
             if (joins.containsKey(t2.toString()))
                 return this;
-            Pair<Column, Column> joinColumns = BaseTable.getJoin(t1, t2);
-            if (joinColumns != null)
-                return _join(joinType, t2, joinColumns.first, joinColumns.second);
+            JoinEntry entry = BaseTable.getJoin(t1, t2);
+            if (entry != null)
+                return _join(t2, entry.text, entry.isLeft || isLeft);
             // Look for a many to many join path if we don't have a simple join
-            Map<String, Pair<Column, Column>> map = BaseTable.joinMap.get(t1.TABLE_NAME);
+            Map<String, JoinEntry> map = BaseTable.joinMap.get(t1.TABLE_NAME);
             if (map == null)
                 throw new JoinException(t1, t2);
             for (String other : map.keySet()) {
-                joinColumns = BaseTable.getJoin(other, t2);
-                if (joinColumns != null) {
+                entry = BaseTable.getJoin(other, t2);
+                if (entry != null) {
                     // Join to the intermediate table
-                    Pair<Column, Column> firstJoin = BaseTable.getJoin(t1, other);
-                    _join(joinType, other, firstJoin.first, firstJoin.second);
+                    JoinEntry firstJoin = BaseTable.getJoin(t1, other);
+                    _join(other, firstJoin.text, firstJoin.isLeft || isLeft);
                     // Join to the second table
-                    _join(joinType, t2, joinColumns.first, joinColumns.second);
+                    _join(t2, entry.text, entry.isLeft || isLeft);
                     return this;
                 }
             }
             throw new JoinException(t1, t2);
         }
 
-        protected Query _join(String joinType, Object table, Column on1, Column on2) {
+        protected Query _join(Object table, String joinOn, boolean isLeft) {
             if (joins.containsKey(table.toString()))
                 return this;
-            joins.put(table.toString(), " " + joinType + " " + table + " ON " + on1 + " = " + on2);
+            joins.put(table.toString(),
+                (isLeft ? " LEFT JOIN " : " JOIN ") + table + " ON " + joinOn);
             return this;
         }
 
