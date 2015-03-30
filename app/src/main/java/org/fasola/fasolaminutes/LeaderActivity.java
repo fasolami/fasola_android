@@ -1,6 +1,7 @@
 package org.fasola.fasolaminutes;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 
@@ -23,15 +24,31 @@ public class LeaderActivity extends SimpleTabActivity {
         long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
         MinutesContract.LeaderDAO leader = MinutesContract.Leader.get(id);
         if (leader != null) {
-            String leaderName = leader.fullName.getString();
-            setTitle(leaderName);
+            // Assemble the aka text
+            StringBuilder akaText = new StringBuilder();
+            if (! leader.aka.isNull()) {
+                String[] akaList = leader.aka.getString().split(",");
+                if (akaList.length > 0) {
+                    akaText.append("aka");
+                    for (int i = 0; i < akaList.length; i++) {
+                        akaText.append(" ").append(akaList[i]);
+                        if (i < akaList.length - 2)
+                            akaText.append(",");
+                        else if (i == akaList.length - 2)
+                            akaText.append(" and");
+                    }
+                }
+            }
+            setTitle(leader.fullName.getString());
             int nSongs = leader.songCount.getInt();
             int nTimes = leader.leadCount.getInt();
             int nSingings = leader.singingCount.getInt();
             String songsLed = getResources().getQuantityString(R.plurals.songsLed, nSongs, nSongs);
             String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
             String singings = getResources().getQuantityString(R.plurals.singingsAttended, nSingings, nSingings);
-            ((TextView) findViewById(R.id.leader_name)).setText(leaderName);
+            ((TextView) findViewById(R.id.leader_name)).setText(akaText.toString());
+            if (leader.aka.isNull())
+                findViewById(R.id.leader_name).setVisibility(View.GONE);
             ((TextView) findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
             ((TextView) findViewById(R.id.singings)).setText(singings);
         }
