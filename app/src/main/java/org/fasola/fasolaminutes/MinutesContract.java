@@ -29,8 +29,11 @@ public class MinutesContract {
         SQL.BaseTable.join(Song.id, SongLeader.songId);
         SQL.BaseTable.join(Leader.id, LeaderStats.leaderId);
         SQL.BaseTable.join(Leader.id, SongLeader.leaderId);
-        SQL.BaseTable.join(Leader.id, LeaderAlias.leaderId);
         SQL.BaseTable.join(Singing.id, SongLeader.singingId);
+        SQL.BaseTable.leftJoin(Leader, LeaderAlias,
+            Leader.id + " = " + LeaderAlias.leaderId + " AND " +
+            LeaderAlias.type + " = 'Alternate Spelling'"
+        );
         Song.onCreate();
         SongStats.onCreate();
         Leader.onCreate();
@@ -99,9 +102,10 @@ public class MinutesContract {
         protected void onCreate() {
             songCount = column(SongLeader.songId.countDistinct());
             singingCount = column(SongLeader.singingId.countDistinct());
+            aka = column(LeaderAlias.alias.func("group_concat", true));
         }
 
-        public SQL.Column fullName, lastName, leadCount, entropy, singingCount, songCount;
+        public SQL.Column fullName, lastName, leadCount, entropy, singingCount, songCount, aka;
     }
 
     /* LeaderNameAliases table */
@@ -111,9 +115,10 @@ public class MinutesContract {
             leaderId = column("leader_id");
             name = column("name");
             alias = column("alias");
+            type = column("type");
         }
 
-        public SQL.Column leaderId, name, alias;
+        public SQL.Column leaderId, name, alias, type;
     }
 
     /* LeaderStats table */

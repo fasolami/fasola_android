@@ -136,9 +136,8 @@ public class MainActivity extends SimpleTabActivity {
 
         @Override
         public void onSearch(String query) {
-            mQuery.leftJoin(C.Leader, C.LeaderAlias)
-                .where(C.Leader.fullName, "LIKE", "%" + query + "%")
-                .or(C.LeaderAlias.alias, "LIKE", "%" + query + "%");
+            mQuery.where(C.Leader.fullName, "LIKE", "%" + query + "%")
+                    .or(C.LeaderAlias.alias, "LIKE", "%" + query + "%");
         }
 
         @Override
