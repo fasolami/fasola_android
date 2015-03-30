@@ -346,6 +346,7 @@ public class SQL {
         protected String queryType;
         protected boolean isDistinct;
         protected List<Pair<Object, String>> selectColumns = new ArrayList<>(); // Column, alias
+        protected List<Column> joinColumns = new ArrayList<>();
         protected BaseTable fromTable;
         protected Map<String, String> joins = new LinkedHashMap<>(); // table name, join statment
         protected QueryStringBuilder strGroup = new QueryStringBuilder(" GROUP BY");
@@ -367,6 +368,7 @@ public class SQL {
             queryType = other.queryType;
             isDistinct = other.isDistinct;
             selectColumns = new ArrayList<>(other.selectColumns);
+            joinColumns = new ArrayList<>(other.joinColumns);
             fromTable = other.fromTable;
             joins = new LinkedHashMap<>(other.joins);
             strGroup = new QueryStringBuilder(other.strGroup);
@@ -393,6 +395,7 @@ public class SQL {
                     alias = "_id";
                 Pair<Object, String> pair = Pair.create(col, alias);
                 selectColumns.add(pair);
+                addJoinColumn(col);
             }
             return this;
         }
@@ -485,6 +488,11 @@ public class SQL {
             return this;
         }
 
+        protected void addJoinColumn(Object col) {
+            if (col instanceof Column)
+                joinColumns.add((Column) col);
+        }
+
         // WHERE
         // -----
         public Query where(Object col, Object oper, Object val) {
@@ -520,6 +528,8 @@ public class SQL {
             else if (val != "?")
                 val = DatabaseUtils.sqlEscapeString(val.toString());
             q.append(bool, " ", col, oper, val);
+            // Add join
+            addJoinColumn(col);
             return this;
         }
 
@@ -549,11 +559,13 @@ public class SQL {
             if (! strGroup.isEmpty())
                 strGroup.append(",");
             strGroup.append(" ").appendDelim(", ", cols);
+            addJoinColumn(cols[0]);
             return this;
         }
 
         public Query having(Object... args) {
             strHaving.append(" ").appendDelim(" ", args);
+            addJoinColumn(args[0]);
             return this;
         }
 
@@ -573,6 +585,7 @@ public class SQL {
                     strOrder.append(" ");
                 // Column
                 strOrder.append(args[i]).append(" ");
+                addJoinColumn(args[i]);
                 // ASC/DESC.  Assume ASC if there are an odd number of args
                 if (args.length > i+1)
                     strOrder.append(args[i+1]);
@@ -627,15 +640,15 @@ public class SQL {
                 String delim = " ";
                 for (Pair<Object, String> col : selectColumns) {
                     q.append(delim).append(col.first.toString()).append(" AS ").append(col.second);
-                    // Check to see if we need a join
-                    if (col.first instanceof Column)
-                        ((Column) col.first).addJoin(this, fromTable);
                     delim = ", ";
                 }
             }
             // From
             q.append(" FROM ").append(fromTable);
-            // Join
+            // Check columns for joins
+            for (Column col : joinColumns)
+                col.addJoin(this, fromTable);
+            // Add joins
             for (String str : joins.values())
                 q.append(str);
             // Where/Group By/Having
