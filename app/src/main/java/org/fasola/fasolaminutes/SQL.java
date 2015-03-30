@@ -280,6 +280,10 @@ public class SQL {
         public int getInt() {
             return Integer.parseInt(value);
         }
+
+        public boolean isNull() {
+            return value == null;
+        }
     }
 
     /**
