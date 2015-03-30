@@ -104,11 +104,19 @@ public class SQL {
 
         // Add an entry to the joinMap, joining two tables by their columns
         public static void join(Column col1, Column col2) {
-            join(col1, col2, false);
+            join(col1.table, col2.table, col1 + " = " + col2, false);
         }
 
-        public static void join(Column col1, Column col2, boolean isLeft) {
-            join(col1.table, col2.table, col1 + " = " + col2, isLeft);
+        public static void leftJoin(Column col1, Column col2) {
+            join(col1.table, col2.table, col1 + " = " + col2, true);
+        }
+
+        public static void join(BaseTable t1, BaseTable t2, String text) {
+            join(t1, t2, text, false);
+        }
+
+        public static void leftJoin(BaseTable t1, BaseTable t2, String text) {
+            join(t1, t2, text, true);
         }
 
         public static void join(BaseTable t1, BaseTable t2, String text, boolean isLeft) {
