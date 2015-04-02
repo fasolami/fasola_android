@@ -3,11 +3,9 @@ package org.fasola.fasolaminutes;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -20,7 +18,7 @@ import android.view.MenuItem;
  *  Extend this class, and override onCreateTabs()
  *  In this function, call addTab() to add a tab to your activity
  */
-public class SimpleTabActivity extends ActionBarActivity implements ActionBar.TabListener {
+public class SimpleTabActivity extends FragmentActivity {
     /* Override to change the content view resource */
     protected int getLayoutId() {
         return R.layout.activity_tab;
@@ -46,38 +44,6 @@ public class SimpleTabActivity extends ActionBarActivity implements ActionBar.Ta
 
     protected void removeTab(int index) {
         mSectionsPagerAdapter.removeTab(index);
-    }
-
-    /**
-     * Call from onCreateTabs() to show tabs in the ActionBar
-     * If you want a TabPagerStrip, you must add it to a custom layout and override getLayoutId()
-     */
-    protected void showTabs() {
-        // Set up the action bar.
-        final ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-        // When swiping between different sections, select the corresponding
-        // tab. We can also use ActionBar.Tab#select() to do this if we have
-        // a reference to the Tab.
-        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-            actionBar.setSelectedNavigationItem(position);
-            }
-        });
-
-        // For each of the sections in the app, add a tab to the action bar.
-        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
-            // Create a tab with text corresponding to the page title defined by
-            // the adapter. Also specify this Activity object, which implements
-            // the TabListener interface, as the callback (listener) for when
-            // this tab is selected.
-            actionBar.addTab(
-                    actionBar.newTab()
-                            .setText(mSectionsPagerAdapter.getPageTitle(i).toString().toUpperCase())
-                            .setTabListener(this));
-        }
     }
 
     // UI Stuff
@@ -133,21 +99,6 @@ public class SimpleTabActivity extends ActionBarActivity implements ActionBar.Ta
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-        // When the given tab is selected, switch to the corresponding page in
-        // the ViewPager.
-        mViewPager.setCurrentItem(tab.getPosition());
-    }
-
-    @Override
-    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
-    }
-
-    @Override
-    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
     /**

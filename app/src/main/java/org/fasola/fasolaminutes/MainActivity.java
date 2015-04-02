@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.SearchView;
+import android.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -64,13 +64,6 @@ public class MainActivity extends SimpleTabActivity {
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         final MenuItem searchItem = menu.findItem(R.id.menu_search);
         final SearchView searchView = (SearchView) searchItem.getActionView();
-        // Collapse the search box when it is cleared
-        searchView.findViewById(R.id.search_close_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                searchItem.collapseActionView();
-            }
-        });
         // Update search results as you type
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
