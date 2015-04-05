@@ -32,6 +32,21 @@ public class CursorListFragment extends ListFragment
     protected String mSearchTerm = "";
     protected String[] mQueryParams;
     protected boolean mNeedsRangeIndexer;
+    protected String BUNDLE_SEARCH = "SEARCH_TERM";
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            mSearchTerm = savedInstanceState.getString(BUNDLE_SEARCH, mSearchTerm);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(final Bundle saveInstanceState) {
+        super.onSaveInstanceState(saveInstanceState);
+        saveInstanceState.putSerializable(BUNDLE_SEARCH, mSearchTerm);
+    }
 
     // Set the custom list item layout
     public void setItemLayout(int layoutId) {
@@ -73,6 +88,10 @@ public class CursorListFragment extends ListFragment
             mSearchTerm = query;
             getLoaderManager().restartLoader(1, null, this);
         }
+    }
+
+    public String getSearch() {
+        return mSearchTerm;
     }
 
     public void clearSearch() {

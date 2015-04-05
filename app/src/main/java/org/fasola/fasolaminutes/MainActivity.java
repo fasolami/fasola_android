@@ -18,19 +18,29 @@ import android.widget.ListView;
 public class MainActivity extends SimpleTabActivity {
     public final static String EXTRA_ID = "org.fasola.fasolaminutes.ID";
     public final static String ACTIVITY_POSITION = "org.fasola.fasolaminutes.POSITION";
+    SearchView mSearchView;
+    MenuItem mSearchItem;
+    boolean mAllowSearchUpdates;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Save all the pages since the queries may take some time to run
         mViewPager.setOffscreenPageLimit(mSectionsPagerAdapter.getCount());
-        // Change title and FaSoLa tabs when the page changes
+        // Change title, FaSoLa tabs, and search when the page changes
         final FasolaTabView tabs = (FasolaTabView) findViewById(R.id.fasola_tabs);
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 setTitle(mSectionsPagerAdapter.getPageTitle(position));
                 tabs.setSelection(position);
+                // Android will expand/collapse and change the SearchView text several times
+                // in the process of rebuilding the menu (due to the newly focused Fragment).
+                // Here we set an internal flag so that changes to the SearchView will not
+                // be forwarded to the Fragment (and trigger a new db query).
+                // The menu update ends with onPreparePanel(), at which point this flag is
+                // turned back on, and subsequent searches will go through to the Fragment.
+                mAllowSearchUpdates = false;
             }
         });
         // Initial settings
@@ -55,6 +65,23 @@ public class MainActivity extends SimpleTabActivity {
         //addTab("SEARCH", SearchListFragment.class);
     }
 
+    public boolean onPreparePanel(int featureId, View view, Menu menu) {
+        boolean ret = super.onPreparePanel(featureId, view, menu);
+        // Update the SearchView with the searchTerm from the current Fragment
+        final CursorListFragment fragment = (CursorListFragment) getCurrentFragment();
+        if (fragment != null) {
+            String searchTerm = fragment.getSearch();
+            if (searchTerm != null && ! searchTerm.isEmpty())
+                mSearchItem.expandActionView();
+            else
+                mSearchItem.collapseActionView();
+            mSearchView.setQuery(searchTerm, false);
+        }
+        // Forward searches to the Fragment (see onPageSelected for a full explanation)
+        mAllowSearchUpdates = true;
+        return ret;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -62,13 +89,13 @@ public class MainActivity extends SimpleTabActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        final MenuItem searchItem = menu.findItem(R.id.menu_search);
-        final SearchView searchView = (SearchView) searchItem.getActionView();
+        mSearchItem = menu.findItem(R.id.menu_search);
+        mSearchView = (SearchView) mSearchItem.getActionView();
         // Update search results as you type
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                searchView.clearFocus(); // Hide the keyboard
+                mSearchView.clearFocus(); // Hide the keyboard
                 onQueryTextChange(query);
                 return true;
             }
@@ -76,14 +103,15 @@ public class MainActivity extends SimpleTabActivity {
             @Override
             public boolean onQueryTextChange(String query) {
                 CursorListFragment fragment = (CursorListFragment) getCurrentFragment();
-                fragment.setSearch(query);
+                if (mAllowSearchUpdates)
+                    fragment.setSearch(query);
                 return true;
             }
 
         });
         SearchableInfo info = searchManager.getSearchableInfo(getComponentName());
-        searchView.setSearchableInfo(info);
-        searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+        mSearchView.setSearchableInfo(info);
+        mSearchView.setIconifiedByDefault(true); // Do not iconify the widget; expand it by default
         return true;
     }
 
