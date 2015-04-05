@@ -10,9 +10,12 @@ import android.util.Pair;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * A namespace class with SQL helpers
@@ -61,7 +64,7 @@ public class SQL {
     public static class BaseTable {
         public String TABLE_NAME;
         public Column id;
-        protected Map<String, Column> _columns;
+        protected Map<String, Column> _columns; // Make escaped column key to Column
         protected static JoinMap joinMap = new JoinMap();
 
         protected BaseTable(String tableName) {
@@ -83,7 +86,7 @@ public class SQL {
 
         // Add an existing column
         public Column column(Column col) {
-            _columns.put(col.name, col);
+            _columns.put(col.key, col);
             return col;
         }
 
@@ -159,6 +162,25 @@ public class SQL {
             return null;
         }
 
+        @SuppressWarnings("unchecked")
+        protected <T extends BaseTable> T fromCursor(Cursor cursor) {
+            if (! cursor.moveToFirst())
+                return null;
+            // Create the object
+            T obj;
+            try {
+                obj = (T) this.getClass().newInstance();
+            } catch(InstantiationException|IllegalAccessException e) {
+                return null;
+            }
+             // Setup secondary fields
+            obj.onCreate();
+            // Fill values
+            for (int i = 0; i < cursor.getColumnCount(); i++)
+                obj._columns.get(cursor.getColumnName(i)).setValue(cursor.getString(i));
+            return obj;
+        }
+
         protected void doQuery(Column field, Object value) {
             // Make a column list
             Column[] cols = new Column[_columns.size()];
@@ -212,20 +234,39 @@ public class SQL {
      * See QueryColumn for more complex queries
      */
     public static class Column {
-        public String name;
-        public BaseTable table;
+        private String name;
+        private String key;
+        private BaseTable table;
 
         protected Column() {
-            name = "";
+            setName("");
         }
 
         public Column(BaseTable table, String columnName) {
             this.table = table;
-            name = table.toString() + "." + columnName;
+            setName(table.toString() + "." + columnName);
         }
 
         public String toString() {
             return name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        static final Pattern keyPat = Pattern.compile("\\W+");
+        public void setName(String name) {
+            this.name = name;
+            key = keyPat.matcher(name).replaceAll("_");
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public BaseTable getTable() {
+            return table;
         }
 
         // Column formatting: Use {column} for the column
@@ -272,7 +313,11 @@ public class SQL {
         }
 
         // For use as a DAO
-        protected String value;
+        private String value;
+        protected void setValue(String value) {
+            this.value = value;
+        }
+
         public String getString() {
             return value;
         }
@@ -301,7 +346,7 @@ public class SQL {
             StringBuilder q = new StringBuilder();
             for (Object arg : args)
                 q.append(arg.toString());
-            name = q.toString();
+            setName(q.toString());
             addTables(args);
         }
 
@@ -309,7 +354,7 @@ public class SQL {
             QueryColumn q = new QueryColumn(col);
             q.addTables(args);
             // fmt should use {column} as the column placeholder
-            q.name = String.format(fmt.replace("{column}", col.toString()), args);
+            q.setName(String.format(fmt.replace("{column}", col.toString()), args));
             return q;
         }
 
@@ -391,10 +436,12 @@ public class SQL {
         // SELECT
         // ------
 
-        // Adds an automatic alias for every column ("column[0-n]")
+        // Adds an automatic alias for every column (Column.key or "column[0-n]")
         public Query select(Object... cols) {
             for (Object col : cols) {
                 String alias = "column" + selectColumns.size();
+                if (col instanceof Column)
+                    alias = ((Column) col).getKey();
                 // Preserve _id column for CursorAdapters
                 if (col.toString().endsWith("._id") || col.toString().endsWith(".id"))
                     alias = "_id";
@@ -642,9 +689,18 @@ public class SQL {
                 q.append(" DISTINCT");
             // Columns
             {
+                Set<String> aliases = new HashSet<>();
                 String delim = " ";
                 for (Pair<Object, String> col : selectColumns) {
-                    q.append(delim).append(col.first.toString()).append(" AS ").append(col.second);
+                    q.append(delim).append(col.first.toString());
+                    // Make sure there are no duplicate aliases by appending a sequential number if necessary
+                    String alias = col.second;
+                    int i = 1;
+                    while (aliases.contains(alias))
+                        alias = col.second + i++;
+                    // Add alias
+                    aliases.add(alias);
+                    q.append(" AS ").append(alias);
                     delim = ", ";
                 }
             }
