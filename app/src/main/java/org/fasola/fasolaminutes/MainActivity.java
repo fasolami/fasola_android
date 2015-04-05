@@ -156,9 +156,9 @@ public class MainActivity extends SimpleTabActivity {
         }
 
         @Override
-        public void onSearch(String query) {
-            mQuery.where(C.Leader.fullName, "LIKE", "%" + query + "%")
-                    .or(C.LeaderAlias.alias, "LIKE", "%" + query + "%");
+        public void onSearch(SQL.Query query, String searchTerm) {
+            query.where(C.Leader.fullName, "LIKE", "%" + searchTerm + "%")
+                    .or(C.LeaderAlias.alias, "LIKE", "%" + searchTerm + "%");
         }
 
         @Override
@@ -237,9 +237,9 @@ public class MainActivity extends SimpleTabActivity {
         }
 
         @Override
-        public void onSearch(String query) {
-            mQuery.where(C.Song.fullName, "LIKE", "%" + query + "%")
-                    .or(C.Song.lyrics, "LIKE", "%" + query + "%");
+        public void onSearch(SQL.Query query, String searchTerm) {
+            query.where(C.Song.fullName, "LIKE", "%" + searchTerm + "%")
+                    .or(C.Song.lyrics, "LIKE", "%" + searchTerm + "%");
         }
 
         @Override
@@ -286,15 +286,15 @@ public class MainActivity extends SimpleTabActivity {
             super.onCreate(savedInstanceState);
             mIntentClass = SingingActivity.class;
             mItemLayoutId = android.R.layout.simple_list_item_2;
-            mQuery = C.Singing.selectList(C.Singing.name, C.Singing.location)
-                                .sectionIndex(C.Singing.year);
+            setQuery(C.Singing.selectList(C.Singing.name, C.Singing.location)
+                                .sectionIndex(C.Singing.year));
             setRangeIndexer();
         }
 
         @Override
-        public void onSearch(String query) {
-            mQuery.where(C.Singing.name, "LIKE", "%" + query + "%")
-                    .or(C.Singing.location, "LIKE", "%" + query + "%");
+        public void onSearch(SQL.Query query, String searchTerm) {
+            query.where(C.Singing.name, "LIKE", "%" + searchTerm + "%")
+                    .or(C.Singing.location, "LIKE", "%" + searchTerm + "%");
         }
     }
 
@@ -303,7 +303,7 @@ public class MainActivity extends SimpleTabActivity {
         public SearchListFragment() {
             mIntentClass = LeaderActivity.class;
             mItemLayoutId = android.R.layout.simple_list_item_1;
-            mQuery = new SQL.Query("", "");
+            setQuery(new SQL.Query("", ""));
         }
 
         public void onSearch(String query) {
@@ -319,7 +319,7 @@ public class MainActivity extends SimpleTabActivity {
                 C.Singing.selectList(C.Singing.name)
                     .sectionIndex(new SQL.QueryColumn("'Singing'"))
                     .where(C.Singing.name, "LIKE", "%" + query + "%").or(C.Singing.location, "LIKE", "%" + query + "%");
-            mQuery = SQL.union(leaderQuery, singingQuery, songQuery).order(SQL.INDEX_COLUMN);
+            setQuery(SQL.union(leaderQuery, singingQuery, songQuery).order(SQL.INDEX_COLUMN));
             setBins("Leader", "Singing", "Song");
         }
 

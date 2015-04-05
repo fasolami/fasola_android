@@ -4,9 +4,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.view.View;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
@@ -24,13 +21,11 @@ import junit.framework.Assert;
  *      The number of TextViews must be >= the number of display columns
  * Call setIntentActivity() to provide an Activity that will be started when an item is clicked
  */
-public class CursorListFragment extends ListFragment
-        implements LoaderManager.LoaderCallbacks<Cursor> {
+public class CursorListFragment extends ListFragment implements MinutesCursorLoader.LoaderCallbacks {
     protected int mItemLayoutId = android.R.layout.simple_list_item_1;
     protected Class<?> mIntentClass;
-    protected SQL.Query mQuery;
+    protected MinutesCursorLoader mCursorLoader;
     protected String mSearchTerm = "";
-    protected String[] mQueryParams;
     protected boolean mNeedsRangeIndexer;
     protected String BUNDLE_SEARCH = "SEARCH_TERM";
 
@@ -40,6 +35,8 @@ public class CursorListFragment extends ListFragment
         if (savedInstanceState != null) {
             mSearchTerm = savedInstanceState.getString(BUNDLE_SEARCH, mSearchTerm);
         }
+        // Setup the cursor loader
+        mCursorLoader = new MinutesCursorLoader(getActivity(), getLoaderManager(), this);
     }
 
     @Override
@@ -58,51 +55,46 @@ public class CursorListFragment extends ListFragment
         mIntentClass = cls;
     }
 
-    // Set the query and restart the loader (if the query has changed)
+    // Set the query and restart the loader
     public void setQuery(SQL.Query query, String... params) {
-        boolean restartLoader = mQuery != null;
-        mQuery = query;
-        mQueryParams = params;
-        if (! mSearchTerm.isEmpty()) { // Apply the current search
+        boolean restartLoader = mCursorLoader.hasQuery();
+        mCursorLoader.setQuery(query, params);
+        // Apply the current search term
+        if (! mSearchTerm.isEmpty()) {
             String term = mSearchTerm;
-            mSearchTerm = ""; // Clear so setSearch knows we don't have an existing search
+            mSearchTerm = ""; // Clear so setSearch knows we don't have an existing search term
             setSearch(term); // This will call restartLoader
         }
         else if (restartLoader)
-            getLoaderManager().restartLoader(1, null, this);
+            mCursorLoader.restartLoader();
 
     }
 
     // Override and change the query string
-    public void onSearch(String query) {
+    public void onSearch(SQL.Query query, String searchTerm) {
     }
 
-    public void setSearch(String query) {
-        if (mQuery != null) {
+    public void setSearch(String searchTerm) {
+        if (mCursorLoader.hasQuery()) {
+            SQL.Query query = mCursorLoader.getQuery();
+            // Push or pop the new query filter
             if (! mSearchTerm.isEmpty())
-                mQuery = mQuery.popFilter();
-            if (! query.isEmpty()) {
-                mQuery = mQuery.pushFilter();
-                onSearch(query); // Update the query
+                query = query.popFilter();
+            if (! searchTerm.isEmpty()) {
+                query = query.pushFilter();
+                onSearch(query, searchTerm); // Update the query
             }
-            mSearchTerm = query;
-            getLoaderManager().restartLoader(1, null, this);
+            // Set the new query and update
+            mCursorLoader.setQuery(query);
+            mCursorLoader.restartLoader();
         }
+        mSearchTerm = searchTerm;
     }
 
     public String getSearch() {
         return mSearchTerm;
     }
 
-    public void clearSearch() {
-        setSearch("");
-    }
-
-    public SQL.Query getQuery() {
-        return mQuery;
-    }
-
-    // Set an indexer
     public void setIndexer(LetterIndexer indexer) {
         mNeedsRangeIndexer = false;
         IndexedCursorAdapter adapter = ((IndexedCursorAdapter) getListAdapter());
@@ -135,11 +127,6 @@ public class CursorListFragment extends ListFragment
         mNeedsRangeIndexer = true;
     }
 
-    // Get the minutes database
-    public MinutesDb getDb() {
-        return MinutesDb.getInstance(getActivity());
-    }
-
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -148,7 +135,7 @@ public class CursorListFragment extends ListFragment
             getActivity(), mItemLayoutId, null, null, null, 0);
         setListAdapter(adapter);
         // Start loading the cursor in the background
-        getLoaderManager().initLoader(1, savedInstanceState, this);
+        mCursorLoader.initLoader();
     }
 
     protected void setFastScrollEnabled(boolean enabled) {
@@ -164,17 +151,8 @@ public class CursorListFragment extends ListFragment
         }
     }
 
-    // LoaderCallbacks
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(getActivity()) {
-            @Override
-            public Cursor loadInBackground() {
-                return getDb().query(mQuery != null ? mQuery : "", mQueryParams);
-            }
-        };
-    }
-
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+    @Override
+    public void onLoadFinished(Cursor cursor) {
         // Setup any deferred section indexers
         if (mNeedsRangeIndexer) {
             setIndexer(new RangeIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor)));
@@ -193,9 +171,8 @@ public class CursorListFragment extends ListFragment
         setFastScrollEnabled(adapter.hasIndex() && adapter.hasIndexer());
     }
 
-    // For some reason this never gets called...
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
+    public void onLoaderReset() {
         ((CursorAdapter)getListAdapter()).changeCursor(null);
         setListAdapter(null);
     }
