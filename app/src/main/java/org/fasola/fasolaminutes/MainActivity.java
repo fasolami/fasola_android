@@ -14,7 +14,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
 
-
 public class MainActivity extends SimpleTabActivity {
     public final static String EXTRA_ID = "org.fasola.fasolaminutes.ID";
     public final static String ACTIVITY_POSITION = "org.fasola.fasolaminutes.POSITION";
@@ -51,6 +50,7 @@ public class MainActivity extends SimpleTabActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        // Change to the requested fragment (by position)
         int position = intent.getIntExtra(ACTIVITY_POSITION, -1);
         if (position != -1)
             mViewPager.setCurrentItem(position, true);
@@ -116,12 +116,50 @@ public class MainActivity extends SimpleTabActivity {
     }
 
     public static class LeaderListFragment extends CursorStickyListFragment {
-        protected int mSortId;
+        protected int mSortId = R.id.menu_leader_sort_name;
         protected final static String BUNDLE_SORT = "SORT_ID";
 
-        public LeaderListFragment() {
-            mIntentClass = LeaderActivity.class;
-            mItemLayoutId = R.layout.leader_list_item;
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setIntentActivity(LeaderActivity.class);
+            setItemLayout(R.layout.leader_list_item);
+            if (savedInstanceState != null)
+                mSortId = savedInstanceState.getInt(BUNDLE_SORT, mSortId);
+            setHasOptionsMenu(true);
+        }
+
+        @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            updateQuery();
+        }
+
+        @Override
+        public void onSaveInstanceState(final Bundle saveInstanceState) {
+            super.onSaveInstanceState(saveInstanceState);
+            saveInstanceState.putSerializable(BUNDLE_SORT, mSortId);
+        }
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+            inflater.inflate(R.menu.menu_leader_fragment, menu);
+            // Check the initial sort
+            MenuItem item = menu.findItem(mSortId);
+            if (item != null)
+                item.setChecked(true);
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            // Sort
+            if (item.getGroupId() == R.id.menu_group_leader_sort) {
+                item.setChecked(true);
+                mSortId = item.getItemId();
+                updateQuery();
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
         }
 
         // Change query/index based on the selected sort column
@@ -160,26 +198,38 @@ public class MainActivity extends SimpleTabActivity {
             query.where(C.Leader.fullName, "LIKE", "%" + searchTerm + "%")
                     .or(C.LeaderAlias.alias, "LIKE", "%" + searchTerm + "%");
         }
+    }
+
+    public static class SongListFragment extends CursorStickyListFragment {
+        protected int mSortId = R.id.menu_song_sort_page;
+        protected final static String BUNDLE_SORT = "SORT_ID";
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setIntentActivity(SongActivity.class);
+            setItemLayout(R.layout.song_list_item);
+            if (savedInstanceState != null) {
+                mSortId = savedInstanceState.getInt(BUNDLE_SORT, mSortId);
+            }
+            setHasOptionsMenu(true);
+        }
 
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            setHasOptionsMenu(true);
-            if (savedInstanceState != null)
-                mSortId = savedInstanceState.getInt(BUNDLE_SORT, R.id.menu_leader_sort_name);
-            else
-                mSortId = R.id.menu_leader_sort_name;
             updateQuery();
         }
 
         @Override
         public void onSaveInstanceState(final Bundle saveInstanceState) {
+            super.onSaveInstanceState(saveInstanceState);
             saveInstanceState.putSerializable(BUNDLE_SORT, mSortId);
         }
 
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.menu_leader_fragment, menu);
+            inflater.inflate(R.menu.menu_song_fragment, menu);
             // Check the initial sort
             MenuItem item = menu.findItem(mSortId);
             if (item != null)
@@ -189,23 +239,13 @@ public class MainActivity extends SimpleTabActivity {
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             // Sort
-            if (item.getGroupId() == R.id.menu_group_leader_sort) {
+            if (item.getGroupId() == R.id.menu_group_song_sort) {
                 item.setChecked(true);
                 mSortId = item.getItemId();
                 updateQuery();
                 return true;
             }
             return super.onOptionsItemSelected(item);
-        }
-    }
-
-    public static class SongListFragment extends CursorStickyListFragment {
-        protected int mSortId;
-        protected final static String BUNDLE_SORT = "SORT_ID";
-
-        public SongListFragment() {
-            mIntentClass = SongActivity.class;
-            mItemLayoutId = R.layout.song_list_item;
         }
 
         // Change query/index based on the selected sort column
@@ -241,51 +281,14 @@ public class MainActivity extends SimpleTabActivity {
             query.where(C.Song.fullName, "LIKE", "%" + searchTerm + "%")
                     .or(C.Song.lyrics, "LIKE", "%" + searchTerm + "%");
         }
-
-        @Override
-        public void onViewCreated(View view, Bundle savedInstanceState) {
-            super.onViewCreated(view, savedInstanceState);
-            setHasOptionsMenu(true);
-            if (savedInstanceState != null)
-                mSortId = savedInstanceState.getInt(BUNDLE_SORT, R.id.menu_song_sort_page);
-            else
-                mSortId = R.id.menu_song_sort_page;
-            updateQuery();
-        }
-
-        @Override
-        public void onSaveInstanceState(final Bundle saveInstanceState) {
-            saveInstanceState.putSerializable(BUNDLE_SORT, mSortId);
-        }
-
-        @Override
-        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.menu_song_fragment, menu);
-            // Check the initial sort
-            MenuItem item = menu.findItem(mSortId);
-            if (item != null)
-                item.setChecked(true);
-        }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            // Sort
-            if (item.getGroupId() == R.id.menu_group_song_sort) {
-                item.setChecked(true);
-                mSortId = item.getItemId();
-                updateQuery();
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
-        }
     }
 
     public static class SingingListFragment extends CursorStickyListFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            mIntentClass = SingingActivity.class;
-            mItemLayoutId = android.R.layout.simple_list_item_2;
+            setIntentActivity(SingingActivity.class);
+            setItemLayout(mItemLayoutId = android.R.layout.simple_list_item_2);
             setQuery(C.Singing.selectList(C.Singing.name, C.Singing.location)
                                 .sectionIndex(C.Singing.year));
             setRangeIndexer();
