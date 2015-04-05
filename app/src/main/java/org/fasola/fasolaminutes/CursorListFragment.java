@@ -12,7 +12,7 @@ import junit.framework.Assert;
 
 /**
  * Simple framework for using queries as the base for a ListFragment
- * Call setQuery() with a String or SQL.Query to update the list
+ * Call setQuery() with a SQL.Query to update the list
  *      Query should have id as the first column, and display columns afterwards
  *      To use sections and fastScroll, name a column IndexedCursorAdapter.INDEX_COLUMN
  * Call setIndexer/setAlphabet/setBins/setIntSections to initialize an Indexer
@@ -67,7 +67,10 @@ public class CursorListFragment extends ListFragment implements MinutesCursorLoa
         }
         else if (restartLoader)
             mCursorLoader.restartLoader();
+    }
 
+    public SQL.Query getQuery() {
+        return mCursorLoader.getQuery();
     }
 
     // Override and change the query string
@@ -151,6 +154,8 @@ public class CursorListFragment extends ListFragment implements MinutesCursorLoa
         }
     }
 
+    //region LoaderCallbacks
+    //-------------------------------------------------------------------------
     @Override
     public void onLoadFinished(Cursor cursor) {
         // Setup any deferred section indexers
@@ -176,6 +181,7 @@ public class CursorListFragment extends ListFragment implements MinutesCursorLoa
         ((CursorAdapter)getListAdapter()).changeCursor(null);
         setListAdapter(null);
     }
+    //endregion
 
     // Static helper functions
 

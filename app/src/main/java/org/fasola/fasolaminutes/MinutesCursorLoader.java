@@ -89,6 +89,15 @@ public class MinutesCursorLoader implements LoaderManager.LoaderCallbacks<Cursor
         setQueryParams(queryParams);
     }
 
+    public void setQueryAndLoad(SQL.Query query, String... queryParams) {
+        boolean doInit = mQuery == null;
+        setQuery(query, queryParams);
+        if (doInit)
+            initLoader();
+        else
+            restartLoader();
+    }
+
     public boolean hasQuery() {
         return mQuery != null;
     }
