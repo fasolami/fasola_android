@@ -1,7 +1,10 @@
 package org.fasola.fasolaminutes;
 
+import android.database.Cursor;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
 
@@ -13,6 +16,7 @@ public class LeaderActivity extends SimpleTabActivity {
 
     @Override
     public void onCreateTabs() {
+        addTab("Stats", LeaderStatsFragment.class);
         addTab("Songs", LeaderSongFragment.class);
         addTab("Singings", LeaderSingingFragment.class);
     }
@@ -22,35 +26,54 @@ public class LeaderActivity extends SimpleTabActivity {
         super.onCreate(savedInstanceState);
         // Query for main data
         long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-        MinutesContract.LeaderDAO leader = MinutesContract.Leader.get(id);
+        setQuery(SQL.select(C.Leader.fullName, C.Leader.aka).where(C.Leader.id, "=", id));
+    }
+
+    @Override
+    public void onLoadFinished(Cursor cursor) {
+        MinutesContract.LeaderDAO leader = MinutesContract.Leader.fromCursor(cursor);
         if (leader != null) {
-            // Assemble the aka text
-            StringBuilder akaText = new StringBuilder();
-            if (! leader.aka.isNull()) {
-                String[] akaList = leader.aka.getString().split(",");
-                if (akaList.length > 0) {
-                    akaText.append("aka");
-                    for (int i = 0; i < akaList.length; i++) {
-                        akaText.append(" ").append(akaList[i]);
-                        if (i < akaList.length - 2)
-                            akaText.append(",");
-                        else if (i == akaList.length - 2)
-                            akaText.append(" and");
-                    }
-                }
-            }
             setTitle(leader.fullName.getString());
-            int nSongs = leader.songCount.getInt();
-            int nTimes = leader.leadCount.getInt();
-            int nSingings = leader.singingCount.getInt();
-            String songsLed = getResources().getQuantityString(R.plurals.songsLed, nSongs, nSongs);
-            String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
-            String singings = getResources().getQuantityString(R.plurals.singingsAttended, nSingings, nSingings);
-            ((TextView) findViewById(R.id.leader_name)).setText(akaText.toString());
-            if (leader.aka.isNull())
-                findViewById(R.id.leader_name).setVisibility(View.GONE);
-            ((TextView) findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
-            ((TextView) findViewById(R.id.singings)).setText(singings);
+            // Assemble the aka text
+            TextView akaText = (TextView) findViewById(R.id.leader_aka);
+            if (! leader.aka.isNull()) {
+                String aka = leader.aka.getString().replace(",", ", ").replaceAll(", ([^,]+)$", " and $1");
+                akaText.setText("also known as: " + aka);
+            }
+            else
+                findViewById(R.id.leader_aka).setVisibility(View.GONE);
+        }
+    }
+
+    static public class LeaderStatsFragment extends CursorFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            setQuery(SQL.select(C.Leader.songCount, C.Leader.leadCount, C.Leader.singingCount)
+                    .where(C.Leader.id, "=", id));
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            return inflater.inflate(R.layout.fragment_leader_stats, container, false);
+        }
+
+        @Override
+        public void onLoadFinished(Cursor cursor) {
+            MinutesContract.LeaderDAO leader = MinutesContract.Leader.fromCursor(cursor);
+            if (leader != null) {
+                int nSongs = leader.songCount.getInt();
+                int nTimes = leader.leadCount.getInt();
+                int nSingings = leader.singingCount.getInt();
+                String songsLed = getResources().getQuantityString(R.plurals.songsLed, nSongs, nSongs);
+                String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
+                String singings = getResources().getQuantityString(R.plurals.singingsAttended, nSingings, nSingings);
+                View root = getView();
+                ((TextView) root.findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
+                ((TextView) root.findViewById(R.id.singings)).setText(singings);
+            }
         }
     }
 
@@ -64,12 +87,10 @@ public class LeaderActivity extends SimpleTabActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            SQL.Query query = C.Song.selectList(C.Song.fullName,
-                                                C.LeaderStats.leadCount.format("'(' || {column} || ')'"))
-                                    .whereEq(C.LeaderStats.leaderId)
-                                    .order(C.LeaderStats.leadCount, "DESC", C.Song.pageSort, "ASC");
-
-            setQuery(query, String.valueOf(id));
+            setQuery(C.Song.selectList(C.Song.fullName,
+                                       C.LeaderStats.leadCount.format("'(' || {column} || ')'"))
+                            .where(C.LeaderStats.leaderId, "=", id)
+                            .order(C.LeaderStats.leadCount, "DESC", C.Song.pageSort, "ASC"));
         }
     }
 
@@ -77,19 +98,13 @@ public class LeaderActivity extends SimpleTabActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            mItemLayoutId = android.R.layout.simple_list_item_2;
-            mIntentClass = SingingActivity.class;
-            SQL.Query query =
-                SQL.select(C.Singing.id).distinct()
-                    .select(C.Singing.name)
-                    .select(C.Singing.location)
-                    .sectionIndex(C.Singing.year)
-                    .from(C.SongLeader)
-                    .join(C.SongLeader, C.Singing)
-                    .whereEq(C.SongLeader.leaderId);
-            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            setItemLayout(android.R.layout.simple_list_item_2);
+            setIntentActivity(SingingActivity.class);
             setRangeIndexer();
-            setQuery(query, String.valueOf(id));
+            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            setQuery(C.Singing.selectList(C.Singing.name, C.Singing.location).distinct()
+                        .sectionIndex(C.Singing.year)
+                        .where(C.SongLeader.leaderId, "=", id));
         }
     }
 }
