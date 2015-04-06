@@ -437,11 +437,15 @@ public class SQL {
         // ------
 
         // Adds an automatic alias for every column (Column.key or "column[0-n]")
+        // Default to FROM the table of the first select argument
         public Query select(Object... cols) {
             for (Object col : cols) {
                 String alias = "column" + selectColumns.size();
-                if (col instanceof Column)
+                if (col instanceof Column) {
                     alias = ((Column) col).getKey();
+                    if (fromTable == null)
+                        fromTable = ((Column) col).getTable();
+                }
                 // Preserve _id column for CursorAdapters
                 if (col.toString().endsWith("._id") || col.toString().endsWith(".id"))
                     alias = "_id";
