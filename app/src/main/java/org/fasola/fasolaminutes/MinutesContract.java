@@ -40,6 +40,7 @@ public class MinutesContract {
         LeaderAlias.onCreate();
         LeaderStats.onCreate();
         SongLeader.onCreate();
+        Singing.onCreate();
     }
 
     // Use as a base table class to provide a database for SQL.BaseTable
