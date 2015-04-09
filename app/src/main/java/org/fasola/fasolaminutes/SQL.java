@@ -176,12 +176,15 @@ public class SQL {
              // Setup secondary fields
             obj.onCreate();
             // Fill values
-            for (int i = 0; i < cursor.getColumnCount(); i++)
-                obj._columns.get(cursor.getColumnName(i)).setValue(cursor.getString(i));
+            for (int i = 0; i < cursor.getColumnCount(); i++) {
+                Column col = obj._columns.get(cursor.getColumnName(i));
+                if (col != null)
+                    col.setValue(cursor.getString(i));
+            }
             return obj;
         }
 
-        protected void doQuery(Column field, Object value) {
+        protected <T extends BaseTable> T doQuery(Column field, Object value) {
             // Make a column list
             Column[] cols = new Column[_columns.size()];
             int idx = 0;
@@ -194,11 +197,7 @@ public class SQL {
             query.from(this).whereEq(field).group(this.id);
             // Query
             Cursor cursor = getDb().rawQuery(query.toString(), new String[] {value.toString()});
-            // Fill column values (already in order)
-            if (cursor.moveToFirst())
-                for (int i = 0; i < cols.length; i++)
-                    _columns.get(cols[i].name).value = cursor.getString(i);
-            cursor.close();
+            return fromCursor(cursor);
         }
 
         // Return a new BaseTable object that functions as a DAO
@@ -208,14 +207,7 @@ public class SQL {
 
         @SuppressWarnings("unchecked")
         protected <T extends BaseTable> T get(Column field, Object value) {
-            try {
-                T obj = (T) (this.getClass().newInstance());
-                obj.onCreate(); // Setup secondary fields
-                obj.doQuery(field, value);
-                return obj;
-            } catch(InstantiationException|IllegalAccessException e) {
-                return null;
-            }
+            return doQuery(field, value);
         }
 
         // Return a Query object for this table
