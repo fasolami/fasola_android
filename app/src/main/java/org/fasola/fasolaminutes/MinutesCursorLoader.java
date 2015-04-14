@@ -1,6 +1,5 @@
 package org.fasola.fasolaminutes;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
@@ -8,54 +7,61 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 
 /**
- * A helper class for CursorLoaders and LoaderManagers
- * To handle onLoadFinished and onLoaderReset, pass an implementation of LoaderCallbacks
- * in the second constructor.  NB: These are simplifed from LoaderManager.LoaderCallbacks<Cursor>
+ * A helper class that handles LoaderManager callbacks for a CursorLoader
+ * To handle onLoadFinished and onLoaderReset, pass an implementation of LoaderCallbacks,
+ * which are simplified from LoaderManager.LoaderCallbacks<Cursor>.
  */
-public class MinutesCursorLoader implements LoaderManager.LoaderCallbacks<Cursor> {
+
+// Declared outside the class so it can implement this interface
+interface _MinutesLoaderCallbacksInterface {
+    public void onLoadFinished(Cursor cursor);
+    public void onLoaderReset();
+}
+
+public class MinutesCursorLoader implements LoaderManager.LoaderCallbacks<Cursor>, _MinutesLoaderCallbacksInterface {
+    public interface LoaderCallbacks extends _MinutesLoaderCallbacksInterface {
+    }
+
     // Simplified callbacks
-    public interface LoaderCallbacks {
-        public void onLoadFinished(Cursor cursor);
-        public void onLoaderReset();
+    public abstract class FinishedCallback implements _MinutesLoaderCallbacksInterface {
+        @Override
+        public void onLoaderReset() {
+            // Do nothing
+        }
     }
 
-    Context mContext;
-    LoaderManager mLoaderManager;
     SQL.Query mQuery;
-    String[] mQueryParams;
-    LoaderCallbacks mCallbacks;
+    String[] mQueryArgs;
+    _MinutesLoaderCallbacksInterface mCallbacks;
 
-
-    public MinutesCursorLoader(Context context, LoaderManager loaderManager) {
-        mContext = context;
-        mLoaderManager = loaderManager;
-    }
-
-    public MinutesCursorLoader(Context context, LoaderManager loaderManager, LoaderCallbacks callbacks) {
-        this(context, loaderManager);
+    public MinutesCursorLoader(_MinutesLoaderCallbacksInterface callbacks) {
         mCallbacks = callbacks;
     }
 
-    public void initLoader() {
-        mLoaderManager.initLoader(1, null, this);
+    public MinutesCursorLoader(_MinutesLoaderCallbacksInterface callbacks, SQL.Query query,
+                               String... queryArgs) {
+        this(callbacks);
+        setQuery(query, queryArgs);
     }
 
-    public void restartLoader() {
-        mLoaderManager.restartLoader(1, null, this);
+    // Constructors without Callbacks param use this
+    public MinutesCursorLoader() {
+        mCallbacks = this;
     }
 
-    public MinutesDb getDb() {
-        return MinutesDb.getInstance(mContext);
+    public MinutesCursorLoader(SQL.Query query, String... queryArgs) {
+        this();
+        setQuery(query, queryArgs);
     }
 
     // LoaderCallbacks
     //----------------
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return new CursorLoader(mContext) {
+        return new CursorLoader(MinutesApplication.getContext()) {
             @Override
             public Cursor loadInBackground() {
-                return getDb().query(mQuery != null ? mQuery : "", mQueryParams);
+                return MinutesDb.getInstance().query(mQuery != null ? mQuery : "", mQueryArgs);
             }
         };
     }
@@ -63,15 +69,21 @@ public class MinutesCursorLoader implements LoaderManager.LoaderCallbacks<Cursor
     // Either override these using an anonymous subclass of MinutesCursorLoader, or pass an
     // implementation of LoaderCallbacks in the constructor.
     @Override
+    public void onLoadFinished(Cursor cursor) {
+    }
+
+    @Override
+    public void onLoaderReset() {
+    }
+
+    @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        if (mCallbacks != null)
-            mCallbacks.onLoadFinished(cursor);
+        mCallbacks.onLoadFinished(cursor);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        if (mCallbacks != null)
-            mCallbacks.onLoaderReset();
+        mCallbacks.onLoaderReset();
     }
 
     // Query getters/setters
@@ -84,29 +96,20 @@ public class MinutesCursorLoader implements LoaderManager.LoaderCallbacks<Cursor
         mQuery = query;
     }
 
-    public void setQuery(SQL.Query query, String... queryParams) {
+    public void setQuery(SQL.Query query, String... queryArgs) {
         setQuery(query);
-        setQueryParams(queryParams);
-    }
-
-    public void setQueryAndLoad(SQL.Query query, String... queryParams) {
-        boolean doInit = mQuery == null;
-        setQuery(query, queryParams);
-        if (doInit)
-            initLoader();
-        else
-            restartLoader();
+        setQueryArgs(queryArgs);
     }
 
     public boolean hasQuery() {
         return mQuery != null;
     }
 
-    public String[] getQueryParams() {
-        return mQueryParams;
+    public String[] getQueryArgs() {
+        return mQueryArgs;
     }
 
-    public void setQueryParams(String... queryParams) {
-        mQueryParams = queryParams;
+    public void setQueryArgs(String... queryArgs) {
+        mQueryArgs = queryArgs;
     }
 }
