@@ -7,6 +7,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.utils.ValueFormatter;
+import com.github.mikephil.charting.utils.XLabels;
+
+import java.util.ArrayList;
+
 public class LeaderActivity extends SimpleTabActivity {
     @Override
     public int getLayoutId() {
@@ -73,6 +82,56 @@ public class LeaderActivity extends SimpleTabActivity {
                         ((TextView) root.findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
                         ((TextView) root.findViewById(R.id.singings)).setText(singings);
                     }
+                }
+            });
+            // Query for BarChart
+            SQL.Query chartQuery = SQL.select(C.Leader.singingCount, C.Singing.year)
+                                        .whereEq(C.Leader.id)
+                                        .group(C.Singing.year)
+                                        .orderAsc(C.Singing.year);
+            getLoaderManager().initLoader(2, null, new MinutesLoader(chartQuery, String.valueOf(id)) {
+                @Override
+                public void onLoadFinished(Cursor cursor) {
+                    // Chart entries
+                    ArrayList<BarEntry> entries = new ArrayList<>();
+                    int minYear = Integer.MAX_VALUE;
+                    int maxYear = Integer.MIN_VALUE;
+                    while (cursor.moveToNext()) {
+                        int count = cursor.getInt(0);
+                        int year = cursor.getInt(1);
+                        if (year < minYear)
+                            minYear = year;
+                        if (year > maxYear)
+                            maxYear = year;
+                        entries.add(new BarEntry(count, year-minYear));
+                    }
+                    // Chart labels
+                    ArrayList<String> labels = new ArrayList<>();
+                    for(int i = minYear; i <= maxYear; ++i)
+                        labels.add(String.valueOf(i));
+                    // Set data
+                    BarDataSet dataset = new BarDataSet(entries, "Singings Attended");
+                    dataset.setColor(FasolaTabView.SELECTED_COLOR);
+                    BarChart chart = (BarChart)getView().findViewById(R.id.chart);
+                    chart.setDescription("");
+                    chart.setData(new BarData(labels, dataset));
+                    // Style the chart
+                    chart.setDrawLegend(false);
+                    chart.getXLabels().setCenterXLabelText(true);
+                    chart.getXLabels().setPosition(XLabels.XLabelPosition.BOTTOM);
+                    chart.setDrawHorizontalGrid(false);
+                    chart.setDrawVerticalGrid(false);
+                    chart.setDrawGridBackground(false);
+                    chart.setDrawBarShadow(false);
+                    int labelCount = (int)(chart.getYChartMax() - chart.getYChartMin());
+                    if (labelCount < 6)
+                        chart.getYLabels().setLabelCount(labelCount);
+                    chart.setValueFormatter(new ValueFormatter() {
+                        @Override
+                        public String getFormattedValue(float v) {
+                            return String.format("%d", (long) v);
+                        }
+                    });
                 }
             });
         }
