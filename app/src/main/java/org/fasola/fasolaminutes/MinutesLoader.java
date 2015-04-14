@@ -8,8 +8,8 @@ import android.support.v4.content.Loader;
 
 /**
  * A helper class that handles LoaderManager callbacks for a CursorLoader
- * To handle onLoadFinished and onLoaderReset, pass an implementation of LoaderCallbacks,
- * which are simplified from LoaderManager.LoaderCallbacks<Cursor>.
+ * To handle onLoadFinished and onLoaderReset, pass an implementation of Callbacks,
+ * which are simplified from LoaderManager.Callbacks<Cursor>.
  */
 
 // Declared outside the class so it can implement this interface
@@ -19,7 +19,7 @@ interface _MinutesLoaderCallbacksInterface {
 }
 
 public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>, _MinutesLoaderCallbacksInterface {
-    public interface LoaderCallbacks extends _MinutesLoaderCallbacksInterface {
+    public interface Callbacks extends _MinutesLoaderCallbacksInterface {
     }
 
     // Simplified callbacks
@@ -54,7 +54,7 @@ public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>, _Mi
         setQuery(query, queryArgs);
     }
 
-    // LoaderCallbacks
+    // Callbacks
     //----------------
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -67,7 +67,7 @@ public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>, _Mi
     }
 
     // Either override these using an anonymous subclass of MinutesLoader, or pass an
-    // implementation of LoaderCallbacks in the constructor.
+    // implementation of Callbacks in the constructor.
     @Override
     public void onLoadFinished(Cursor cursor) {
     }
