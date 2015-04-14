@@ -97,7 +97,7 @@ public class MinutesDb {
     // ------------------------------------------------------------------------------------------
     private static class MinutesDbHelper extends SQLiteAssetHelper {
         public MinutesDbHelper(Context context) {
-            super(context, C.DB_NAME, null, C.DB_VERSION);
+            super(context.getApplicationContext(), C.DB_NAME, null, C.DB_VERSION);
             setForcedUpgrade();
         }
     }
