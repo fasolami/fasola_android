@@ -18,7 +18,7 @@ interface _MinutesLoaderCallbacksInterface {
     public void onLoaderReset();
 }
 
-public class MinutesCursorLoader implements LoaderManager.LoaderCallbacks<Cursor>, _MinutesLoaderCallbacksInterface {
+public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>, _MinutesLoaderCallbacksInterface {
     public interface LoaderCallbacks extends _MinutesLoaderCallbacksInterface {
     }
 
@@ -34,22 +34,22 @@ public class MinutesCursorLoader implements LoaderManager.LoaderCallbacks<Cursor
     String[] mQueryArgs;
     _MinutesLoaderCallbacksInterface mCallbacks;
 
-    public MinutesCursorLoader(_MinutesLoaderCallbacksInterface callbacks) {
+    public MinutesLoader(_MinutesLoaderCallbacksInterface callbacks) {
         mCallbacks = callbacks;
     }
 
-    public MinutesCursorLoader(_MinutesLoaderCallbacksInterface callbacks, SQL.Query query,
-                               String... queryArgs) {
+    public MinutesLoader(_MinutesLoaderCallbacksInterface callbacks, SQL.Query query,
+                         String... queryArgs) {
         this(callbacks);
         setQuery(query, queryArgs);
     }
 
     // Constructors without Callbacks param use this
-    public MinutesCursorLoader() {
+    public MinutesLoader() {
         mCallbacks = this;
     }
 
-    public MinutesCursorLoader(SQL.Query query, String... queryArgs) {
+    public MinutesLoader(SQL.Query query, String... queryArgs) {
         this();
         setQuery(query, queryArgs);
     }
@@ -66,7 +66,7 @@ public class MinutesCursorLoader implements LoaderManager.LoaderCallbacks<Cursor
         };
     }
 
-    // Either override these using an anonymous subclass of MinutesCursorLoader, or pass an
+    // Either override these using an anonymous subclass of MinutesLoader, or pass an
     // implementation of LoaderCallbacks in the constructor.
     @Override
     public void onLoadFinished(Cursor cursor) {
