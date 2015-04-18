@@ -28,7 +28,7 @@ public class MainActivity extends SimpleTabActivity {
         mViewPager.setOffscreenPageLimit(mSectionsPagerAdapter.getCount());
         // Change title, FaSoLa tabs, and search when the page changes
         final FasolaTabView tabs = (FasolaTabView) findViewById(R.id.fasola_tabs);
-        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+        setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 setTitle(mSectionsPagerAdapter.getPageTitle(position));

@@ -13,6 +13,8 @@ import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.astuetz.PagerSlidingTabStrip;
+
 /**
  *  A base class for an activity with tabs
  *  Extend this class, and override onCreateTabs()
@@ -63,6 +65,8 @@ public class SimpleTabActivity extends FragmentActivity {
      */
     ViewPager mViewPager;
 
+    PagerSlidingTabStrip mTabStrip;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +83,19 @@ public class SimpleTabActivity extends FragmentActivity {
         // Initialize tabs
         onCreateTabs();
         mSectionsPagerAdapter.notifyDataSetChanged();
+
+        // If using tab strip, bind here
+        mTabStrip = (PagerSlidingTabStrip) findViewById(R.id.tab_strip);
+        if (mTabStrip != null) {
+            mTabStrip.setViewPager(mViewPager);
+        }
+    }
+
+    public void setOnPageChangeListener(ViewPager.OnPageChangeListener listener) {
+        if (mTabStrip != null)
+            mTabStrip.setOnPageChangeListener(listener);
+        else
+            mViewPager.setOnPageChangeListener(listener);
     }
 
     @Override
