@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.View;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
@@ -148,6 +149,8 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         if (mIntentClass != null) {
+            Log.v("CursorListFragment", "Starting " + mIntentClass.getSimpleName() +
+                                        " with id=" + String.valueOf(id));
             Intent intent = new Intent(getActivity(), mIntentClass);
             intent.putExtra(MainActivity.EXTRA_ID, id);
             startActivity(intent);
