@@ -1,6 +1,5 @@
 package org.fasola.fasolaminutes;
 
-import android.graphics.Color;
 import android.support.v4.app.Fragment;
 import android.database.Cursor;
 import android.text.SpannableString;
@@ -14,16 +13,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
 
 import java.util.ArrayList;
 
 
 public class SongActivity extends SimpleTabActivity {
-    MinutesContract.SongDAO mSong;
     @Override
     protected int getLayoutId() {
         return R.layout.activity_song;
@@ -31,46 +29,35 @@ public class SongActivity extends SimpleTabActivity {
 
     @Override
     protected void onCreateTabs() {
-        addTab("Leaders", SongLeaderListFragment.class);
-        addTab("Lyrics", LyricsFragment.class);
-        addTab("Chart", ChartFragment.class);
+        addTab("Stats", SongStatsFragment.class);
+        addTab("Words", SongWordsFragment.class);
+        addTab("Top Leaders", SongLeaderListFragment.class);
+        addTab("Recordings", SongRecordingsFragment.class);
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
         super.onCreate(savedInstanceState);
-        // Query
-        mSong = C.Song.get(id);
-        if (mSong != null) {
-            String songName = mSong.fullName.getString();
-            setTitle(songName);
-            String words = "PLACEHOLDER"; //mSong.POET.getString();
-            String tune = "PLACEHOLDER"; //mSong.COMPOSER.getString();
-            int nLeaders = mSong.leaderCount.getInt();
-            int nTimes = mSong.leadCount.getInt();
-            if (words.endsWith(", "))
-                words = words.substring(0, words.length() - 2);
-            if (tune.endsWith(", "))
-                tune = tune.substring(0, tune.length() - 2);
-            String leaders = getResources().getQuantityString(R.plurals.leaders, nLeaders, nLeaders);
-            String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
-            ((TextView) findViewById(R.id.song_title)).setText(songName);
-            ((TextView) findViewById(R.id.words)).setText(words);
-            ((TextView) findViewById(R.id.tune)).setText(tune);
-            ((TextView) findViewById(R.id.stats)).setText("Led " + timesLed + ", by " + leaders);
-        }
+        // Query for main data
+        long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+        SQL.Query query = C.Song.select(C.Song.fullName).whereEq(C.Song.id);
+        getSupportLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
+            @Override
+            public void onLoadFinished(Cursor cursor) {
+                C.SongDAO song = C.Song.fromCursor(cursor);
+                if (song != null) {
+                    setTitle(song.fullName.getString());
+                }
+            }
+        });
     }
 
     public static class SongLeaderListFragment extends CursorListFragment {
-        public SongLeaderListFragment() {
-            mItemLayoutId = R.layout.leader_list_item;
-            mIntentClass = LeaderActivity.class;
-        }
-
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            setItemLayout(R.layout.leader_list_item);
+            setIntentActivity(LeaderActivity.class);
             long songId = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
             SQL.Query query = C.Leader.selectList(C.Leader.fullName,
                                 C.LeaderStats.leadCount.format("'(' || {column} || ')'"))
@@ -81,20 +68,33 @@ public class SongActivity extends SimpleTabActivity {
         }
     }
 
-    public static class LyricsFragment extends Fragment {
+    public static class SongWordsFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_song_lyrics, container, false);
+            return inflater.inflate(R.layout.fragment_song_words, container, false);
         }
 
         @Override
-        public void onViewCreated(View view, Bundle savedInstanceState) {
-            // Query
-            String lyrics = ((SongActivity) getActivity()).mSong.lyrics.getString();
-            ((TextView) view.findViewById(R.id.lyrics)).setText(createIndentedText(lyrics, 0, 20));
-            // Done
+        public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            SQL.Query query = C.Song.select(C.Song.lyrics)
+                                    .whereEq(C.Song.id);
+            getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
+                @Override
+                public void onLoadFinished(Cursor cursor) {
+                    C.SongDAO song = C.Song.fromCursor(cursor);
+                    if (song != null) {
+                        String words = "PLACEHOLDER"; //song.poet.getString();
+                        String tune = "PLACEHOLDER"; //song.composer.getString();
+                        ((TextView) view.findViewById(R.id.words)).setText(words);
+                        ((TextView) view.findViewById(R.id.tune)).setText(tune);
+                        CharSequence lyrics = createIndentedText(song.lyrics.getString(), 0, 20);
+                        ((TextView) view.findViewById(R.id.lyrics)).setText(lyrics);
+                    }
+                }
+            });
         }
 
         // Add a hanging indent to a string
@@ -115,46 +115,70 @@ public class SongActivity extends SimpleTabActivity {
         }
     }
 
-    public static class ChartFragment extends Fragment {
+    public static class SongStatsFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            return inflater.inflate(R.layout.fragment_song_chart, container, false);
+            return inflater.inflate(R.layout.fragment_song_stats, container, false);
         }
 
         @Override
-        public void onViewCreated(View view, Bundle savedInstanceState) {
-            // Query
-            long songId = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            MinutesDb db = MinutesDb.getInstance(getActivity());
-            String query = SQL.select(C.SongStats.year, C.SongStats.leadCount, C.SongStats.rank)
-                                .from(C.SongStats)
-                                .whereEq(C.SongStats.songId)
-                                .order(C.SongStats.year, "ASC").toString();
-            Cursor cursor = db.query(query, String.valueOf(songId));
-            // Get data
-            ArrayList<String> xVals = new ArrayList<>();
-            ArrayList<Entry> rankVals = new ArrayList<>();
-            ArrayList<Entry> countVals = new ArrayList<>();
-            while (cursor.moveToNext()) {
-                xVals.add(cursor.getString(0));
-                countVals.add(new Entry(cursor.getInt(1), xVals.size()));
-                rankVals.add(new Entry(cursor.getInt(2), xVals.size()));
-            }
-            cursor.close();
-            // Make chart data
-            LineDataSet countSet = new LineDataSet(countVals, "Times Led");
-            countSet.setColor(Color.BLUE);
-            LineDataSet rankSet = new LineDataSet(rankVals, "Rank");
-            rankSet.setColor(Color.GRAY);
-            ArrayList<LineDataSet> dataSets = new ArrayList<>();
-            dataSets.add(countSet);
-            dataSets.add(rankSet);
-            // Set chart data
-            LineData data = new LineData(xVals, dataSets);
-            LineChart chart = (LineChart) view.findViewById(R.id.chart);
-            chart.setData(data);
+        public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            // Stats summary
+            SQL.Query query = C.Song.select(C.Song.leaderCount, C.Song.leadCount)
+                                    .whereEq(C.Song.id);
+            getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
+                @Override
+                public void onLoadFinished(Cursor cursor) {
+                    C.SongDAO song = C.Song.fromCursor(cursor);
+                    if (song != null) {
+                        int nLeaders = song.leaderCount.getInt();
+                        int nTimes = song.leadCount.getInt();
+                        String leaders = getResources().getQuantityString(R.plurals.leaders, nLeaders, nLeaders);
+                        String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
+                        ((TextView) view.findViewById(R.id.stats)).setText("Led " + timesLed + ", by " + leaders);
+                    }
+                }
+            });
+            // Chart data
+            query = C.SongStats.select(C.SongStats.year, C.SongStats.leadCount)
+                                           .whereEq(C.SongStats.songId)
+                                           .order(C.SongStats.year, "ASC");
+            getLoaderManager().initLoader(2, null, new MinutesLoader(query, String.valueOf(id)) {
+                @Override
+                public void onLoadFinished(Cursor cursor) {
+                    // Get data
+                    ArrayList<String> xVals = new ArrayList<>();
+                    ArrayList<BarEntry> countVals = new ArrayList<>();
+                    while (cursor.moveToNext()) {
+                        C.SongStatsDAO stats = C.SongStats.fromCursor(cursor);
+                        xVals.add(stats.year.getString());
+                        countVals.add(new BarEntry(stats.leadCount.getInt(), xVals.size()));
+                    }
+                    // Make chart data
+                    BarDataSet countSet = new BarDataSet(countVals, "Times Led");
+                    ArrayList<BarDataSet> dataSets = new ArrayList<>();
+                    dataSets.add(countSet);
+                    // Set chart data
+                    BarData data = new BarData(xVals, dataSets);
+                    BarChart chart = (BarChart)view.findViewById(R.id.chart);
+                    chart.setDescription("");
+                    chart.setData(data);
+                    // Style chart
+                    MinutesApplication.applyDefaultChartStyle(chart);
+                }
+            });
+        }
+    }
+
+    public static class SongRecordingsFragment extends CursorListFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setItemLayout(android.R.layout.simple_list_item_1);
+            setQuery(C.Leader.selectList("'Placeholder'").limit(20));
         }
     }
 }
