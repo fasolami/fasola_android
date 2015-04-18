@@ -42,13 +42,6 @@ public class LeaderActivity extends SimpleTabActivity {
                 MinutesContract.LeaderDAO leader = MinutesContract.Leader.fromCursor(cursor);
                 if (leader != null) {
                     setTitle(leader.fullName.getString());
-                    // Assemble the aka text
-                    TextView akaText = (TextView) findViewById(R.id.leader_aka);
-                    if (!leader.aka.isNull()) {
-                        String aka = leader.aka.getString().replace(",", ", ").replaceAll(", ([^,]+)$", " and $1");
-                        akaText.setText("also known as: " + aka);
-                    } else
-                        findViewById(R.id.leader_aka).setVisibility(View.GONE);
                 }
             }
         });
@@ -66,20 +59,29 @@ public class LeaderActivity extends SimpleTabActivity {
             super.onViewCreated(view, savedInstanceState);
             long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
             // Query for stats
-            SQL.Query query = SQL.select(C.Leader.songCount, C.Leader.leadCount, C.Leader.singingCount)
+            SQL.Query query = SQL.select(C.Leader.aka, C.Leader.songCount, C.Leader.leadCount, C.Leader.singingCount)
                                  .whereEq(C.Leader.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
                 @Override
                 public void onLoadFinished(Cursor cursor) {
                     MinutesContract.LeaderDAO leader = MinutesContract.Leader.fromCursor(cursor);
                     if (leader != null) {
+                        View root = getView();
+                        // AKA text
+                        TextView akaText = (TextView) root.findViewById(R.id.aka);
+                        if (!leader.aka.isNull()) {
+                            String aka = leader.aka.getString().replace(",", ", ").replaceAll(", ([^,]+)$", " and $1");
+                            akaText.setText("also known as: " + aka);
+                        }
+                        else
+                            akaText.setVisibility(View.GONE);
+                        // Songs/singings text
                         int nSongs = leader.songCount.getInt();
                         int nTimes = leader.leadCount.getInt();
                         int nSingings = leader.singingCount.getInt();
                         String songsLed = getResources().getQuantityString(R.plurals.songsLed, nSongs, nSongs);
                         String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
                         String singings = getResources().getQuantityString(R.plurals.singingsAttended, nSingings, nSingings);
-                        View root = getView();
                         ((TextView) root.findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
                         ((TextView) root.findViewById(R.id.singings)).setText(singings);
                     }

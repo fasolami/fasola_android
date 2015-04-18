@@ -6,8 +6,19 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/aka"
+        android:layout_centerHorizontal="true"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingBottom="8dp"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/songs"
+        android:layout_below="@+id/aka"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="false"
         android:layout_marginRight="8dp"
@@ -20,6 +31,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text=""
         android:id="@+id/singings"
+        android:layout_below="@+id/aka"
         android:layout_alignParentRight="true"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin" />

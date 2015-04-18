@@ -6,17 +6,6 @@
     tools:context="org.fasola.fasolaminutes.LeaderActivity"
     android:id="@+id/activity_leader">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/leader_aka"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingBottom="8dp"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
     <android.support.v4.view.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
@@ -26,7 +15,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentLeft="true"
         android:layout_above="@+id/fasola_tabs"
-        android:layout_below="@+id/leader_aka">
+        android:layout_alignParentTop="true" >
 
     <!--
         <android.support.v4.view.PagerTabStrip
