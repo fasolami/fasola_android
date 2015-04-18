@@ -78,6 +78,9 @@ public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>, _Mi
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        // Reset cursor position to before the first row in case this is an automatic call
+        // from initLoader (i.e. we are using an existing cursor)
+        cursor.moveToPosition(-1);
         mCallbacks.onLoadFinished(cursor);
     }
 
