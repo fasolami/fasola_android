@@ -12,8 +12,6 @@ import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.utils.ValueFormatter;
-import com.github.mikephil.charting.utils.XLabels;
 
 import java.util.ArrayList;
 
@@ -114,27 +112,11 @@ public class LeaderActivity extends SimpleTabActivity {
                         labels.add(String.valueOf(i));
                     // Set data
                     BarDataSet dataset = new BarDataSet(entries, "Singings Attended");
-                    dataset.setColor(FasolaTabView.SELECTED_COLOR);
                     BarChart chart = (BarChart)getView().findViewById(R.id.chart);
                     chart.setDescription("");
                     chart.setData(new BarData(labels, dataset));
                     // Style the chart
-                    chart.setDrawLegend(false);
-                    chart.getXLabels().setCenterXLabelText(true);
-                    chart.getXLabels().setPosition(XLabels.XLabelPosition.BOTTOM);
-                    chart.setDrawHorizontalGrid(false);
-                    chart.setDrawVerticalGrid(false);
-                    chart.setDrawGridBackground(false);
-                    chart.setDrawBarShadow(false);
-                    int labelCount = (int)(chart.getYChartMax() - chart.getYChartMin());
-                    if (labelCount < 6)
-                        chart.getYLabels().setLabelCount(labelCount);
-                    chart.setValueFormatter(new ValueFormatter() {
-                        @Override
-                        public String getFormattedValue(float v) {
-                            return String.format("%d", (long) v);
-                        }
-                    });
+                    MinutesApplication.applyDefaultChartStyle(chart);
                 }
             });
         }
