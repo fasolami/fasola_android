@@ -162,10 +162,9 @@ public class SQL {
             return null;
         }
 
+        // Create a new BaseTable DAO and load cursor values
         @SuppressWarnings("unchecked")
-        protected <T extends BaseTable> T fromCursor(Cursor cursor) {
-            if (! cursor.moveToFirst())
-                return null;
+        public <T extends BaseTable> T fromCursor(Cursor cursor) {
             // Create the object
             T obj;
             try {
@@ -175,13 +174,26 @@ public class SQL {
             }
              // Setup secondary fields
             obj.onCreate();
-            // Fill values
+            if (! obj.loadCursor(cursor))
+                return null;
+            return obj;
+        }
+
+        // Load values from the cursor into a BaseTable DAO
+        public boolean loadCursor(Cursor cursor) {
+            // Move to the first item if the cursor isn't at a position yet
+            if (cursor.isBeforeFirst() && ! cursor.moveToFirst())
+                return false;
+            // Clear values
+            for (Column col : _columns.values())
+                col.setValue(null);
+            // Fill values from the cursor
             for (int i = 0; i < cursor.getColumnCount(); i++) {
-                Column col = obj._columns.get(cursor.getColumnName(i));
+                Column col = _columns.get(cursor.getColumnName(i));
                 if (col != null)
                     col.setValue(cursor.getString(i));
             }
-            return obj;
+            return true;
         }
 
         protected <T extends BaseTable> T doQuery(Column field, Object value) {
