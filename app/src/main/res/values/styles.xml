@@ -1,11 +1,23 @@
 <resources>
 
     <color name="fasola_background">#ffedeae3</color>
+    <color name="fasola_foreground">#ff411c24</color>
+    <color name="tab_background">#44411c24</color>
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.Fasolatheme2014">
         <item name="android:colorBackground">@color/fasola_background</item>
         <item name="android:windowBackground">@color/fasola_background</item>
+
+        <!-- PagerSlidingTabStrip styles -->
+        <item name="pstsShouldExpand">true</item>
+        <item name="pstsIndicatorColor">@color/fasola_foreground</item>
+        <item name="pstsUnderlineColor">@color/fasola_foreground</item>
+        <item name="pstsDividerColor">@color/fasola_foreground</item>
+        <item name="pstsTabBackground">@drawable/sliding_tab_background</item>
+        <item name="pstsTabPaddingLeftRight">10dp</item>
+        <item name="pstsIndicatorHeight">4dp</item>
+        <item name="pstsUnderlineHeight">1dp</item>
     </style>
 
 </resources>

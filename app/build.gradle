@@ -25,4 +25,5 @@ dependencies {
     compile 'com.readystatesoftware.sqliteasset:sqliteassethelper:2.0.1'
     compile 'org.quanqi:mpandroidchart:1.7.5'
     compile 'se.emilsjolander:stickylistheaders:2.5.2'
+    compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
 }
