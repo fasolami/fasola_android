@@ -21,10 +21,10 @@ import junit.framework.Assert;
  *      The number of TextViews must be >= the number of display columns
  * Call setIntentActivity() to provide an Activity that will be started when an item is clicked
  */
-public class CursorListFragment extends ListFragment implements MinutesCursorLoader.LoaderCallbacks {
+public class CursorListFragment extends ListFragment implements MinutesLoader.Callbacks {
     protected int mItemLayoutId = android.R.layout.simple_list_item_1;
     protected Class<?> mIntentClass;
-    protected MinutesCursorLoader mCursorLoader;
+    protected MinutesLoader mMinutesLoader;
     protected String mSearchTerm = "";
     protected boolean mNeedsRangeIndexer;
     protected String BUNDLE_SEARCH = "SEARCH_TERM";
@@ -36,7 +36,7 @@ public class CursorListFragment extends ListFragment implements MinutesCursorLoa
             mSearchTerm = savedInstanceState.getString(BUNDLE_SEARCH, mSearchTerm);
         }
         // Setup the cursor loader
-        mCursorLoader = new MinutesCursorLoader(getActivity(), getLoaderManager(), this);
+        mMinutesLoader = new MinutesLoader(this);
     }
 
     @Override
@@ -56,21 +56,20 @@ public class CursorListFragment extends ListFragment implements MinutesCursorLoa
     }
 
     // Set the query and restart the loader
-    public void setQuery(SQL.Query query, String... params) {
-        boolean restartLoader = mCursorLoader.hasQuery();
-        mCursorLoader.setQuery(query, params);
+    public void setQuery(SQL.Query query, String... queryArgs) {
+        mMinutesLoader.setQuery(query, queryArgs);
         // Apply the current search term
         if (! mSearchTerm.isEmpty()) {
             String term = mSearchTerm;
             mSearchTerm = ""; // Clear so setSearch knows we don't have an existing search term
             setSearch(term); // This will call restartLoader
         }
-        else if (restartLoader)
-            mCursorLoader.restartLoader();
+        else
+            getLoaderManager().restartLoader(1, null, mMinutesLoader);
     }
 
     public SQL.Query getQuery() {
-        return mCursorLoader.getQuery();
+        return mMinutesLoader.getQuery();
     }
 
     // Override and change the query string
@@ -78,8 +77,8 @@ public class CursorListFragment extends ListFragment implements MinutesCursorLoa
     }
 
     public void setSearch(String searchTerm) {
-        if (mCursorLoader.hasQuery()) {
-            SQL.Query query = mCursorLoader.getQuery();
+        if (mMinutesLoader.hasQuery()) {
+            SQL.Query query = mMinutesLoader.getQuery();
             // Push or pop the new query filter
             if (! mSearchTerm.isEmpty())
                 query = query.popFilter();
@@ -88,8 +87,8 @@ public class CursorListFragment extends ListFragment implements MinutesCursorLoa
                 onSearch(query, searchTerm); // Update the query
             }
             // Set the new query and update
-            mCursorLoader.setQuery(query);
-            mCursorLoader.restartLoader();
+            mMinutesLoader.setQuery(query);
+            getLoaderManager().restartLoader(1, null, mMinutesLoader);
         }
         mSearchTerm = searchTerm;
     }
@@ -138,7 +137,8 @@ public class CursorListFragment extends ListFragment implements MinutesCursorLoa
             getActivity(), mItemLayoutId, null, null, null, 0);
         setListAdapter(adapter);
         // Start loading the cursor in the background
-        mCursorLoader.initLoader();
+        if (mMinutesLoader.hasQuery())
+            getLoaderManager().initLoader(1, null, mMinutesLoader);
     }
 
     protected void setFastScrollEnabled(boolean enabled) {
@@ -154,7 +154,7 @@ public class CursorListFragment extends ListFragment implements MinutesCursorLoa
         }
     }
 
-    //region LoaderCallbacks
+    //region Callbacks
     //-------------------------------------------------------------------------
     @Override
     public void onLoadFinished(Cursor cursor) {
