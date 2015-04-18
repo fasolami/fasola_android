@@ -154,8 +154,8 @@ public class SongActivity extends SimpleTabActivity {
                     ArrayList<BarEntry> countVals = new ArrayList<>();
                     while (cursor.moveToNext()) {
                         C.SongStatsDAO stats = C.SongStats.fromCursor(cursor);
-                        xVals.add(stats.year.getString());
                         countVals.add(new BarEntry(stats.leadCount.getInt(), xVals.size()));
+                        xVals.add(stats.year.getString());
                     }
                     // Make chart data
                     BarDataSet countSet = new BarDataSet(countVals, "Times Led");
