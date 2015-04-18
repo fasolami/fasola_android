@@ -3,7 +3,6 @@ package org.fasola.fasolaminutes;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -19,8 +18,7 @@ import android.view.MenuItem;
  *  Extend this class, and override onCreateTabs()
  *  In this function, call addTab() to add a tab to your activity
  */
-public class SimpleTabActivity extends FragmentActivity
-        implements MinutesCursorLoader.LoaderCallbacks {
+public class SimpleTabActivity extends FragmentActivity {
     /* Override to change the content view resource */
     protected int getLayoutId() {
         return R.layout.activity_tab;
@@ -68,9 +66,6 @@ public class SimpleTabActivity extends FragmentActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Setup cursorLoader
-        mCursorLoader = new MinutesCursorLoader(getBaseContext(), getSupportLoaderManager(), this);
-
         setContentView(getLayoutId());
 
         // Create the adapter that will return a fragment for each of the
@@ -158,27 +153,4 @@ public class SimpleTabActivity extends FragmentActivity
             }
         }
     }
-
-    //region CursorLoader stuff
-    //--------------------------------------------------------------------------------
-    MinutesCursorLoader mCursorLoader;
-
-    // Set the query and start the loader
-    public void setQuery(SQL.Query query, String... params) {
-        mCursorLoader.setQueryAndLoad(query, params);
-    }
-
-    public SQL.Query getQuery() {
-        return mCursorLoader.getQuery();
-    }
-
-    // Loader callbacks: override in the subclass
-    @Override
-    public void onLoadFinished(Cursor cursor) {
-    }
-
-    @Override
-    public void onLoaderReset() {
-    }
-    //endregion
 }

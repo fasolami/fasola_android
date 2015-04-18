@@ -2,6 +2,7 @@ package org.fasola.fasolaminutes;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,7 +54,7 @@ public class LeaderActivity extends SimpleTabActivity {
         });
     }
 
-    static public class LeaderStatsFragment extends CursorFragment {
+    static public class LeaderStatsFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
