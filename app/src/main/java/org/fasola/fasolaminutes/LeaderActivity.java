@@ -93,23 +93,13 @@ public class LeaderActivity extends SimpleTabActivity {
             getLoaderManager().initLoader(2, null, new MinutesLoader(chartQuery, String.valueOf(id)) {
                 @Override
                 public void onLoadFinished(Cursor cursor) {
-                    // Chart entries
+                    // Chart data
                     ArrayList<BarEntry> entries = new ArrayList<>();
-                    int minYear = Integer.MAX_VALUE;
-                    int maxYear = Integer.MIN_VALUE;
-                    while (cursor.moveToNext()) {
-                        int count = cursor.getInt(0);
-                        int year = cursor.getInt(1);
-                        if (year < minYear)
-                            minYear = year;
-                        if (year > maxYear)
-                            maxYear = year;
-                        entries.add(new BarEntry(count, year-minYear));
-                    }
-                    // Chart labels
                     ArrayList<String> labels = new ArrayList<>();
-                    for(int i = minYear; i <= maxYear; ++i)
-                        labels.add(String.valueOf(i));
+                    while (cursor.moveToNext()) {
+                        entries.add(new BarEntry(cursor.getInt(0), entries.size()));
+                        labels.add(cursor.getString(1));
+                    }
                     // Set data
                     BarDataSet dataset = new BarDataSet(entries, "Singings Attended");
                     BarChart chart = (BarChart)getView().findViewById(R.id.chart);
