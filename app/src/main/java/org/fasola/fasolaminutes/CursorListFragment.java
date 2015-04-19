@@ -5,7 +5,10 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewStub;
 import android.widget.CursorAdapter;
 import android.widget.ListView;
 
@@ -40,6 +43,26 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
         mMinutesLoader = new MinutesLoader(this);
     }
 
+    // Subclasses that want to override the default layout should provide a ViewStub with
+    // id = android.R.id.list and call this method to inflate the default ListView
+    protected void inflateList(LayoutInflater inflater, View container, Bundle savedInstanceState) {
+        ViewStub stub = (ViewStub) container.findViewById(android.R.id.list);
+        if (stub != null) {
+            ViewGroup parent = (ViewGroup) stub.getParent();
+            if (parent != null) {
+                View listView = super.onCreateView(inflater, parent, savedInstanceState);
+                // Replace the ViewStub with the ListView (code mostly lifted from ViewStub)
+                final int index = parent.indexOfChild(stub);
+                parent.removeViewInLayout(stub);
+                final ViewGroup.LayoutParams layoutParams = stub.getLayoutParams();
+                if (layoutParams != null)
+                    parent.addView(listView, index, layoutParams);
+                else
+                    parent.addView(listView, index);
+            }
+        }
+    }
+
     @Override
     public void onSaveInstanceState(final Bundle saveInstanceState) {
         super.onSaveInstanceState(saveInstanceState);
@@ -66,7 +89,7 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
             setSearch(term); // This will call restartLoader
         }
         else
-            getLoaderManager().restartLoader(1, null, mMinutesLoader);
+            getLoaderManager().restartLoader(-1, null, mMinutesLoader);
     }
 
     public SQL.Query getQuery() {
@@ -89,7 +112,7 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
             }
             // Set the new query and update
             mMinutesLoader.setQuery(query);
-            getLoaderManager().restartLoader(1, null, mMinutesLoader);
+            getLoaderManager().restartLoader(-1, null, mMinutesLoader);
         }
         mSearchTerm = searchTerm;
     }
@@ -139,7 +162,7 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
         setListAdapter(adapter);
         // Start loading the cursor in the background
         if (mMinutesLoader.hasQuery())
-            getLoaderManager().initLoader(1, null, mMinutesLoader);
+            getLoaderManager().initLoader(-1, null, mMinutesLoader);
     }
 
     protected void setFastScrollEnabled(boolean enabled) {
