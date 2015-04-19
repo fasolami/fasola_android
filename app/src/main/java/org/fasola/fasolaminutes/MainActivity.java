@@ -166,29 +166,29 @@ public class MainActivity extends SimpleTabActivity {
         public void updateQuery() {
             switch(mSortId) {
                 case R.id.menu_leader_sort_count:
-                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
-                                        .sectionIndex(C.Leader.leadCount, "DESC"));
                     setBins(0, 10, 50, 100, 500, 1000);
                     showHeaders(false);
+                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
+                                        .sectionIndex(C.Leader.leadCount, "DESC"));
                     break;
                 case R.id.menu_leader_sort_entropy:
-                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.entropy.format("'(' || ROUND({column}, 4) || ')'"))
-                                     .sectionIndex(C.Leader.entropy.format("CAST({column} * 100 AS INT)"), "DESC"));
                     setBins(0,10,20,30,40,50,60,70,80,90);
                     showHeaders(false);
+                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.entropy.format("'(' || ROUND({column}, 4) || ')'"))
+                                     .sectionIndex(C.Leader.entropy.format("CAST({column} * 100 AS INT)"), "DESC"));
                     break;
                 case R.id.menu_leader_sort_first_name:
-                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
-                                  .sectionIndex(C.Leader.fullName, "ASC"));
                     setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
                     showHeaders(true);
+                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
+                                  .sectionIndex(C.Leader.fullName, "ASC"));
                     break;
                 case R.id.menu_leader_sort_name:
                 default:
-                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
-                                  .sectionIndex(C.Leader.lastName, "ASC"));
                     setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
                     showHeaders(true);
+                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
+                                  .sectionIndex(C.Leader.lastName, "ASC"));
                     break;
             }
         }
@@ -252,26 +252,26 @@ public class MainActivity extends SimpleTabActivity {
         public void updateQuery() {
             switch(mSortId) {
                 case R.id.menu_song_sort_title:
+                    setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                    showHeaders(true);
                     setQuery(C.Song.selectList(C.Song.number, C.Song.title,
                                       C.SongStats.leadCount.sum().format("'(' || {column} || ')'"))
                                 .sectionIndex(C.Song.title, "ASC"));
-                    setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-                    showHeaders(true);
                     break;
                 case R.id.menu_song_sort_leads:
+                    setBins(100, 500, 1000, 1500, 2000, 2500, 3000);
+                    showHeaders(false);
                     setQuery(C.Song.selectList(C.Song.number, C.Song.title,
                                       C.SongStats.leadCount.sum().format("'(' || {column} || ')'"))
                                 .sectionIndex(C.SongStats.leadCount.sum(), "DESC"));
-                    setBins(100, 500, 1000, 1500, 2000, 2500, 3000);
-                    showHeaders(false);
                     break;
                 case R.id.menu_song_sort_page:
                 default:
+                    setBins(0, 100, 200, 300, 400, 500);
+                    showHeaders(false);
                     setQuery(C.Song.selectList(C.Song.number, C.Song.title,
                                       C.SongStats.leadCount.sum().format("'(' || {column} || ')'"))
                                 .sectionIndex(C.Song.pageSort, "ASC"));
-                    setBins(0, 100, 200, 300, 400, 500);
-                    showHeaders(false);
                     break;
             }
         }
