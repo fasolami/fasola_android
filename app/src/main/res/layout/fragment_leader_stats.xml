@@ -36,6 +36,16 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin" />
 
+    <TextView
+        android:id="@+id/entropy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_below="@+id/singings"
+        android:layout_centerHorizontal="true"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin" />
+
     <com.github.mikephil.charting.charts.BarChart
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

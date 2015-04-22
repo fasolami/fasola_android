@@ -58,7 +58,9 @@ public class LeaderActivity extends SimpleTabActivity {
             super.onViewCreated(view, savedInstanceState);
             long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
             // Query for stats
-            SQL.Query query = SQL.select(C.Leader.aka, C.Leader.songCount, C.Leader.leadCount, C.Leader.singingCount)
+            SQL.Query query = SQL.select(C.Leader.aka, C.Leader.songCount,
+                                         C.Leader.leadCount, C.Leader.singingCount,
+                                         C.Leader.entropyDisplay)
                                  .whereEq(C.Leader.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
                 @Override
@@ -74,15 +76,17 @@ public class LeaderActivity extends SimpleTabActivity {
                         }
                         else
                             akaText.setVisibility(View.GONE);
-                        // Songs/singings text
+                        // Stats
                         int nSongs = leader.songCount.getInt();
                         int nTimes = leader.leadCount.getInt();
                         int nSingings = leader.singingCount.getInt();
                         String songsLed = getResources().getQuantityString(R.plurals.songsLed, nSongs, nSongs);
                         String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
                         String singings = getResources().getQuantityString(R.plurals.singingsAttended, nSingings, nSingings);
+                        String entropy = "Entropy: " + leader.entropyDisplay.getString();
                         ((TextView) root.findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
                         ((TextView) root.findViewById(R.id.singings)).setText(singings);
+                        ((TextView) root.findViewById(R.id.entropy)).setText(entropy);
                     }
                 }
             });
