@@ -2,6 +2,7 @@ package org.fasola.fasolaminutes;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
     protected Object[] mSections;
     protected LayoutInflater mInflater;
     boolean mAreHeadersVisible = true;
+    int mHighlight = -1;
 
     public IndexedCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flag) {
         super(context, layout, c, from, to, flag);
@@ -132,5 +134,24 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         if (areHeadersShown())
             return getSectionForPosition(position);
         return 0;
+    }
+
+    // Highlight
+    public int getHighlight() {
+        return mHighlight;
+    }
+
+    public void setHighlight(int position) {
+        mHighlight = position;
+    }
+
+    @Override
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View view = super.getView(position, convertView, parent);
+        if (position == mHighlight)
+            view.setBackgroundResource(R.color.tab_background);
+        else
+            view.setBackgroundColor(Color.TRANSPARENT);
+        return view;
     }
 }

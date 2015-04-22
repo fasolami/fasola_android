@@ -153,6 +153,23 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
         mNeedsRangeIndexer = true;
     }
 
+    // Highlight
+    public int getHighlight() {
+        return ((IndexedCursorAdapter) getListAdapter()).getHighlight();
+    }
+
+    public void setHighlight(int position) {
+        ListView list = getListView();
+        // I can't find another way to jump to a position without smooth-scrolling
+        list.setSelection(position);
+        IndexedCursorAdapter adapter = (IndexedCursorAdapter) getListAdapter();
+        adapter.setHighlight(position);
+        // Update the view's background if it is currently visible
+        View view = list.getChildAt(position - list.getFirstVisiblePosition());
+        if (view != null)
+            adapter.getView(position, view, getListView()); // NB: should reuse the view
+    }
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
