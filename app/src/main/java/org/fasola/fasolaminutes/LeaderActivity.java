@@ -133,11 +133,11 @@ public class LeaderActivity extends SimpleTabActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            setItemLayout(android.R.layout.simple_list_item_2);
+            setItemLayout(R.layout.singing_list_item);
             setIntentActivity(SingingActivity.class);
             setRangeIndexer();
             long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
-            setQuery(C.Singing.selectList(C.Singing.name, C.Singing.location).distinct()
+            setQuery(C.Singing.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location).distinct()
                         .sectionIndex(C.Singing.year)
                         .where(C.SongLeader.leaderId, "=", id));
         }

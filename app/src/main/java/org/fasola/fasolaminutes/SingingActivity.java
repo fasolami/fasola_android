@@ -49,7 +49,7 @@ public class SingingActivity extends SimpleTabActivity {
 
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
-            setItemLayout(android.R.layout.simple_list_item_2);
+            setItemLayout(R.layout.singing_song_list_item);
             setIntentActivity(SongActivity.class);
             long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
             // Singing info query

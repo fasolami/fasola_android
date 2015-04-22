@@ -288,8 +288,8 @@ public class MainActivity extends SimpleTabActivity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setIntentActivity(SingingActivity.class);
-            setItemLayout(mItemLayoutId = android.R.layout.simple_list_item_2);
-            setQuery(C.Singing.selectList(C.Singing.name, C.Singing.location)
+            setItemLayout(R.layout.singing_list_item);
+            setQuery(C.Singing.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location)
                                 .sectionIndex(C.Singing.year));
             setRangeIndexer();
         }
