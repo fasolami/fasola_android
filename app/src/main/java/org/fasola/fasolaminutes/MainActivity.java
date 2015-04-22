@@ -174,7 +174,7 @@ public class MainActivity extends SimpleTabActivity {
                 case R.id.menu_leader_sort_entropy:
                     setBins(0,10,20,30,40,50,60,70,80,90);
                     showHeaders(false);
-                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.entropy.format("'(' || ROUND({column}, 4) || ')'"))
+                    setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.entropyDisplay.format("'(' || {column} || ')'"))
                                      .sectionIndex(C.Leader.entropy.format("CAST({column} * 100 AS INT)"), "DESC"));
                     break;
                 case R.id.menu_leader_sort_first_name:

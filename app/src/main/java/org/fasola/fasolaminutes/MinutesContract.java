@@ -96,7 +96,10 @@ public class MinutesContract {
             fullName = column("name");
             lastName = column("last_name"); // NB must use db altered from iPhone version
             leadCount = column("lead_count");
+            // Raw entropy
             entropy = column("song_entropy");
+            // Rounded entropy
+            entropyDisplay = column(entropy.format("ROUND({column}, 4)"));
         }
 
         @Override
@@ -106,7 +109,7 @@ public class MinutesContract {
             aka = column(LeaderAlias.alias.func("group_concat", true));
         }
 
-        public SQL.Column fullName, lastName, leadCount, entropy, singingCount, songCount, aka;
+        public SQL.Column fullName, lastName, leadCount, entropy, entropyDisplay, singingCount, songCount, aka;
     }
 
     /* LeaderNameAliases table */
