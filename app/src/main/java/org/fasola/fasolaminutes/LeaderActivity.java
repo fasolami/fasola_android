@@ -26,6 +26,7 @@ public class LeaderActivity extends SimpleTabActivity {
         addTab("Stats", LeaderStatsFragment.class);
         addTab("Songs", LeaderSongFragment.class);
         addTab("Singings", LeaderSingingFragment.class);
+        addTab("All Leads", LeaderLeadsFragment.class);
     }
 
     @Override
@@ -138,6 +139,20 @@ public class LeaderActivity extends SimpleTabActivity {
             setRangeIndexer();
             long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
             setQuery(C.Singing.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location).distinct()
+                        .sectionIndex(C.Singing.year)
+                        .where(C.SongLeader.leaderId, "=", id));
+        }
+    }
+
+    static public class LeaderLeadsFragment extends CursorStickyListFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setItemLayout(R.layout.singing_list_item);
+            setIntentActivity(SingingActivity.class);
+            setRangeIndexer();
+            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            setQuery(C.Singing.selectList(C.Song.fullName, C.Singing.name, C.Singing.startDate)
                         .sectionIndex(C.Singing.year)
                         .where(C.SongLeader.leaderId, "=", id));
         }
