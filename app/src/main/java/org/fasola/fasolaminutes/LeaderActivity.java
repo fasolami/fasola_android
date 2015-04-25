@@ -1,5 +1,6 @@
 package org.fasola.fasolaminutes;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -156,9 +157,20 @@ public class LeaderActivity extends SimpleTabActivity {
             setIntentActivity(SingingActivity.class);
             setRangeIndexer();
             long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
-            setQuery(C.Singing.selectList(C.Song.fullName, C.Singing.name, C.Singing.startDate)
-                        .sectionIndex(C.Singing.year)
-                        .where(C.SongLeader.leaderId, "=", id));
+            setQuery(SQL.select(C.Singing.id, C.Song.fullName, C.Singing.name, C.Singing.startDate)
+                    .select(C.SongLeader.leadId).as(SingingActivity.EXTRA_LEAD_ID)
+                    .sectionIndex(C.Singing.year)
+                    .where(C.SongLeader.leaderId, "=", id));
+        }
+
+        @Override
+        protected void setIntentData(Intent intent, int position, long id) {
+            super.setIntentData(intent, position, id);
+            Cursor cursor = getListAdapter().getCursor();
+            if (cursor.moveToPosition(position)) {
+                long leadId = cursor.getLong(cursor.getColumnIndex(SingingActivity.EXTRA_LEAD_ID));
+                intent.putExtra(SingingActivity.EXTRA_LEAD_ID, leadId);
+            }
         }
     }
 }

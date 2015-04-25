@@ -12,6 +12,9 @@ import android.widget.TextView;
 
 
 public class SingingActivity extends SimpleTabActivity {
+    // Underscores so we can use this as an alias in SQL statements (Android doesn't like dots)
+    public final static String EXTRA_LEAD_ID = "__SINGING_LEAD_ID";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,10 +79,21 @@ public class SingingActivity extends SimpleTabActivity {
             });
             // Song list query
             query = C.Song.selectList(C.Song.fullName, C.Leader.fullName.func("group_concat", "', '"))
+                                .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
                                 .whereEq(C.SongLeader.singingId)
+                                .group(C.SongLeader.leadId)
                                 .order(C.SongLeader.singingOrder, "ASC");
             setQuery(query, String.valueOf(id));
             super.onViewCreated(view, savedInstanceState);
+        }
+
+        @Override
+        public void onLoadFinished(Cursor cursor) {
+            super.onLoadFinished(cursor);
+            // Highlight the Intent's lead id
+            long leadId = getActivity().getIntent().getLongExtra(EXTRA_LEAD_ID, -1);
+            if (leadId > -1)
+                setHighlight(EXTRA_LEAD_ID, String.valueOf(leadId));
         }
     }
 
