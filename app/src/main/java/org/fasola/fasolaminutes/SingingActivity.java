@@ -94,7 +94,7 @@ public class SingingActivity extends SimpleTabActivity {
             // Highlight the Intent's lead id
             long leadId = getActivity().getIntent().getLongExtra(EXTRA_LEAD_ID, -1);
             if (leadId > -1)
-                setHighlight(cursor, EXTRA_LEAD_ID, String.valueOf(leadId));
+                setHighlight(cursor, EXTRA_LEAD_ID, leadId);
             super.onLoadFinished(cursor);
         }
 
