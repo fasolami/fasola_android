@@ -192,9 +192,14 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
             Log.v("CursorListFragment", "Starting " + mIntentClass.getSimpleName() +
                                         " with id=" + String.valueOf(id));
             Intent intent = new Intent(getActivity(), mIntentClass);
-            intent.putExtra(MainActivity.EXTRA_ID, id);
+            setIntentData(intent, position, id);
             startActivity(intent);
         }
+    }
+
+    // Override to add custom data to an intent
+    protected void setIntentData(Intent intent, int position, long id) {
+        intent.putExtra(MainActivity.EXTRA_ID, id);
     }
 
     //region Callbacks
