@@ -1,5 +1,6 @@
 package org.fasola.fasolaminutes;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -53,7 +54,7 @@ public class SingingActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             setItemLayout(R.layout.singing_song_list_item);
-            setIntentActivity(SongActivity.class);
+            setIntentActivity(LeaderActivity.class);
             long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             // Singing info query
             SQL.Query query = C.Singing.select(C.Singing.name, C.Singing.location,
@@ -80,6 +81,7 @@ public class SingingActivity extends SimpleTabActivity {
             // Song list query
             query = C.Song.selectList(C.Song.fullName, C.Leader.fullName.func("group_concat", "', '"))
                                 .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
+                                .select(C.Leader.id.func("group_concat")).as("__leaders")
                                 .whereEq(C.SongLeader.singingId)
                                 .group(C.SongLeader.leadId)
                                 .order(C.SongLeader.singingOrder, "ASC");
@@ -94,6 +96,21 @@ public class SingingActivity extends SimpleTabActivity {
             if (leadId > -1)
                 setHighlight(cursor, EXTRA_LEAD_ID, String.valueOf(leadId));
             super.onLoadFinished(cursor);
+        }
+
+        @Override
+        protected void setIntentData(Intent intent, int position, long id) {
+            super.setIntentData(intent, position, id);
+            Cursor cursor = getListAdapter().getCursor();
+            if (cursor.moveToPosition(position)) {
+                // Parse out the first leaderId from the leaders list (comma separated)
+                String leaders = cursor.getString(cursor.getColumnIndex("__leaders"));
+                long leaderId = Long.parseLong(leaders.split(",")[0]);
+                intent.putExtra(CursorListFragment.EXTRA_ID, leaderId);
+                // Get leadId for highlighting
+                long leadId = cursor.getLong(cursor.getColumnIndex(SingingActivity.EXTRA_LEAD_ID));
+                intent.putExtra(SingingActivity.EXTRA_LEAD_ID, leadId);
+            }
         }
     }
 

@@ -45,6 +45,11 @@ public class LeaderActivity extends SimpleTabActivity {
                 }
             }
         });
+        // Check for a lead id and switch to All Leads tab
+        if (getIntent().getLongExtra(SingingActivity.EXTRA_LEAD_ID, -1) > -1) {
+            int position = mSectionsPagerAdapter.getFragmentIndex(LeaderLeadsFragment.class);
+            mViewPager.setCurrentItem(position);
+        }
     }
 
     static public class LeaderStatsFragment extends Fragment {
@@ -161,6 +166,15 @@ public class LeaderActivity extends SimpleTabActivity {
                     .select(C.SongLeader.leadId).as(SingingActivity.EXTRA_LEAD_ID)
                     .sectionIndex(C.Singing.year)
                     .where(C.SongLeader.leaderId, "=", id));
+        }
+
+        @Override
+        public void onLoadFinished(Cursor cursor) {
+            // Highlight the Intent's lead id
+            long leadId = getActivity().getIntent().getLongExtra(SingingActivity.EXTRA_LEAD_ID, -1);
+            if (leadId > -1)
+                setHighlight(cursor, SingingActivity.EXTRA_LEAD_ID, String.valueOf(leadId));
+            super.onLoadFinished(cursor);
         }
 
         @Override

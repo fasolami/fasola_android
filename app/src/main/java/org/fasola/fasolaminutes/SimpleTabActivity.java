@@ -169,5 +169,12 @@ public class SimpleTabActivity extends FragmentActivity {
                 return null;
             }
         }
+
+        public int getFragmentIndex(Class<? extends Fragment> fragmentClass) {
+            for (int i = 0; i < mTabs.size(); i++)
+                if (mTabs.get(i).second == fragmentClass)
+                    return i;
+            return -1;
+        }
     }
 }
