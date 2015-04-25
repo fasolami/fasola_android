@@ -14,6 +14,8 @@ import android.widget.ListView;
 
 import junit.framework.Assert;
 
+import java.util.ArrayList;
+
 /**
  * Simple framework for using queries as the base for a ListFragment
  * Call setQuery() with a SQL.Query to update the list
@@ -160,6 +162,20 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
         return ((IndexedCursorAdapter) getListAdapter()).getHighlight();
     }
 
+    // Set highlight to the first row where column matches value
+    public void setHighlight(String column, String value) {
+        Cursor cursor = ((IndexedCursorAdapter) getListAdapter()).getCursor();
+        if (cursor == null || ! cursor.moveToFirst())
+            return;
+        int columnIndex = cursor.getColumnIndex(column);
+        do {
+            if (cursor.getString(columnIndex).equals(value)) {
+                setHighlight(cursor.getPosition());
+                return;
+            }
+        } while (cursor.moveToNext());
+    }
+
     public void setHighlight(int position) {
         ListView list = getListView();
         // I can't find another way to jump to a position without smooth-scrolling
@@ -239,14 +255,15 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
     public static String[] getFrom(Cursor cursor) {
         // Assemble the column names based on query columns
         // Check for an index column, which is not included as a display column
-        String[] from = new String[cursor.getColumnCount() - (IndexedCursorAdapter.hasIndex(cursor) ? 2 : 1)];
-        int fromIdx = 0;
+        ArrayList<String> from = new ArrayList<>();
         for (int i = 1; i < cursor.getColumnCount(); ++i) {
             String columnName = cursor.getColumnName(i);
-            if (! columnName.equals(SQL.INDEX_COLUMN))
-                from[fromIdx++] = columnName;
+            if (columnName.equals(SQL.INDEX_COLUMN)
+                    || columnName.startsWith("__")) // Start excluded columns with __
+                continue;
+            from.add(columnName);
         }
-        return from;
+        return from.toArray(new String[from.size()]);
     }
 
     // Return an array of View ids (using the pattern R.id.text[n])
