@@ -25,6 +25,7 @@
     <string name="menu_song_sort_page">By page number</string>
     <string name="menu_song_sort_title">By title</string>
     <string name="menu_song_sort_leads">By lead count</string>
+    <string name="select_leader">Pick a leader</string>
 
     <plurals name="timesLed">
         <item quantity="one">%d Time</item>

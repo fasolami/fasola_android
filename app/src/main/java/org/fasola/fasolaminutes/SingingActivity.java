@@ -1,9 +1,11 @@
 package org.fasola.fasolaminutes;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,7 +83,7 @@ public class SingingActivity extends SimpleTabActivity {
             // Song list query
             query = C.Song.selectList(C.Song.fullName, C.Leader.fullName.func("group_concat", "', '"))
                                 .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
-                                .select(C.Leader.id.func("group_concat")).as("__leaders")
+                                .select(C.Leader.id.func("group_concat")).as("__leaderIds")
                                 .whereEq(C.SongLeader.singingId)
                                 .group(C.SongLeader.leadId)
                                 .order(C.SongLeader.singingOrder, "ASC");
@@ -99,18 +101,43 @@ public class SingingActivity extends SimpleTabActivity {
         }
 
         @Override
-        protected void setIntentData(Intent intent, int position, long id) {
-            super.setIntentData(intent, position, id);
+        public void onListItemClick(ListView l, View v, int position, long id) {
             Cursor cursor = getListAdapter().getCursor();
             if (cursor.moveToPosition(position)) {
-                // Parse out the first leaderId from the leaders list (comma separated)
-                String leaders = cursor.getString(cursor.getColumnIndex("__leaders"));
-                long leaderId = Long.parseLong(leaders.split(",")[0]);
-                intent.putExtra(CursorListFragment.EXTRA_ID, leaderId);
-                // Get leadId for highlighting
-                long leadId = cursor.getLong(cursor.getColumnIndex(SingingActivity.EXTRA_LEAD_ID));
-                intent.putExtra(SingingActivity.EXTRA_LEAD_ID, leadId);
+                final long leadId = cursor.getLong(cursor.getColumnIndex(EXTRA_LEAD_ID));
+                // Check for multiple leaders
+                int idColumn = cursor.getColumnIndex("__leaderIds");
+                final String[] leaderIds = cursor.getString(idColumn).split(",");
+                if (leaderIds.length == 1) {
+                    // Single leader: start the activity
+                    sendIntent(Long.parseLong(leaderIds[0]), leadId);
+                }
+                else {
+                    // Multiple leaders: prompt
+                    int leaderColumn = 2;
+                    String[] names = cursor.getString(leaderColumn).split(", ");
+                    ListDialogFragment dialog = new ListDialogFragment(
+                            getResources().getString(R.string.select_leader),
+                            names,
+                            new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            sendIntent(Long.parseLong(leaderIds[which]), leadId);
+                        }
+                    });
+                    dialog.show(getFragmentManager(), "select_leader");
+                }
             }
+        }
+
+        // Start a LeaderActivity with id and leadId
+        protected void sendIntent(long leaderId, long leadId) {
+            Log.v("CursorListFragment", "Starting " + mIntentClass.getSimpleName() +
+                    " with id=" + String.valueOf(leaderId));
+            Intent intent = new Intent(getActivity(), mIntentClass);
+            intent.putExtra(CursorListFragment.EXTRA_ID, leaderId);
+            intent.putExtra(EXTRA_LEAD_ID, leadId);
+            startActivity(intent);
         }
     }
 
