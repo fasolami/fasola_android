@@ -37,12 +37,6 @@ public class MinutesDb {
             if (mHelper == null)
                 mHelper = new MinutesDbHelper(context);
             db = mHelper.getReadableDatabase();
-            // Change to true when data is changed -- takes a while to copy the db
-            if (false) {
-                db.setVersion(-1);
-                db.close();
-                db = mHelper.getReadableDatabase();
-            }
         }
         return db;
     }

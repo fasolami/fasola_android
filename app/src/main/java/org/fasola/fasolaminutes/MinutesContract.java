@@ -10,7 +10,7 @@ public class MinutesContract {
     protected MinutesContract() {
     }
 
-    public static final int DB_VERSION = 1;
+    public static final int DB_VERSION = 2;
     public static final String DB_NAME = "minutes.db";
 
     // Contract classes (see below for definitions
@@ -165,9 +165,10 @@ public class MinutesContract {
             songId = column("song_id");
             singingId = column("minutes_id");
             leaderId = column("leader_id");
+            leadId = column("lead_id");
         }
 
-        public SQL.Column songId, singingId, leaderId;
+        public SQL.Column songId, singingId, leaderId, leadId;
         public String singingOrder;
     }
 }
