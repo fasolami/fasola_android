@@ -3,6 +3,7 @@ package org.fasola.fasolaminutes;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,13 +37,16 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
     protected String mSearchTerm = "";
     protected boolean mNeedsRangeIndexer;
     protected LetterIndexer mDeferredIndexer;
-    protected String BUNDLE_SEARCH = "SEARCH_TERM";
+    private String BUNDLE_SEARCH = "SEARCH_TERM";
+    private String LIST_STATE = "LIST_STATE";
+    private Parcelable mListState;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mSearchTerm = savedInstanceState.getString(BUNDLE_SEARCH, mSearchTerm);
+            mListState = savedInstanceState.getParcelable(LIST_STATE);
         }
         // Setup the cursor loader
         mMinutesLoader = new MinutesLoader(this);
@@ -72,6 +76,8 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
     public void onSaveInstanceState(final Bundle saveInstanceState) {
         super.onSaveInstanceState(saveInstanceState);
         saveInstanceState.putSerializable(BUNDLE_SEARCH, mSearchTerm);
+        if (getView() != null) // Prevent IllegalStateException "Content view not yet created"
+            saveInstanceState.putParcelable(LIST_STATE, getListView().onSaveInstanceState());
     }
 
     // Set the custom list item layout
@@ -241,6 +247,11 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
         adapter.changeCursorAndColumns(cursor, from, to);
         // Set fastScroll if we have an index column
         setFastScrollEnabled(adapter.hasIndex() && adapter.hasIndexer());
+        // Update list state
+        if (mListState != null) {
+            getListView().onRestoreInstanceState(mListState);
+            mListState = null;
+        }
     }
 
     @Override
