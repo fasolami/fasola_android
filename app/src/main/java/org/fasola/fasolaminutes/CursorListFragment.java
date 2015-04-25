@@ -161,23 +161,21 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
         mNeedsRangeIndexer = true;
     }
 
-    // Highlight
     public int getHighlight() {
         return ((IndexedCursorAdapter) getListAdapter()).getHighlight();
     }
 
-    // Set highlight to the first row where column matches value
-    public void setHighlight(String column, String value) {
-        Cursor cursor = ((IndexedCursorAdapter) getListAdapter()).getCursor();
+    public int setHighlight(Cursor cursor, String column, String value) {
         if (cursor == null || ! cursor.moveToFirst())
-            return;
+            return -1;
         int columnIndex = cursor.getColumnIndex(column);
         do {
             if (cursor.getString(columnIndex).equals(value)) {
                 setHighlight(cursor.getPosition());
-                return;
+                return cursor.getPosition();
             }
         } while (cursor.moveToNext());
+        return -1;
     }
 
     public void setHighlight(int position) {
