@@ -35,6 +35,7 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
     protected MinutesLoader mMinutesLoader;
     protected String mSearchTerm = "";
     protected boolean mNeedsRangeIndexer;
+    protected LetterIndexer mDeferredIndexer;
     protected String BUNDLE_SEARCH = "SEARCH_TERM";
 
     @Override
@@ -127,11 +128,8 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
 
     public void setIndexer(LetterIndexer indexer) {
         mNeedsRangeIndexer = false;
-        IndexedCursorAdapter adapter = ((IndexedCursorAdapter) getListAdapter());
-        adapter.setIndexer(indexer);
-        // Update fastscroll when the indexer changes
-        if (adapter.getCursor() != null)
-            setFastScrollEnabled(adapter.hasIndex() && adapter.hasIndexer());
+        // Defer til onLoadFinished so we don't apply this indexer to the previous query
+        mDeferredIndexer = indexer;
     }
 
     // Indexer shortcuts
@@ -224,13 +222,16 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
     //-------------------------------------------------------------------------
     @Override
     public void onLoadFinished(Cursor cursor) {
+        IndexedCursorAdapter adapter = ((IndexedCursorAdapter) getListAdapter());
         // Setup any deferred section indexers
         if (mNeedsRangeIndexer) {
-            setIndexer(new RangeIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor)));
-            mNeedsRangeIndexer = true; // setIndexer sets this to false
+            mDeferredIndexer = new RangeIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
+        }
+        if (mDeferredIndexer != null) {
+            adapter.setIndexer(mDeferredIndexer);
+            mDeferredIndexer = null;
         }
         // Setup the CursorAdapter
-        IndexedCursorAdapter adapter = (IndexedCursorAdapter) getListAdapter();
         if (cursor.getColumnCount() == 0) {
             adapter.changeCursor(null);
             return;
