@@ -33,7 +33,7 @@ public class LeaderActivity extends SimpleTabActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Query for main data
-        long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+        long id = getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
         SQL.Query query = SQL.select(C.Leader.fullName, C.Leader.aka).whereEq(C.Leader.id);
         getSupportLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
             @Override
@@ -56,7 +56,7 @@ public class LeaderActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
             // Query for stats
             SQL.Query query = SQL.select(C.Leader.aka, C.Leader.songCount,
                                          C.Leader.leadCount, C.Leader.singingCount,
@@ -126,7 +126,7 @@ public class LeaderActivity extends SimpleTabActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             setQuery(C.Song.selectList(C.Song.fullName,
                                        C.LeaderStats.leadCount.format("'(' || {column} || ')'"))
                             .where(C.LeaderStats.leaderId, "=", id)
@@ -141,7 +141,7 @@ public class LeaderActivity extends SimpleTabActivity {
             setItemLayout(R.layout.singing_list_item);
             setIntentActivity(SingingActivity.class);
             setRangeIndexer();
-            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             setQuery(C.Singing.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location).distinct()
                         .sectionIndex(C.Singing.year)
                         .where(C.SongLeader.leaderId, "=", id));
@@ -155,7 +155,7 @@ public class LeaderActivity extends SimpleTabActivity {
             setItemLayout(R.layout.singing_list_item);
             setIntentActivity(SingingActivity.class);
             setRangeIndexer();
-            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             setQuery(C.Singing.selectList(C.Song.fullName, C.Singing.name, C.Singing.startDate)
                         .sectionIndex(C.Singing.year)
                         .where(C.SongLeader.leaderId, "=", id));

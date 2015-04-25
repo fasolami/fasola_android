@@ -26,6 +26,8 @@ import junit.framework.Assert;
  * Call setIntentActivity() to provide an Activity that will be started when an item is clicked
  */
 public class CursorListFragment extends ListFragment implements MinutesLoader.Callbacks {
+    public final static String EXTRA_ID = "org.fasola.fasolaminutes.LIST_ID";
+
     protected int mItemLayoutId = android.R.layout.simple_list_item_1;
     protected Class<?> mIntentClass;
     protected MinutesLoader mMinutesLoader;
@@ -199,7 +201,7 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
 
     // Override to add custom data to an intent
     protected void setIntentData(Intent intent, int position, long id) {
-        intent.putExtra(MainActivity.EXTRA_ID, id);
+        intent.putExtra(EXTRA_ID, id);
     }
 
     //region Callbacks

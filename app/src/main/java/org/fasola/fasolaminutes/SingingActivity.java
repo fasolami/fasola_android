@@ -16,7 +16,7 @@ public class SingingActivity extends SimpleTabActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Query
-        long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+        long id = getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
         SQL.Query query = C.Singing.select(C.Singing.name).whereEq(C.Singing.id);
         getSupportLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
             @Override
@@ -51,7 +51,7 @@ public class SingingActivity extends SimpleTabActivity {
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             setItemLayout(R.layout.singing_song_list_item);
             setIntentActivity(SongActivity.class);
-            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             // Singing info query
             SQL.Query query = C.Singing.select(C.Singing.name, C.Singing.location,
                                                C.Singing.songCount, C.Singing.leaderCount)
@@ -92,7 +92,7 @@ public class SingingActivity extends SimpleTabActivity {
 
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
-            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
             SQL.Query query = C.Singing.select(C.Singing.fullText).whereEq(C.Singing.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
                 @Override

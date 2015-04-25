@@ -39,7 +39,7 @@ public class SongActivity extends SimpleTabActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // Query for main data
-        long id = getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+        long id = getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
         SQL.Query query = C.Song.select(C.Song.fullName).whereEq(C.Song.id);
         getSupportLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
             @Override
@@ -58,7 +58,7 @@ public class SongActivity extends SimpleTabActivity {
             super.onCreate(savedInstanceState);
             setItemLayout(R.layout.leader_list_item);
             setIntentActivity(LeaderActivity.class);
-            long songId = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            long songId = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             SQL.Query query = C.Leader.selectList(C.Leader.fullName,
                                 C.LeaderStats.leadCount.format("'(' || {column} || ')'"))
                             .whereEq(C.LeaderStats.songId)
@@ -78,7 +78,7 @@ public class SongActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
             SQL.Query query = C.Song.select(C.Song.lyrics)
                                     .whereEq(C.Song.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
@@ -125,7 +125,7 @@ public class SongActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            long id = getActivity().getIntent().getLongExtra(MainActivity.EXTRA_ID, -1);
+            long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
             // Stats summary
             SQL.Query query = C.Song.select(C.Song.leaderCount, C.Song.leadCount)
                                     .whereEq(C.Song.id);

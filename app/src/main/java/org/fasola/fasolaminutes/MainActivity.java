@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.ListView;
 
 public class MainActivity extends SimpleTabActivity {
-    public final static String EXTRA_ID = "org.fasola.fasolaminutes.ID";
     public final static String ACTIVITY_POSITION = "org.fasola.fasolaminutes.POSITION";
     SearchView mSearchView;
     MenuItem mSearchItem;
@@ -343,7 +342,7 @@ public class MainActivity extends SimpleTabActivity {
                     intent = new Intent(getActivity(), LeaderActivity.class);
                     break;
             }
-            intent.putExtra(MainActivity.EXTRA_ID, id);
+            intent.putExtra(EXTRA_ID, id);
             startActivity(intent);
         }
     }
