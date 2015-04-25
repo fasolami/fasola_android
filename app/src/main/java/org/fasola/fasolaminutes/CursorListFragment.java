@@ -260,8 +260,10 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
 
     @Override
     public void onLoaderReset() {
-        getListAdapter().changeCursor(null);
-        setListAdapter(null);
+        if (getView() != null) {
+            getListAdapter().changeCursor(null);
+            setListAdapter(null);
+        }
     }
     //endregion
 
