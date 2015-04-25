@@ -162,7 +162,7 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
     }
 
     public int getHighlight() {
-        return ((IndexedCursorAdapter) getListAdapter()).getHighlight();
+        return getListAdapter().getHighlight();
     }
 
     public int setHighlight(Cursor cursor, String column, String value) {
@@ -182,12 +182,11 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
         ListView list = getListView();
         // I can't find another way to jump to a position without smooth-scrolling
         list.setSelection(position);
-        IndexedCursorAdapter adapter = (IndexedCursorAdapter) getListAdapter();
-        adapter.setHighlight(position);
+        getListAdapter().setHighlight(position);
         // Update the view's background if it is currently visible
         View view = list.getChildAt(position - list.getFirstVisiblePosition());
         if (view != null)
-            adapter.getView(position, view, getListView()); // NB: should reuse the view
+            getListAdapter().getView(position, view, getListView()); // NB: should reuse the view
     }
 
     @Override
@@ -204,6 +203,12 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
 
     protected void setFastScrollEnabled(boolean enabled) {
         getListView().setFastScrollEnabled(enabled);
+    }
+
+    // Cast to IndexedCursorAdapter
+    @Override
+    public IndexedCursorAdapter getListAdapter() {
+        return (IndexedCursorAdapter) getListView().getAdapter();
     }
 
     @Override
@@ -226,7 +231,7 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
     //-------------------------------------------------------------------------
     @Override
     public void onLoadFinished(Cursor cursor) {
-        IndexedCursorAdapter adapter = ((IndexedCursorAdapter) getListAdapter());
+        IndexedCursorAdapter adapter = getListAdapter();
         // Setup any deferred section indexers
         if (mNeedsRangeIndexer) {
             mDeferredIndexer = new RangeIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
@@ -254,7 +259,7 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
 
     @Override
     public void onLoaderReset() {
-        ((CursorAdapter)getListAdapter()).changeCursor(null);
+        getListAdapter().changeCursor(null);
         setListAdapter(null);
     }
     //endregion
