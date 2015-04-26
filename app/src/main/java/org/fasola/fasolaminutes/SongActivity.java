@@ -54,8 +54,7 @@ public class SongActivity extends SimpleTabActivity {
 
     public static class SongLeaderListFragment extends CursorListFragment {
         @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
+        public void onViewCreated(View view, Bundle savedInstanceState) {
             setItemLayout(R.layout.leader_list_item);
             setIntentActivity(LeaderActivity.class);
             long songId = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
@@ -65,6 +64,7 @@ public class SongActivity extends SimpleTabActivity {
                             .order(C.LeaderStats.leadCount, "DESC", C.Leader.lastName, "ASC")
                             .limit(20);
             setQuery(query, String.valueOf(songId));
+            super.onViewCreated(view, savedInstanceState);
         }
     }
 
