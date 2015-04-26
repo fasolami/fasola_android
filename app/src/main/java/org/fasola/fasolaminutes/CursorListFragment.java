@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
-import android.widget.CursorAdapter;
 import android.widget.ListView;
 
 import junit.framework.Assert;
@@ -199,9 +198,11 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // Create and attach an empty adapter
-        IndexedCursorAdapter adapter = new IndexedCursorAdapter(
-            getActivity(), mItemLayoutId, null, null, null, 0);
-        setListAdapter(adapter);
+        if (getListAdapter() == null) {
+            IndexedCursorAdapter adapter = new IndexedCursorAdapter(
+                getActivity(), mItemLayoutId);
+            setListAdapter(adapter);
+        }
         // Start loading the cursor in the background
         if (mMinutesLoader.hasQuery())
             getLoaderManager().initLoader(-1, null, mMinutesLoader);

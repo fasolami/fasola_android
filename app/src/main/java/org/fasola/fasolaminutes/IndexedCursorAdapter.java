@@ -27,6 +27,10 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
+    public IndexedCursorAdapter(Context context, int layout) {
+        this(context, layout, null, null, null, 0);
+    }
+
     // Custom labels for the indexer
     public void setSections(String... sections) {
         mSections = sections;
