@@ -166,9 +166,10 @@ public class MinutesContract {
             singingId = column("minutes_id");
             leaderId = column("leader_id");
             leadId = column("lead_id");
+            audioUrl = column("audio_url");
         }
 
-        public SQL.Column songId, singingId, leaderId, leadId;
+        public SQL.Column songId, singingId, leaderId, leadId, audioUrl;
         public String singingOrder;
     }
 }
