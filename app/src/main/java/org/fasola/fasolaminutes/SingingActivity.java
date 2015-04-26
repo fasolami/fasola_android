@@ -49,7 +49,7 @@ public class SingingActivity extends SimpleTabActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View root = inflater.inflate(R.layout.fragment_singing_songlist, container, false);
-            inflateList(inflater, root, savedInstanceState);
+            inflateList(inflater, (ViewGroup)root, savedInstanceState);
             return root;
         }
 

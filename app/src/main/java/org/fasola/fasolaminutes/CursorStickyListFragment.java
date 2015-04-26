@@ -16,6 +16,11 @@ public abstract class CursorStickyListFragment extends CursorListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return createListView(inflater, container, savedInstanceState);
+    }
+
+    @Override
+    protected View createListView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sticky_list, container, false);
         mStickyList = (StickyListHeadersListView) view.findViewById(R.id.sticky_list);
         // ListFragment wants a specific ID for its ListView

@@ -54,12 +54,12 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
 
     // Subclasses that want to override the default layout should provide a ViewStub with
     // id = android.R.id.list and call this method to inflate the default ListView
-    protected void inflateList(LayoutInflater inflater, View container, Bundle savedInstanceState) {
+    protected void inflateList(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewStub stub = (ViewStub) container.findViewById(android.R.id.list);
         if (stub != null) {
             ViewGroup parent = (ViewGroup) stub.getParent();
             if (parent != null) {
-                View listView = super.onCreateView(inflater, parent, savedInstanceState);
+                View listView = createListView(inflater, parent, savedInstanceState);
                 // Replace the ViewStub with the ListView (code mostly lifted from ViewStub)
                 final int index = parent.indexOfChild(stub);
                 parent.removeViewInLayout(stub);
@@ -70,6 +70,11 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
                     parent.addView(listView, index);
             }
         }
+    }
+
+    // Override in a subclass to return a custom list view (see CursorStickyListFragment)
+    protected View createListView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
