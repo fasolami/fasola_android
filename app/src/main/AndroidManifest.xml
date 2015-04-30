@@ -48,6 +48,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.fasola.fasolaminutes.MainActivity" />
         </activity>
+
+        <service
+            android:name=".PlaybackService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
 </manifest>

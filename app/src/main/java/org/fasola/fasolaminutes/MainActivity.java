@@ -47,6 +47,13 @@ public class MainActivity extends SimpleTabActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Kill the service
+        stopService(new Intent(this, PlaybackService.class));
+    }
+
+    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         // Change to the requested fragment (by position)
