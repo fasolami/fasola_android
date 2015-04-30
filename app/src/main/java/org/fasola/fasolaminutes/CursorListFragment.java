@@ -27,8 +27,12 @@ import java.util.ArrayList;
  *      The number of TextViews must be >= the number of display columns
  * Call setIntentActivity() to provide an Activity that will be started when an item is clicked
  */
-public class CursorListFragment extends ListFragment implements MinutesLoader.Callbacks {
+public class CursorListFragment extends ListFragment
+                                implements MinutesLoader.Callbacks,
+                                           View.OnClickListener,
+                                           View.OnLongClickListener {
     public final static String EXTRA_ID = "org.fasola.fasolaminutes.LIST_ID";
+    public static final String AUDIO_COLUMN = "__sql_audio_column";
 
     protected int mItemLayoutId = android.R.layout.simple_list_item_1;
     protected Class<?> mIntentClass;
@@ -203,6 +207,8 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
                 getActivity(), mItemLayoutId);
             setListAdapter(adapter);
         }
+        // Setup listeners for the play button
+        getListAdapter().setPlayClickListeners(this, this);
         // Start loading the cursor in the background
         if (mMinutesLoader.hasQuery())
             getLoaderManager().initLoader(-1, null, mMinutesLoader);
@@ -216,6 +222,49 @@ public class CursorListFragment extends ListFragment implements MinutesLoader.Ca
     @Override
     public IndexedCursorAdapter getListAdapter() {
         return (IndexedCursorAdapter) getListView().getAdapter();
+    }
+
+    /**
+     * Play button click listeners.
+     * Override onPlayClick() and onPlayLongClick() in a derived class to handle these events
+     */
+    @Override
+    public void onClick(View v) {
+        onPlayClick(v, getListView().getPositionForView(v));
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        return onPlayLongClick(v, getListView().getPositionForView(v));
+    }
+
+    // Default onPlayClick: play the song
+    public void onPlayClick(View v, int position) {
+        Cursor cursor = getListAdapter().getCursor();
+        int urlColumn = cursor.getColumnIndex(AUDIO_COLUMN);
+        if (! cursor.moveToPosition(position))
+            return;
+        if (cursor.isNull(urlColumn)) {
+            Log.w("SingingActivity", "Clicked ImageView should have been hidden");
+            return;
+        }
+        Intent intent = new Intent(getActivity(), PlaybackService.class);
+        intent.setAction(PlaybackService.ACTION_PLAY);
+        intent.putExtra(PlaybackService.EXTRA_URL, cursor.getString(urlColumn));
+        getActivity().startService(intent);
+        // Enqueue next items
+        while (cursor.moveToNext()) {
+            if (! cursor.isNull(urlColumn)) {
+                intent = new Intent(getActivity(), PlaybackService.class);
+                intent.setAction(PlaybackService.ACTION_ENQUEUE);
+                intent.putExtra(PlaybackService.EXTRA_URL, cursor.getString(urlColumn));
+                getActivity().startService(intent);
+            }
+        }
+    }
+
+    public boolean onPlayLongClick(View v, int position) {
+        return false;
     }
 
     @Override

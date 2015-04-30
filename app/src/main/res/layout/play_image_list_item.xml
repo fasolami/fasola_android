@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:id="@+id/play_image_layout" >
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:paddingRight="?android:attr/listPreferredItemPaddingRight"
+        android:id="@+id/play_image"
+        android:src="@drawable/ic_action_play_over_video"
+        android:contentDescription="@string/play_recording_text"
+        android:clickable="true" />
+
+</LinearLayout>

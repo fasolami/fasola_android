@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.SectionIndexer;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -21,6 +22,9 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
     protected LayoutInflater mInflater;
     boolean mAreHeadersVisible = true;
     int mHighlight = -1;
+    int mAudioColumn = -1;
+    View.OnClickListener mClickListener;
+    View.OnLongClickListener mLongClickListener;
 
     public IndexedCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flag) {
         super(context, layout, c, from, to, flag);
@@ -29,6 +33,12 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
 
     public IndexedCursorAdapter(Context context, int layout) {
         this(context, layout, null, null, null, 0);
+    }
+
+    // Call immediately after constructing
+    public void setPlayClickListeners(View.OnClickListener click, View.OnLongClickListener longClick) {
+        mClickListener = click;
+        mLongClickListener = longClick;
     }
 
     // Custom labels for the indexer
@@ -91,6 +101,11 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         }
         else
             mIndexer.setCursor(null);
+        // Set audio column
+        if (cursor == null)
+            mAudioColumn = -1;
+        else
+            mAudioColumn = cursor.getColumnIndex(CursorListFragment.AUDIO_COLUMN);
     }
     // SectionIndexer overrides
     @Override
@@ -149,9 +164,36 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         mHighlight = position;
     }
 
+    // Play button
+
+    // Change layout if Cursor has an audioUrl
+    protected View addOrRemoveImage(View view, ViewGroup parent) {
+        if (mAudioColumn > -1) {
+            if (view.getId() != R.id.play_image_layout) {
+                // Use the layout with an image button
+                LinearLayout layout = (LinearLayout)mInflater.inflate(R.layout.play_image_list_item, parent, false);
+                layout.addView(view, 0, new LinearLayout.LayoutParams(
+                        0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+                view = layout;
+                View image = view.findViewById(R.id.play_image);
+                image.setOnClickListener(mClickListener);
+                image.setOnLongClickListener(mLongClickListener);
+            }
+            // Change image visibility by audioUrl column
+            view.findViewById(R.id.play_image).setVisibility(
+                    getCursor().isNull(mAudioColumn) ? View.GONE : View.VISIBLE);
+        }
+        else if (view.getId() == R.id.play_image_layout) {
+            // Remove the layout and return the original layout
+            view = ((LinearLayout)view).getChildAt(0);
+        }
+        return view;
+    }
+
+    // The custom view: check for a play button and highlight
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View view = super.getView(position, convertView, parent);
+        View view = addOrRemoveImage(super.getView(position, convertView, parent), parent);
         if (position == mHighlight)
             view.setBackgroundResource(R.color.tab_background);
         else
