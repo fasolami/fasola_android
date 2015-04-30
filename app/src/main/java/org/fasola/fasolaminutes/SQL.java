@@ -585,8 +585,11 @@ public class SQL {
                 oper = "=";
             if (val == null)
                 val = "?";
-            else if (val != "?")
-                val = DatabaseUtils.sqlEscapeString(val.toString());
+            else {
+                String cmp = val.toString().toUpperCase();
+                if (!(cmp.equals("?") || cmp.equals("NULL")))
+                    val = DatabaseUtils.sqlEscapeString(val.toString());
+            }
             q.append(bool, " ", col, oper, val);
             // Add join
             addJoinColumn(col);
