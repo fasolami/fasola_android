@@ -175,10 +175,17 @@ public class SongActivity extends SimpleTabActivity {
 
     public static class SongRecordingsFragment extends CursorListFragment {
         @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setItemLayout(android.R.layout.simple_list_item_1);
-            setQuery(C.Leader.selectList("'Placeholder'").limit(20));
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            setItemLayout(R.layout.singing_list_item);
+            setRangeIndexer();
+            long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
+            setQuery(C.SongLeader.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location)
+                    .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
+                    .distinct()
+                    .sectionIndex(C.Singing.year)
+                    .where(C.SongLeader.songId, "=", id)
+                        .and(C.SongLeader.audioUrl, "IS NOT", "NULL"));
+            super.onViewCreated(view, savedInstanceState);
         }
     }
 }

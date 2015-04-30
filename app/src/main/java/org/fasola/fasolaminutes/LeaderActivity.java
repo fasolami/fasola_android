@@ -160,6 +160,7 @@ public class LeaderActivity extends SimpleTabActivity {
             long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             setQuery(SQL.select(C.Singing.id, C.Song.fullName, C.Singing.name, C.Singing.startDate)
                     .select(C.SongLeader.leadId).as(SingingActivity.EXTRA_LEAD_ID)
+                    .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
                     .sectionIndex(C.Singing.year)
                     .where(C.SongLeader.leaderId, "=", id));
             super.onViewCreated(view, savedInstanceState);
