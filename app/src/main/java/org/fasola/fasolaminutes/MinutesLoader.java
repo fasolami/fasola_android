@@ -18,12 +18,14 @@ interface _MinutesLoaderCallbacksInterface {
     public void onLoaderReset();
 }
 
-public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>, _MinutesLoaderCallbacksInterface {
-    public interface Callbacks extends _MinutesLoaderCallbacksInterface {
+public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>,
+                                      Loader.OnLoadCompleteListener<Cursor>,
+                                      _MinutesLoaderCallbacksInterface {
+    public static interface Callbacks extends _MinutesLoaderCallbacksInterface {
     }
 
     // Simplified callbacks
-    public abstract class FinishedCallback implements _MinutesLoaderCallbacksInterface {
+    public static abstract class FinishedCallback implements _MinutesLoaderCallbacksInterface {
         @Override
         public void onLoaderReset() {
             // Do nothing
@@ -87,6 +89,41 @@ public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>, _Mi
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mCallbacks.onLoaderReset();
+    }
+
+    // For loading without LoaderManager (e.g. in a Service)
+    // -----------------------------------------------------
+    private CursorLoader mLoader;
+    public void startLoading() {
+        startLoading(this);
+    }
+
+    public void startLoading(final _MinutesLoaderCallbacksInterface callback) {
+        release();
+        mLoader = (CursorLoader)onCreateLoader(1, null);
+        mLoader.registerListener(1, new Loader.OnLoadCompleteListener<Cursor>() {
+            @Override
+            public void onLoadComplete(Loader<Cursor> loader, Cursor data) {
+                callback.onLoadFinished(data);
+                // Assume this is a single-shot loader if it's called without a LoaderManager
+                mLoader.unregisterListener(this);
+                release();
+            }
+        });
+        mLoader.startLoading();
+    }
+
+    public void release() {
+        if (mLoader != null) {
+            mLoader.cancelLoad();
+            mLoader.stopLoading();
+            mLoader = null;
+        }
+    }
+
+    @Override
+    public void onLoadComplete(Loader<Cursor> loader, Cursor data) {
+        onLoadFinished(loader, data);
     }
 
     // Query getters/setters
