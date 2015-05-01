@@ -1,8 +1,8 @@
 package org.fasola.fasolaminutes;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,11 +45,12 @@ public class SingingActivity extends SimpleTabActivity {
         addTab("Full Text", FullTextFragment.class);
     }
 
-    public static class SingingSongListFragment extends CursorListFragment {
+    public static class SingingSongListFragment extends CursorListFragment
+                                                implements ListDialogFragment.Listener {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View root = inflater.inflate(R.layout.fragment_singing_songlist, container, false);
-            inflateList(inflater, (ViewGroup)root, savedInstanceState);
+            inflateList(inflater, (ViewGroup) root, savedInstanceState);
             return root;
         }
 
@@ -105,10 +106,10 @@ public class SingingActivity extends SimpleTabActivity {
         public void onListItemClick(ListView l, View v, int position, long id) {
             Cursor cursor = getListAdapter().getCursor();
             if (cursor.moveToPosition(position)) {
-                final long leadId = cursor.getLong(cursor.getColumnIndex(EXTRA_LEAD_ID));
+                long leadId = cursor.getLong(cursor.getColumnIndex(EXTRA_LEAD_ID));
                 // Check for multiple leaders
                 int idColumn = cursor.getColumnIndex("__leaderIds");
-                final String[] leaderIds = cursor.getString(idColumn).split(",");
+                String[] leaderIds = cursor.getString(idColumn).split(",");
                 if (leaderIds.length == 1) {
                     // Single leader: start the activity
                     sendIntent(Long.parseLong(leaderIds[0]), leadId);
@@ -117,18 +118,24 @@ public class SingingActivity extends SimpleTabActivity {
                     // Multiple leaders: prompt
                     int leaderColumn = 2;
                     String[] names = cursor.getString(leaderColumn).split(", ");
-                    ListDialogFragment dialog = new ListDialogFragment(
-                            getResources().getString(R.string.select_leader),
-                            names,
-                            new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            sendIntent(Long.parseLong(leaderIds[which]), leadId);
-                        }
-                    });
+                    // Add data
+                    Bundle data = new Bundle();
+                    data.putLong("leadId", leadId);
+                    data.putStringArray("leaderIds", leaderIds);
+                    // show the dialog
+                    ListDialogFragment dialog = ListDialogFragment.newInstance(
+                        R.string.select_leader, names, data);
+                    dialog.setTargetFragment(this, 1);
                     dialog.show(getFragmentManager(), "select_leader");
                 }
             }
+        }
+
+        @Override
+        public void onListDialogClick(DialogFragment dialog, int which, Bundle data) {
+            String[] leaderIds = data.getStringArray("leaderIds");
+            long leadId = data.getLong("leadId");
+            sendIntent(Long.parseLong(leaderIds[which]), leadId);
         }
 
         // Start a LeaderActivity with id and leadId
