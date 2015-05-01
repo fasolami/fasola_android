@@ -89,9 +89,9 @@ public class LeaderActivity extends SimpleTabActivity {
                         String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
                         String singings = getResources().getQuantityString(R.plurals.singingsAttended, nSingings, nSingings);
                         String entropy = "Entropy: " + leader.entropyDisplay.getString();
-                        ((TextView) root.findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
-                        ((TextView) root.findViewById(R.id.singings)).setText(singings);
-                        ((TextView) root.findViewById(R.id.entropy)).setText(entropy);
+                        ((TextView) view.findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
+                        ((TextView) view.findViewById(R.id.singings)).setText(singings);
+                        ((TextView) view.findViewById(R.id.entropy)).setText(entropy);
                     }
                 }
             });
