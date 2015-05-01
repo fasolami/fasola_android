@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:paddingRight="?android:attr/listPreferredItemPaddingRight"
+        android:paddingLeft="?android:attr/listPreferredItemPaddingRight"
         android:id="@+id/play_image"
         android:src="@drawable/ic_action_play_over_video"
         android:contentDescription="@string/play_recording_text"

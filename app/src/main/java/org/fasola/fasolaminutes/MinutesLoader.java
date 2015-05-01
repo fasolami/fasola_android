@@ -14,14 +14,14 @@ import android.support.v4.content.Loader;
 
 // Declared outside the class so it can implement this interface
 interface _MinutesLoaderCallbacksInterface {
-    public void onLoadFinished(Cursor cursor);
-    public void onLoaderReset();
+    void onLoadFinished(Cursor cursor);
+    void onLoaderReset();
 }
 
 public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>,
                                       Loader.OnLoadCompleteListener<Cursor>,
                                       _MinutesLoaderCallbacksInterface {
-    public static interface Callbacks extends _MinutesLoaderCallbacksInterface {
+    public interface Callbacks extends _MinutesLoaderCallbacksInterface {
     }
 
     // Simplified callbacks

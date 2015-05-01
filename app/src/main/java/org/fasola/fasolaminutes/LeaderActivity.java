@@ -60,7 +60,7 @@ public class LeaderActivity extends SimpleTabActivity {
         }
 
         @Override
-        public void onViewCreated(View view, Bundle savedInstanceState) {
+        public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
             long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
             // Query for stats
@@ -73,9 +73,8 @@ public class LeaderActivity extends SimpleTabActivity {
                 public void onLoadFinished(Cursor cursor) {
                     MinutesContract.LeaderDAO leader = MinutesContract.Leader.fromCursor(cursor);
                     if (leader != null) {
-                        View root = getView();
                         // AKA text
-                        TextView akaText = (TextView) root.findViewById(R.id.aka);
+                        TextView akaText = (TextView) view.findViewById(R.id.aka);
                         if (!leader.aka.isNull()) {
                             String aka = leader.aka.getString().replace(",", ", ").replaceAll(", ([^,]+)$", " and $1");
                             akaText.setText("also known as: " + aka);
@@ -113,7 +112,7 @@ public class LeaderActivity extends SimpleTabActivity {
                     }
                     // Set data
                     BarDataSet dataset = new BarDataSet(entries, "Singings Attended");
-                    BarChart chart = (BarChart)getView().findViewById(R.id.chart);
+                    BarChart chart = (BarChart)view.findViewById(R.id.chart);
                     chart.setDescription("");
                     chart.setData(new BarData(labels, dataset));
                     // Style the chart

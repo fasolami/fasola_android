@@ -20,7 +20,7 @@ import com.astuetz.PagerSlidingTabStrip;
  *  Extend this class, and override onCreateTabs()
  *  In this function, call addTab() to add a tab to your activity
  */
-public class SimpleTabActivity extends FragmentActivity {
+public abstract class SimpleTabActivity extends FragmentActivity {
     /* Override to change the content view resource */
     protected int getLayoutId() {
         return R.layout.activity_tab;

@@ -169,7 +169,9 @@ public class SQL {
             T obj;
             try {
                 obj = (T) this.getClass().newInstance();
-            } catch(InstantiationException|IllegalAccessException e) {
+            } catch(InstantiationException e) {
+                return null;
+            } catch(IllegalAccessException e) {
                 return null;
             }
              // Setup secondary fields
@@ -330,6 +332,7 @@ public class SQL {
             return Integer.parseInt(value);
         }
 
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
         public boolean isNull() {
             return value == null;
         }
@@ -395,6 +398,7 @@ public class SQL {
         return q.union(queries);
     }
 
+    @SuppressWarnings("SameParameterValue")
     public static class Query {
         // Query elements
         protected String queryType;
@@ -402,7 +406,7 @@ public class SQL {
         protected List<Pair<Object, String>> selectColumns = new ArrayList<>(); // Column, alias
         protected List<Column> joinColumns = new ArrayList<>();
         protected BaseTable fromTable;
-        protected Map<String, String> joins = new LinkedHashMap<>(); // table name, join statment
+        protected Map<String, String> joins = new LinkedHashMap<>(); // table name, join statement
         protected QueryStringBuilder strGroup = new QueryStringBuilder(" GROUP BY");
         protected QueryStringBuilder strHaving = new QueryStringBuilder(" HAVING");
         protected List<QueryStringBuilder> whereList = new ArrayList<>();
@@ -531,6 +535,8 @@ public class SQL {
                 if (entry != null) {
                     // Join to the intermediate table
                     JoinEntry firstJoin = BaseTable.getJoin(t1, other);
+                    if (firstJoin == null)
+                        throw new JoinException(t1, t2);
                     _join(other, firstJoin.text, firstJoin.isLeft || isLeft);
                     // Join to the second table
                     _join(t2, entry.text, entry.isLeft || isLeft);
@@ -787,6 +793,7 @@ public class SQL {
                 return this;
             }
 
+            @SuppressWarnings("BooleanMethodIsAlwaysInverted")
             public boolean isEmpty() {
                 return ! mHasValue;
             }

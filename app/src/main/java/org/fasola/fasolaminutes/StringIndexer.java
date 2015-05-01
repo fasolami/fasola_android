@@ -1,6 +1,7 @@
 package org.fasola.fasolaminutes;
 
 import android.database.Cursor;
+import android.support.annotation.NonNull;
 
 /**
  * A Hacked up version of AlphabetIndexer that uses a full String instead of just the first letter
@@ -37,7 +38,7 @@ public class StringIndexer extends LetterIndexer {
     }
 
     @Override
-    protected int compare(String word, String index) {
+    protected int compare(@NonNull String word, String index) {
         // Compare using index as an integer, and reverse if sort order is DESC
         return compare(word, index.codePointAt(0)) * (mIsDesc ? -1 : 1);
     }

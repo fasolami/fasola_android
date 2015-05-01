@@ -122,7 +122,7 @@ public class PlaybackService extends Service
                     .setContentTitle(cursor.getString(1))
                     .setContentText(cursor.getString(2))
                     .setOngoing(true)
-                    .build();
+                    .getNotification(); // build() was added in API 16
                 if (! mHasNotification) {
                     Log.v(TAG, "Starting foreground service");
                     startForeground(NOTIFICATION_ID, notification);
