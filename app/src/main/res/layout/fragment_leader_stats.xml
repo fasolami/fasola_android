@@ -4,20 +4,20 @@
     android:id="@+id/fragment_leader_stats">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:id="@+id/aka"
-        android:layout_centerHorizontal="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:gravity="center_horizontal"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingBottom="8dp"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:paddingBottom="8dp" />
 
     <TextView
+        android:id="@+id/songs"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:id="@+id/songs"
         android:layout_below="@+id/aka"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="false"
@@ -29,7 +29,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text=""
         android:id="@+id/singings"
         android:layout_below="@+id/aka"
         android:layout_alignParentRight="true"
@@ -38,11 +37,11 @@
 
     <TextView
         android:id="@+id/entropy"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_below="@+id/singings"
-        android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin" />
 

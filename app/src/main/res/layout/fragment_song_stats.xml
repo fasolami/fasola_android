@@ -5,10 +5,10 @@
     <TextView
         android:id="@+id/stats"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:gravity="center_horizontal" />
 
     <com.github.mikephil.charting.charts.BarChart
         android:id="@+id/chart"
