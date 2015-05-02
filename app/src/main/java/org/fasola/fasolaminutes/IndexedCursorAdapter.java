@@ -86,11 +86,21 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
     public Cursor swapCursor(Cursor newCursor) {
         Cursor oldCursor = super.swapCursor(newCursor);
         updateIndexerCursor();
+        updateAudioColumn();
         return oldCursor;
     }
 
+    private void updateAudioColumn() {
+        Cursor cursor = getCursor();
+        if (cursor == null)
+            mAudioColumn = -1;
+        else
+            mAudioColumn = cursor.getColumnIndex(CursorListFragment.AUDIO_COLUMN);
+    }
+
     // Update the indexer when the cursor changes
-    protected void updateIndexerCursor() {
+    private void updateIndexerCursor() {
+        // Update indexer
         if (! hasIndexer())
             return;
         Cursor cursor = getCursor();
@@ -101,11 +111,6 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         }
         else
             mIndexer.setCursor(null);
-        // Set audio column
-        if (cursor == null)
-            mAudioColumn = -1;
-        else
-            mAudioColumn = cursor.getColumnIndex(CursorListFragment.AUDIO_COLUMN);
     }
     // SectionIndexer overrides
     @Override
