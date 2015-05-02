@@ -15,6 +15,7 @@ import android.widget.ListView;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Simple framework for using queries as the base for a ListFragment
@@ -248,19 +249,17 @@ public class CursorListFragment extends ListFragment
             Log.w("SingingActivity", "Clicked ImageView should have been hidden");
             return;
         }
+        // Make a list of urls to add
+        List<String> urls = new ArrayList<>();
+        urls.add(cursor.getString(urlColumn));
+        while (cursor.moveToNext())
+            if (! cursor.isNull(urlColumn))
+                urls.add(cursor.getString(urlColumn)); // Enqueue next songs
+        // Send the intent
         Intent intent = new Intent(getActivity(), PlaybackService.class);
         intent.setAction(PlaybackService.ACTION_PLAY);
-        intent.putExtra(PlaybackService.EXTRA_URL, cursor.getString(urlColumn));
+        intent.putExtra(PlaybackService.EXTRA_URL_LIST, urls.toArray(new String[urls.size()]));
         getActivity().startService(intent);
-        // Enqueue next items
-        while (cursor.moveToNext()) {
-            if (! cursor.isNull(urlColumn)) {
-                intent = new Intent(getActivity(), PlaybackService.class);
-                intent.setAction(PlaybackService.ACTION_ENQUEUE);
-                intent.putExtra(PlaybackService.EXTRA_URL, cursor.getString(urlColumn));
-                getActivity().startService(intent);
-            }
-        }
     }
 
     public boolean onPlayLongClick(View v, int position) {

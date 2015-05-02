@@ -27,6 +27,7 @@ public class PlaybackService extends Service
     public static final String ACTION_ENQUEUE = "org.fasola.fasolaminutes.media.ENQUEUE";
     public static final String EXTRA_LEAD_ID = "org.fasola.fasolaminutes.media.EXTRA_LEAD_ID";
     public static final String EXTRA_URL = "org.fasola.fasolaminutes.media.EXTRA_URL";
+    public static final String EXTRA_URL_LIST = "org.fasola.fasolaminutes.media.EXTRA_URL_LIST";
     private static final int NOTIFICATION_ID = 1;
     MediaPlayer mMediaPlayer;
     NotificationManager mNotificationManager;
@@ -57,13 +58,13 @@ public class PlaybackService extends Service
         }
 
         // Return a query that can be used to construct the song object
-        private static SQL.Query getQuery(Object column) {
+        private static SQL.Query getQuery(Object column, Object... args) {
             return SQL.select(
                     C.SongLeader.leadId, C.Song.fullName,
                     C.Leader.fullName.func("group_concat", "', '"),
                     C.Singing.name, C.Singing.startDate,
                     C.SongLeader.audioUrl)
-                    .whereEq(column)
+                    .where(column, "IN", args)
                 .group(column);
         }
     }
@@ -92,12 +93,16 @@ public class PlaybackService extends Service
                 startLead(intent.getLongExtra(EXTRA_LEAD_ID, -1));
             else if (intent.hasExtra(EXTRA_URL))
                 startLead(intent.getStringExtra(EXTRA_URL));
+            else if (intent.hasExtra(EXTRA_URL_LIST))
+                startLead(intent.getStringArrayExtra(EXTRA_URL_LIST));
         }
         else if (intent.getAction().equals(ACTION_ENQUEUE)) {
             if (intent.hasExtra(EXTRA_LEAD_ID))
                 enqueueLead(intent.getLongExtra(EXTRA_LEAD_ID, -1));
             else if (intent.hasExtra(EXTRA_URL))
                 enqueueLead(intent.getStringExtra(EXTRA_URL));
+            else if (intent.hasExtra(EXTRA_URL_LIST))
+                enqueueLead(intent.getStringArrayExtra(EXTRA_URL_LIST));
         }
         return START_STICKY;
     }
@@ -177,30 +182,32 @@ public class PlaybackService extends Service
 
     // Start/Enqueue overloads
     public void startLead(long leadId) {
-        enqueueLead(C.SongLeader.leadId, String.valueOf(leadId), true);
+        enqueueLead(true, C.SongLeader.leadId, leadId);
     }
 
-    public void startLead(String url) {
-        enqueueLead(C.SongLeader.audioUrl, url, true);
+    public void startLead(String... urls) {
+        enqueueLead(true, C.SongLeader.audioUrl, urls);
     }
 
     public void enqueueLead(long leadId) {
-        enqueueLead(C.SongLeader.leadId, String.valueOf(leadId), false);
+        enqueueLead(false, C.SongLeader.leadId, leadId);
     }
 
-    public void enqueueLead(String url) {
-        enqueueLead(C.SongLeader.audioUrl, url, false);
+    public void enqueueLead(String... urls) {
+        enqueueLead(false, C.SongLeader.audioUrl, urls);
     }
 
-    public void enqueueLead(Object column, String arg, final boolean start) {
+    public void enqueueLead(final boolean start, Object column, Object... args) {
         // Construct a Song and add to the playlist
-        MinutesLoader loader = new MinutesLoader(Song.getQuery(column), arg);
+        MinutesLoader loader = new MinutesLoader(Song.getQuery(column, args));
         loader.startLoading(new MinutesLoader.FinishedCallback() {
             @Override
             public void onLoadFinished(Cursor cursor) {
                 if (! cursor.moveToFirst())
                     return;
-                mPlaylist.add(new Song(cursor));
+                do {
+                    mPlaylist.add(new Song(cursor));
+                } while(cursor.moveToNext());
                 if (start)
                     playNext();
             }
