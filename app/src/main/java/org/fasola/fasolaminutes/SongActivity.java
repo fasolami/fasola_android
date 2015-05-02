@@ -179,12 +179,12 @@ public class SongActivity extends SimpleTabActivity {
             setItemLayout(R.layout.singing_list_item);
             setRangeIndexer();
             long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
-            setQuery(C.SongLeader.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location)
-                    .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
-                    .distinct()
-                    .sectionIndex(C.Singing.year)
-                    .where(C.SongLeader.songId, "=", id)
-                        .and(C.SongLeader.audioUrl, "IS NOT", "NULL"));
+            setQuery(SQL.select(C.SongLeader.id, C.Singing.name, C.Singing.startDate, C.Singing.location)
+                        .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
+                        .sectionIndex(C.Singing.year)
+                        .group(C.SongLeader.leadId)
+                        .where(C.SongLeader.songId, "=", id)
+                            .and(C.SongLeader.audioUrl, "IS NOT", "NULL"));
             super.onViewCreated(view, savedInstanceState);
         }
     }
