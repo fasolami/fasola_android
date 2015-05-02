@@ -44,5 +44,6 @@
         <item quantity="one">%d Singing</item>
         <item quantity="other">%d Singings</item>
     </plurals>
+    <string name="title_activity_playlist">PlaylistActivity</string>
 
 </resources>
