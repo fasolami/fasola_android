@@ -585,16 +585,29 @@ public class SQL {
             return this;
         }
 
+        private String escapeWhere(String val) {
+            String cmp = val.toUpperCase();
+            if (!(cmp.equals("?") || cmp.equals("NULL")))
+                return DatabaseUtils.sqlEscapeString(val);
+            return val;
+        }
+
         protected Query _addWhere(Object bool, Object col, Object oper, Object val) {
             QueryStringBuilder q = whereList.get(whereList.size() - 1);
             if (oper == null)
                 oper = "=";
             if (val == null)
                 val = "?";
+            else if (oper.toString().toUpperCase().equals("IN")) {
+                // Treat val as an array of objects to be escaped
+                Object[] valArray = (Object[]) val;
+                String[] escapedVals = new String[valArray.length];
+                for (int i = 0; i < valArray.length; i++)
+                    escapedVals[i] = escapeWhere(valArray[i].toString());
+                val = "(" + TextUtils.join(",", escapedVals) + ")";
+            }
             else {
-                String cmp = val.toString().toUpperCase();
-                if (!(cmp.equals("?") || cmp.equals("NULL")))
-                    val = DatabaseUtils.sqlEscapeString(val.toString());
+                val = escapeWhere(val.toString());
             }
             q.append(bool, " ", col, oper, val);
             // Add join
