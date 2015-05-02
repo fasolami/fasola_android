@@ -2,6 +2,7 @@ package org.fasola.fasolaminutes;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -152,12 +153,18 @@ public class PlaybackService extends Service
             Log.e(TAG, "IOException with url: " + song.url);
         }
         mMediaPlayer.prepareAsync();
+        // Create Notification Intent
+        Intent intent = new Intent(this, PlaylistActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+        );
         // Update notification
         Notification notification = new Notification.Builder(getApplicationContext())
             .setSmallIcon(R.drawable.ic_stat_fasola)
             .setContentTitle(song.name)
             .setContentText(song.leaders)
             .setOngoing(true)
+            .setContentIntent(pendingIntent)
             .getNotification(); // build() was added in API 16
         if (! mHasNotification) {
             Log.v(TAG, "Starting foreground service");
