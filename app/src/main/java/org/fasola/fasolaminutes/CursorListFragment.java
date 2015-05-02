@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import junit.framework.Assert;
 
@@ -260,6 +261,9 @@ public class CursorListFragment extends ListFragment
         intent.setAction(PlaybackService.ACTION_PLAY);
         intent.putExtra(PlaybackService.EXTRA_URL_LIST, urls.toArray(new String[urls.size()]));
         getActivity().startService(intent);
+        // Toast
+        String message = getResources().getQuantityString(R.plurals.play_songs, urls.size(), urls.size());
+        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     }
 
     public boolean onPlayLongClick(View v, int position) {
