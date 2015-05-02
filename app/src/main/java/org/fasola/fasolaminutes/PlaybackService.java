@@ -13,8 +13,8 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.Queue;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlaybackService extends Service
         implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener,
@@ -30,13 +30,50 @@ public class PlaybackService extends Service
     MediaPlayer mMediaPlayer;
     NotificationManager mNotificationManager;
     boolean mHasNotification;
-    Queue<Long> mPlaylist;
+
+    // Song struct
+    public static class Song {
+        public long leadId;
+        public String name;
+        public String leaders;
+        public String singing;
+        public String date;
+        public String url;
+
+        public Song(long leadId, String name, String leaders, String singing, String date, String url) {
+            this.leadId = leadId;
+            this.name = name;
+            this.leaders = leaders;
+            this.singing = singing;
+            this.date = date;
+            this.url = url;
+        }
+
+        // Create a song from a cursor returned from executing Song.getQuery()
+        private Song(Cursor cursor) {
+            this(cursor.getLong(0), cursor.getString(1), cursor.getString(2), cursor.getString(3),
+                 cursor.getString(4), cursor.getString(5));
+        }
+
+        // Return a query that can be used to construct the song object
+        private static SQL.Query getQuery(Object column) {
+            return SQL.select(
+                    C.SongLeader.leadId, C.Song.fullName,
+                    C.Leader.fullName.func("group_concat", "', '"),
+                    C.Singing.name, C.Singing.startDate,
+                    C.SongLeader.audioUrl)
+                    .whereEq(column)
+                .group(column);
+        }
+    }
+
+    List<Song> mPlaylist;
 
     @Override
     public void onCreate() {
         super.onCreate();
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mPlaylist = new LinkedList<>();
+        mPlaylist = new ArrayList<>();
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -86,67 +123,72 @@ public class PlaybackService extends Service
         }
     }
 
-    // Play a song given a lead id
+    public List<Song> getPlaylist() {
+        return mPlaylist;
+    }
+
+    /**
+     * Play the next song in the playlist
+     * @return true if there is a song to play; false if the playlist is empty
+     */
+    public boolean playNext() {
+        // Get the song
+        if (mPlaylist.isEmpty())
+            return false;
+        Song song = mPlaylist.remove(0);
+        // Prepare player
+        ensurePlayer();
+        mMediaPlayer.reset();
+        try {
+            mMediaPlayer.setDataSource(song.url);
+        } catch (IOException e) {
+            Log.e(TAG, "IOException with url: " + song.url);
+        }
+        mMediaPlayer.prepareAsync();
+        // Update notification
+        Notification notification = new Notification.Builder(getApplicationContext())
+            .setSmallIcon(R.drawable.ic_stat_fasola)
+            .setContentTitle(song.name)
+            .setContentText(song.leaders)
+            .setOngoing(true)
+            .getNotification(); // build() was added in API 16
+        if (! mHasNotification) {
+            Log.v(TAG, "Starting foreground service");
+            startForeground(NOTIFICATION_ID, notification);
+            mHasNotification = true;
+        } else
+            mNotificationManager.notify(NOTIFICATION_ID, notification);
+        return true;
+    }
+
+    // Start/Enqueue overloads
     public void startLead(long leadId) {
-        startLead(C.SongLeader.leadId, String.valueOf(leadId));
+        enqueueLead(C.SongLeader.leadId, String.valueOf(leadId), true);
     }
 
     public void startLead(String url) {
-        startLead(C.SongLeader.audioUrl, url);
-    }
-
-    public void startLead(Object column, String... args) {
-        SQL.Query query = C.SongLeader.select(C.SongLeader.audioUrl,
-                                              C.Song.fullName,
-                                              C.Leader.fullName.func("group_concat", "', '"))
-                                      .whereEq(column)
-                                      .group(column);
-        MinutesLoader loader = new MinutesLoader(query, args);
-        loader.startLoading(new MinutesLoader.FinishedCallback() {
-            @Override
-            public void onLoadFinished(Cursor cursor) {
-                if (!cursor.moveToFirst())
-                    return;
-                // Prepare player
-                ensurePlayer();
-                mMediaPlayer.reset();
-                try {
-                    mMediaPlayer.setDataSource(cursor.getString(0));
-                } catch (IOException e) {
-                    Log.e(TAG, "IOException with url: " + cursor.getString(0));
-                }
-                mMediaPlayer.prepareAsync();
-                // Update notification
-                Notification notification = new Notification.Builder(getApplicationContext())
-                    .setSmallIcon(R.drawable.ic_stat_fasola)
-                    .setContentTitle(cursor.getString(1))
-                    .setContentText(cursor.getString(2))
-                    .setOngoing(true)
-                    .getNotification(); // build() was added in API 16
-                if (! mHasNotification) {
-                    Log.v(TAG, "Starting foreground service");
-                    startForeground(NOTIFICATION_ID, notification);
-                    mHasNotification = true;
-                } else
-                    mNotificationManager.notify(NOTIFICATION_ID, notification);
-            }
-        });
+        enqueueLead(C.SongLeader.audioUrl, url, true);
     }
 
     public void enqueueLead(long leadId) {
-        mPlaylist.add(leadId);
+        enqueueLead(C.SongLeader.leadId, String.valueOf(leadId), false);
     }
 
     public void enqueueLead(String url) {
-        // Find the id then add to playlist
-        SQL.Query query = C.SongLeader.select(C.SongLeader.leadId).whereEq(C.SongLeader.audioUrl);
-        MinutesLoader loader = new MinutesLoader(query, url);
+        enqueueLead(C.SongLeader.audioUrl, url, false);
+    }
+
+    public void enqueueLead(Object column, String arg, final boolean start) {
+        // Construct a Song and add to the playlist
+        MinutesLoader loader = new MinutesLoader(Song.getQuery(column), arg);
         loader.startLoading(new MinutesLoader.FinishedCallback() {
             @Override
             public void onLoadFinished(Cursor cursor) {
-                if (!cursor.moveToFirst())
+                if (! cursor.moveToFirst())
                     return;
-                enqueueLead(cursor.getLong(0));
+                mPlaylist.add(new Song(cursor));
+                if (start)
+                    playNext();
             }
         });
     }
@@ -163,9 +205,7 @@ public class PlaybackService extends Service
     public void onCompletion(MediaPlayer mp) {
         Log.v(TAG, "Complete");
         // Start the next
-        if (! mPlaylist.isEmpty())
-            startLead(mPlaylist.remove());
-        else {
+        if (! playNext()) {
             Log.v(TAG, "End of playlist: stopping foreground service");
             stopForeground(true);
             mHasNotification = false;
