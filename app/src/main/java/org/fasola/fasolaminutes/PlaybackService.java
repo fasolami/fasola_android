@@ -68,12 +68,18 @@ public class PlaybackService extends Service
     }
 
     List<Song> mPlaylist;
+    static PlaybackService mInstance;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        mInstance = this;
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mPlaylist = new ArrayList<>();
+    }
+
+    static PlaybackService getInstance() {
+        return mInstance;
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -99,6 +105,7 @@ public class PlaybackService extends Service
     public void onDestroy() {
        if (mMediaPlayer != null)
            mMediaPlayer.release();
+        mInstance = null;
     }
 
     private final IBinder mBinder = new MediaBinder();
