@@ -8,27 +8,6 @@
     android:paddingBottom="@dimen/multiline_item_vertical_margin"
     android:orientation="vertical">
 
-    <TextView android:id="@android:id/text1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:ellipsize="end"
-        android:singleLine="true" />
-
-    <TextView android:id="@android:id/text2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/multiline_item_lineheight_offset"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:ellipsize="end"
-        android:singleLine="true" />
-
-    <TextView android:id="@+id/text3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/multiline_item_lineheight_offset"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:ellipsize="end"
-        android:singleLine="true" />
+    <include layout="@layout/three_line_text" />
 
 </LinearLayout>
