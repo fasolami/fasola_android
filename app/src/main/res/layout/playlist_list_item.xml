@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="0dp"
+    android:paddingRight="?android:attr/listPreferredItemPaddingRight"
+    android:paddingTop="@dimen/multiline_item_vertical_margin"
+    android:paddingBottom="@dimen/multiline_item_vertical_margin"
+    android:orientation="horizontal">
+
+    <!-- ic_drag_handle has enough builtin padding -->
+    <!-- No extra padding is needed on either left or right of the icon -->
+    <ImageView android:id="@id/drag_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center_vertical"
+        android:src="@drawable/ic_drag_handle" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <include layout="@layout/three_line_text" />
+
+    </LinearLayout>
+
+</LinearLayout>

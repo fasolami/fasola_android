@@ -1,11 +1,13 @@
 package org.fasola.fasolaminutes;
 
-import android.support.v4.app.ListFragment;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.TextView;
 
 import com.mobeta.android.dslv.DragSortListView;
 
@@ -17,8 +19,6 @@ import java.util.List;
  * A Fragment with a DragSortListView that shows a playlist
  */
 public class PlaylistFragment extends ListFragment implements DragSortListView.DropListener {
-
-    List<String> mItems;
     DragSortListView mList;
 
     public PlaylistFragment() {
@@ -37,31 +37,70 @@ public class PlaylistFragment extends ListFragment implements DragSortListView.D
         // Setup listener
         mList.setDropListener(this);
         // Connect to the playback service and display the playlist
-        mItems = new ArrayList<>();
-        setListAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, mItems));
-        updateList();
+        setListAdapter(new PlaylistListAdapter(getActivity()));
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        updateList();
-    }
-
-    private void updateList() {
-        PlaybackService service = PlaybackService.getInstance();
-        mItems.clear();
-        if (service != null) {
-            for (PlaybackService.Song song: service.getPlaylist())
-                mItems.add(song.name + "\n" + song.singing + "\n" + song.leaders);
-        }
-        ((ArrayAdapter<String>)getListAdapter()).notifyDataSetChanged();
+        ((BaseAdapter)getListAdapter()).notifyDataSetChanged();
     }
 
     @Override
     public void drop(int from, int to) {
+        /*
         String item = mItems.remove(from);
         mItems.add(to, item);
-        ((ArrayAdapter<String>)getListAdapter()).notifyDataSetChanged();
+        ((BaseAdapter)getListAdapter()).notifyDataSetChanged();
+        */
+    }
+
+    /**
+     * Custom ListAdapter backed by the PlaybackService's playlist
+     */
+    static class PlaylistListAdapter extends BaseAdapter {
+        List<PlaybackService.Song> mEmptyList = new ArrayList<>();
+        Context mContext;
+        LayoutInflater mInflater;
+
+        public PlaylistListAdapter(Context context) {
+            mContext = context;
+            mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+
+        List<PlaybackService.Song> getPlaylist() {
+            PlaybackService service = PlaybackService.getInstance();
+            return service == null ? mEmptyList : service.getPlaylist();
+        }
+
+        @Override
+        public int getCount() {
+            return getPlaylist().size();
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return getPlaylist().get(i);
+        }
+
+        public PlaybackService.Song getSong(int i) {
+            return (PlaybackService.Song)getItem(i);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return getSong(i).leadId;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            if (view == null)
+                view = mInflater.inflate(R.layout.playlist_list_item, viewGroup, false);
+            PlaybackService.Song song = getSong(i);
+            ((TextView) view.findViewById(android.R.id.text1)).setText(song.name);
+            ((TextView) view.findViewById(android.R.id.text2)).setText(song.singing);
+            ((TextView) view.findViewById(R.id.text3)).setText(song.leaders);
+            return view;
+        }
     }
 }

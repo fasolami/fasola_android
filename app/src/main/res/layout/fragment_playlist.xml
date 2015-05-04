@@ -8,5 +8,5 @@
     dslv:use_default_controller="true"
     dslv:collapsed_height="4dp"
     dslv:float_background_color="@color/fasola_background"
-    dslv:drag_handle_id="@android:id/text1"
+    dslv:drag_handle_id="@id/drag_handle"
     dslv:drag_enabled="true" />
