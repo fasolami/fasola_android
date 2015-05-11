@@ -14,8 +14,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PlaybackService extends Service
         implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener,
@@ -29,47 +27,13 @@ public class PlaybackService extends Service
     public static final String EXTRA_URL = "org.fasola.fasolaminutes.media.EXTRA_URL";
     public static final String EXTRA_URL_LIST = "org.fasola.fasolaminutes.media.EXTRA_URL_LIST";
     private static final int NOTIFICATION_ID = 1;
+
     MediaPlayer mMediaPlayer;
     NotificationManager mNotificationManager;
     boolean mHasNotification;
 
-    // Song struct
-    public static class Song {
-        public long leadId;
-        public String name;
-        public String leaders;
-        public String singing;
-        public String date;
-        public String url;
+    Playlist mPlaylist;
 
-        public Song(long leadId, String name, String leaders, String singing, String date, String url) {
-            this.leadId = leadId;
-            this.name = name;
-            this.leaders = leaders;
-            this.singing = singing;
-            this.date = date;
-            this.url = url;
-        }
-
-        // Create a song from a cursor returned from executing Song.getQuery()
-        private Song(Cursor cursor) {
-            this(cursor.getLong(0), cursor.getString(1), cursor.getString(2), cursor.getString(3),
-                 cursor.getString(4), cursor.getString(5));
-        }
-
-        // Return a query that can be used to construct the song object
-        private static SQL.Query getQuery(Object column, Object... args) {
-            return SQL.select(
-                    C.SongLeader.leadId, C.Song.fullName,
-                    C.Leader.fullName.func("group_concat", "', '"),
-                    C.Singing.name, C.Singing.startDate,
-                    C.SongLeader.audioUrl)
-                    .where(column, "IN", args)
-                .group(column);
-        }
-    }
-
-    List<Song> mPlaylist;
     static PlaybackService mInstance;
 
     @Override
@@ -77,7 +41,7 @@ public class PlaybackService extends Service
         super.onCreate();
         mInstance = this;
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mPlaylist = new ArrayList<>();
+        mPlaylist = Playlist.getInstance();
     }
 
     static PlaybackService getInstance() {
@@ -136,7 +100,7 @@ public class PlaybackService extends Service
         }
     }
 
-    public List<Song> getPlaylist() {
+    public Playlist getPlaylist() {
         return mPlaylist;
     }
 
@@ -146,9 +110,9 @@ public class PlaybackService extends Service
      */
     public boolean playNext() {
         // Get the song
-        if (mPlaylist.isEmpty())
+        Playlist.Song song = mPlaylist.moveToNext();
+        if (song == null)
             return false;
-        Song song = mPlaylist.remove(0);
         // Prepare player
         ensurePlayer();
         mMediaPlayer.reset();
@@ -186,7 +150,7 @@ public class PlaybackService extends Service
     }
 
     public void startLead(String... urls) {
-        enqueueLead(true, C.SongLeader.audioUrl, urls);
+        enqueueLead(true, C.SongLeader.audioUrl, (Object[])urls);
     }
 
     public void enqueueLead(long leadId) {
@@ -194,20 +158,16 @@ public class PlaybackService extends Service
     }
 
     public void enqueueLead(String... urls) {
-        enqueueLead(false, C.SongLeader.audioUrl, urls);
+        enqueueLead(false, C.SongLeader.audioUrl, (Object[])urls);
     }
 
     public void enqueueLead(final boolean start, Object column, Object... args) {
         // Construct a Song and add to the playlist
-        MinutesLoader loader = new MinutesLoader(Song.getQuery(column, args));
+        MinutesLoader loader = new MinutesLoader(Playlist.getSongQuery(column, args));
         loader.startLoading(new MinutesLoader.FinishedCallback() {
             @Override
             public void onLoadFinished(Cursor cursor) {
-                if (! cursor.moveToFirst())
-                    return;
-                do {
-                    mPlaylist.add(new Song(cursor));
-                } while(cursor.moveToNext());
+                mPlaylist.addAll(cursor);
                 if (start)
                     playNext();
             }
