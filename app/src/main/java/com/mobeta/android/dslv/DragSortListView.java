@@ -21,12 +21,6 @@
 
 package com.mobeta.android.dslv;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
@@ -52,6 +46,12 @@ import android.widget.ListView;
 import android.widget.WrapperListAdapter;
 
 import org.fasola.fasolaminutes.R;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ListView subclass that mediates drag and drop resorting of items.
@@ -622,10 +622,19 @@ public class DragSortListView extends ListView {
                 setRemoveListener((RemoveListener) adapter);
             }
         } else {
+            if (mAdapterWrapper != null)
+                getInputAdapter().unregisterDataSetObserver(mObserver);
             mAdapterWrapper = null;
         }
 
         super.setAdapter(mAdapterWrapper);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        if (mAdapterWrapper != null)
+            getInputAdapter().unregisterDataSetObserver(mObserver);
+        super.onDetachedFromWindow();
     }
 
     /**
