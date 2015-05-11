@@ -98,6 +98,12 @@ public class PlaylistFragment extends ListFragment implements DragSortListView.D
             ((TextView) view.findViewById(android.R.id.text1)).setText(song.name);
             ((TextView) view.findViewById(android.R.id.text2)).setText(song.singing);
             ((TextView) view.findViewById(R.id.text3)).setText(song.leaders);
+            // Playing indicator
+            int nowPlaying = 0;
+            if (mPlaylist.getPosition() == i)
+                nowPlaying = R.drawable.ic_play_indicator;
+            ((TextView) view.findViewById(android.R.id.text1))
+                    .setCompoundDrawablesWithIntrinsicBounds(nowPlaying, 0, 0, 0);
             return view;
         }
 
