@@ -11,6 +11,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -27,6 +28,10 @@ public class PlaybackService extends Service
     public static final String EXTRA_URL = "org.fasola.fasolaminutes.media.EXTRA_URL";
     public static final String EXTRA_URL_LIST = "org.fasola.fasolaminutes.media.EXTRA_URL_LIST";
     private static final int NOTIFICATION_ID = 1;
+
+    public static final String BROADCAST_PREPARED = "org.fasola.fasolaminutes.mediaBroadcast.PREPARED";
+    public static final String BROADCAST_COMPLETED = "org.fasola.fasolaminutes.mediaBroadcast.COMPLETED";
+    public static final String BROADCAST_ERROR = "org.fasola.fasolaminutes.mediaBroadcast.ERROR";
 
     MediaPlayer mMediaPlayer;
     boolean mIsPrepared;
@@ -195,12 +200,14 @@ public class PlaybackService extends Service
         Log.v(TAG, "Prepared; starting playback");
         mIsPrepared = true;
         mp.start();
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PREPARED));
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         Log.v(TAG, "Complete");
         mIsPrepared = false;
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_COMPLETED));
         // Start the next
         if (! playNext()) {
             Log.v(TAG, "End of playlist: stopping foreground service");
@@ -213,6 +220,7 @@ public class PlaybackService extends Service
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Log.e(TAG, "Error: " + String.valueOf(what));
         mIsPrepared = false;
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_ERROR));
         return false;
     }
 }

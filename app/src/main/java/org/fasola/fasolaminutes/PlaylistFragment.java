@@ -1,10 +1,14 @@
 package org.fasola.fasolaminutes;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.DataSetObserver;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +30,16 @@ public class PlaylistFragment extends ListFragment
     Playlist mPlaylist;
 
     public PlaylistFragment() {
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(PlaybackService.BROADCAST_PREPARED);
+        filter.addAction(PlaybackService.BROADCAST_COMPLETED);
+        filter.addAction(PlaybackService.BROADCAST_ERROR);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
     }
 
     @Override
@@ -56,6 +70,12 @@ public class PlaylistFragment extends ListFragment
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+    }
+
+    @Override
     public void drop(int from, int to) {
         int lastPos = mPlaylist.getPosition();
         mPlaylist.add(to, mPlaylist.remove(from));
@@ -65,6 +85,15 @@ public class PlaylistFragment extends ListFragment
             mPlaylist.moveToPosition(to);
         ((BaseAdapter)getListAdapter()).notifyDataSetChanged();
     }
+
+    // Receive PlaybackService broadcasts
+    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(PlaybackService.BROADCAST_PREPARED))
+                mController.show(0);
+        }
+    };
 
     /**
      * Custom ListAdapter backed by the PlaybackService's playlist
