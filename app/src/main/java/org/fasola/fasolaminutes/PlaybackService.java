@@ -210,9 +210,10 @@ public class PlaybackService extends Service
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_COMPLETED));
         // Start the next
         if (! playNext()) {
-            Log.v(TAG, "End of playlist: stopping foreground service");
+            Log.v(TAG, "End of playlist: stopping service");
             stopForeground(true);
             mHasNotification = false;
+            stopSelf();
         }
     }
 
