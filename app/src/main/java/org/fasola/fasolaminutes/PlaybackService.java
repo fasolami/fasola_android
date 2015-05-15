@@ -29,6 +29,7 @@ public class PlaybackService extends Service
     private static final int NOTIFICATION_ID = 1;
 
     MediaPlayer mMediaPlayer;
+    boolean mIsPrepared;
     NotificationManager mNotificationManager;
     boolean mHasNotification;
 
@@ -44,8 +45,16 @@ public class PlaybackService extends Service
         mPlaylist = Playlist.getInstance();
     }
 
-    static PlaybackService getInstance() {
+    public static PlaybackService getInstance() {
         return mInstance;
+    }
+
+    public static boolean isRunning() {
+        return mInstance != null;
+    }
+
+    public boolean isPrepared() {
+        return mIsPrepared;
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -75,7 +84,8 @@ public class PlaybackService extends Service
     public void onDestroy() {
        if (mMediaPlayer != null)
            mMediaPlayer.release();
-        mInstance = null;
+       mIsPrepared = false;
+       mInstance = null;
     }
 
     private final IBinder mBinder = new MediaBinder();
@@ -179,12 +189,14 @@ public class PlaybackService extends Service
     @Override
     public void onPrepared(MediaPlayer mp) {
         Log.v(TAG, "Prepared; starting playback");
+        mIsPrepared = true;
         mp.start();
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         Log.v(TAG, "Complete");
+        mIsPrepared = false;
         // Start the next
         if (! playNext()) {
             Log.v(TAG, "End of playlist: stopping foreground service");
@@ -196,6 +208,7 @@ public class PlaybackService extends Service
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Log.e(TAG, "Error: " + String.valueOf(what));
+        mIsPrepared = false;
         return false;
     }
 }
