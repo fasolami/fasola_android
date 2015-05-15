@@ -57,6 +57,10 @@ public class PlaybackService extends Service
         return mIsPrepared;
     }
 
+    public MediaPlayer getMediaPlayer () {
+        return mMediaPlayer;
+    }
+
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent.getAction() == null)
             return START_STICKY;
