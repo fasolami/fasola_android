@@ -1,12 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.mobeta.android.dslv.DragSortListView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:dslv="http://schemas.android.com/apk/res-auto"
-    android:id="@android:id/list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    dslv:use_default_controller="true"
-    dslv:collapsed_height="4dp"
-    dslv:float_background_color="@color/fasola_background"
-    dslv:drag_handle_id="@id/drag_handle"
-    dslv:drag_enabled="true" />
+    android:orientation="vertical">
+
+    <com.mobeta.android.dslv.DragSortListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        dslv:use_default_controller="true"
+        dslv:collapsed_height="4dp"
+        dslv:float_background_color="@color/fasola_background"
+        dslv:drag_handle_id="@id/drag_handle"
+        dslv:drag_enabled="true" />
+
+    <org.fasola.fasolaminutes.MediaControllerXml
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/media_controller" />
+
+</LinearLayout>

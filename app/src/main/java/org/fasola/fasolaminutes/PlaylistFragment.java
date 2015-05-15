@@ -2,12 +2,14 @@ package org.fasola.fasolaminutes;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.MediaController;
 import android.widget.TextView;
 
 import com.mobeta.android.dslv.DragSortListView;
@@ -15,8 +17,12 @@ import com.mobeta.android.dslv.DragSortListView;
 /**
  * A Fragment with a DragSortListView that shows a playlist
  */
-public class PlaylistFragment extends ListFragment implements DragSortListView.DropListener {
+public class PlaylistFragment extends ListFragment
+        implements DragSortListView.DropListener,
+                   MediaController.MediaPlayerControl {
+
     DragSortListView mList;
+    MediaController mController;
     Playlist mPlaylist;
 
     public PlaylistFragment() {
@@ -25,23 +31,27 @@ public class PlaylistFragment extends ListFragment implements DragSortListView.D
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mList = (DragSortListView)inflater.inflate(R.layout.fragment_playlist, container, false);
+        View view = inflater.inflate(R.layout.fragment_playlist, container, false);
+        mList = (DragSortListView)view.findViewById(android.R.id.list);
+        mController = (MediaController)view.findViewById(R.id.media_controller);
         mPlaylist = Playlist.getInstance();
-        return mList;
+        return view;
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setListAdapter(new PlaylistListAdapter(getActivity(), mPlaylist));
         // Setup listener
         mList.setDropListener(this);
-        // Connect to the playback service and display the playlist
-        setListAdapter(new PlaylistListAdapter(getActivity(), mPlaylist));
+        // Setup MediaController
+        mController.setMediaPlayer(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        mController.show(0); // Update controls
         ((BaseAdapter)getListAdapter()).notifyDataSetChanged();
     }
 
@@ -121,5 +131,71 @@ public class PlaylistFragment extends ListFragment implements DragSortListView.D
             mPlaylist.unregisterPlayingObserver(observer);
             super.unregisterDataSetObserver(observer);
         }
+    }
+
+    public MediaPlayer getMediaPlayer() {
+        return PlaybackService.getInstance().getMediaPlayer();
+    }
+
+    // MediaPlayerControls override
+    public boolean isPrepared() {
+        return PlaybackService.isRunning() && PlaybackService.getInstance().isPrepared();
+    }
+
+    @Override
+    public void start() {
+        getMediaPlayer().start();
+    }
+
+    @Override
+    public void pause() {
+        if (isPrepared())
+            getMediaPlayer().pause();
+    }
+
+    @Override
+    public int getDuration() {
+        return isPrepared() ? getMediaPlayer().getDuration() : 0;
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        return isPrepared() ? getMediaPlayer().getCurrentPosition() : 0;
+    }
+
+    @Override
+    public void seekTo(int i) {
+        if (isPrepared())
+            getMediaPlayer().seekTo(i);
+    }
+
+    @Override
+    public boolean isPlaying() {
+        return isPrepared() && getMediaPlayer().isPlaying();
+    }
+
+    @Override
+    public int getBufferPercentage() {
+        return 0;
+    }
+
+    @Override
+    public boolean canPause() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekBackward() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekForward() {
+        return true;
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        return 0;
     }
 }
