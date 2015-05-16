@@ -23,8 +23,8 @@ public class PlaybackService extends Service
 
     private static final String TAG = "PlaybackService";
 
-    public static final String ACTION_PLAY = "org.fasola.fasolaminutes.media.PLAY";
-    public static final String ACTION_ENQUEUE = "org.fasola.fasolaminutes.media.ENQUEUE";
+    public static final String ACTION_PLAY_MEDIA = "org.fasola.fasolaminutes.media.PLAY";
+    public static final String ACTION_ENQUEUE_MEDIA = "org.fasola.fasolaminutes.media.ENQUEUE";
     public static final String EXTRA_LEAD_ID = "org.fasola.fasolaminutes.media.EXTRA_LEAD_ID";
     public static final String EXTRA_URL = "org.fasola.fasolaminutes.media.EXTRA_URL";
     public static final String EXTRA_URL_LIST = "org.fasola.fasolaminutes.media.EXTRA_URL_LIST";
@@ -73,7 +73,7 @@ public class PlaybackService extends Service
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent.getAction() == null)
             return START_STICKY;
-        else if (intent.getAction().equals(ACTION_PLAY)) {
+        else if (intent.getAction().equals(ACTION_PLAY_MEDIA)) {
             mPlaylist.clear();
             if (intent.hasExtra(EXTRA_LEAD_ID))
                 startLead(intent.getLongExtra(EXTRA_LEAD_ID, -1));
@@ -82,7 +82,7 @@ public class PlaybackService extends Service
             else if (intent.hasExtra(EXTRA_URL_LIST))
                 startLead(intent.getStringArrayExtra(EXTRA_URL_LIST));
         }
-        else if (intent.getAction().equals(ACTION_ENQUEUE)) {
+        else if (intent.getAction().equals(ACTION_ENQUEUE_MEDIA)) {
             if (intent.hasExtra(EXTRA_LEAD_ID))
                 enqueueLead(intent.getLongExtra(EXTRA_LEAD_ID, -1));
             else if (intent.hasExtra(EXTRA_URL))
@@ -230,8 +230,8 @@ public class PlaybackService extends Service
         remote.setTextViewText(R.id.title, song.name);
         remote.setTextViewText(R.id.singing, song.singing);
         remote.setImageViewResource(R.id.play_pause, mMediaPlayer.isPlaying()
-                                                        ? android.R.drawable.ic_media_pause
-                                                        : android.R.drawable.ic_media_play);
+                ? android.R.drawable.ic_media_pause
+                : android.R.drawable.ic_media_play);
         // Show or update notification
         if (mNotification == null) {
             Log.v(TAG, "Starting foreground service");

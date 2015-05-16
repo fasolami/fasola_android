@@ -258,7 +258,7 @@ public class CursorListFragment extends ListFragment
                 urls.add(cursor.getString(urlColumn)); // Enqueue next songs
         // Send the intent
         Intent intent = new Intent(getActivity(), PlaybackService.class);
-        intent.setAction(PlaybackService.ACTION_PLAY);
+        intent.setAction(PlaybackService.ACTION_PLAY_MEDIA);
         intent.putExtra(PlaybackService.EXTRA_URL_LIST, urls.toArray(new String[urls.size()]));
         getActivity().startService(intent);
         // Toast
