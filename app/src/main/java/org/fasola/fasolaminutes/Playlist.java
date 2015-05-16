@@ -72,6 +72,10 @@ public class Playlist extends ArrayList<Playlist.Song> {
         return mPos;
     }
 
+    public Song getCurrent() {
+        return get(mPos);
+    }
+
     public Song moveToPosition(int i) {
         i = Math.max(-1, Math.min(i, size()));
         boolean hasChanged = i != mPos;

@@ -13,6 +13,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import java.io.IOException;
 
@@ -29,6 +30,9 @@ public class PlaybackService extends Service
     public static final String EXTRA_URL_LIST = "org.fasola.fasolaminutes.media.EXTRA_URL_LIST";
     private static final int NOTIFICATION_ID = 1;
 
+    public static final String ACTION_PLAY_PAUSE = "org.fasola.fasolaminutes.action.PLAY_PAUSE";
+    public static final String ACTION_NEXT = "org.fasola.fasolaminutes.action.NEXT";
+
     public static final String BROADCAST_PREPARED = "org.fasola.fasolaminutes.mediaBroadcast.PREPARED";
     public static final String BROADCAST_COMPLETED = "org.fasola.fasolaminutes.mediaBroadcast.COMPLETED";
     public static final String BROADCAST_ERROR = "org.fasola.fasolaminutes.mediaBroadcast.ERROR";
@@ -36,7 +40,7 @@ public class PlaybackService extends Service
     MediaPlayer mMediaPlayer;
     boolean mIsPrepared;
     NotificationManager mNotificationManager;
-    boolean mHasNotification;
+    Notification mNotification;
 
     Playlist mPlaylist;
 
@@ -86,6 +90,17 @@ public class PlaybackService extends Service
             else if (intent.hasExtra(EXTRA_URL_LIST))
                 enqueueLead(intent.getStringArrayExtra(EXTRA_URL_LIST));
         }
+        // Controls
+        else if (intent.getAction().equals(ACTION_PLAY_PAUSE)) {
+            if (mMediaPlayer.isPlaying())
+                mMediaPlayer.pause();
+            else
+                mMediaPlayer.start();
+            updateNotification();
+        }
+        else if (intent.getAction().equals(ACTION_NEXT)) {
+            playNext();
+        }
         return START_STICKY;
     }
 
@@ -133,7 +148,9 @@ public class PlaybackService extends Service
         if (song == null)
             return false;
         // Prepare player
+        mIsPrepared = false;
         ensurePlayer();
+        mMediaPlayer.stop();
         mMediaPlayer.reset();
         try {
             mMediaPlayer.setDataSource(song.url);
@@ -141,25 +158,7 @@ public class PlaybackService extends Service
             Log.e(TAG, "IOException with url: " + song.url);
         }
         mMediaPlayer.prepareAsync();
-        // Create Notification Intent
-        Intent intent = new Intent(this, PlaylistActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-        );
-        // Update notification
-        Notification notification = new Notification.Builder(getApplicationContext())
-            .setSmallIcon(R.drawable.ic_stat_fasola)
-            .setContentTitle(song.name)
-            .setContentText(song.leaders)
-            .setOngoing(true)
-            .setContentIntent(pendingIntent)
-            .getNotification(); // build() was added in API 16
-        if (! mHasNotification) {
-            Log.v(TAG, "Starting foreground service");
-            startForeground(NOTIFICATION_ID, notification);
-            mHasNotification = true;
-        } else
-            mNotificationManager.notify(NOTIFICATION_ID, notification);
+        updateNotification();
         return true;
     }
 
@@ -193,6 +192,54 @@ public class PlaybackService extends Service
         });
     }
 
+    // Notification
+    public Notification getNotification() {
+        if (mNotification != null)
+            return mNotification;
+        // RemoteViews
+        RemoteViews remote = new RemoteViews(getPackageName(), R.layout.notification_playback);
+        Intent playIntent = new Intent(this, PlaybackService.class);
+        playIntent.setAction(ACTION_PLAY_PAUSE);
+        remote.setOnClickPendingIntent(R.id.play_pause, PendingIntent.getService(
+                this, 0, playIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        ));
+        Intent nextIntent = new Intent(this, PlaybackService.class);
+        nextIntent.setAction(ACTION_NEXT);
+        remote.setOnClickPendingIntent(R.id.next, PendingIntent.getService(
+                this, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        ));
+        // Main Notification Intent
+        Intent intent = new Intent(this, PlaylistActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
+        );
+        // Build Notification
+        return new Notification.Builder(getApplicationContext())
+            .setSmallIcon(R.drawable.ic_stat_fasola)
+            .setContent(remote)
+            .setOngoing(true)
+            .setContentIntent(pendingIntent)
+            .getNotification(); // build() was added in API 16
+    }
+
+    public void updateNotification() {
+        Playlist.Song song = mPlaylist.getCurrent();
+        Notification notification = getNotification();
+        // Update content
+        RemoteViews remote = notification.contentView;
+        remote.setTextViewText(R.id.title, song.name);
+        remote.setTextViewText(R.id.singing, song.singing);
+        remote.setImageViewResource(R.id.play_pause, mMediaPlayer.isPlaying()
+                                                        ? android.R.drawable.ic_media_pause
+                                                        : android.R.drawable.ic_media_play);
+        // Show or update notification
+        if (mNotification == null) {
+            Log.v(TAG, "Starting foreground service");
+            startForeground(NOTIFICATION_ID, notification);
+            mNotification = notification;
+        } else
+            mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+    }
 
     // Callbacks
     @Override
@@ -200,6 +247,7 @@ public class PlaybackService extends Service
         Log.v(TAG, "Prepared; starting playback");
         mIsPrepared = true;
         mp.start();
+        updateNotification();
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PREPARED));
     }
 
@@ -212,7 +260,7 @@ public class PlaybackService extends Service
         if (! playNext()) {
             Log.v(TAG, "End of playlist: stopping service");
             stopForeground(true);
-            mHasNotification = false;
+            mNotification = null;
             stopSelf();
         }
     }

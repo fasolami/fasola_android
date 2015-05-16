@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <ImageView android:id="@+id/icon"
+        android:layout_height="@android:dimen/notification_large_icon_height"
+        android:layout_width="@android:dimen/notification_large_icon_width"
+		android:layout_marginRight="8dip"
+        android:src="@drawable/ic_launcher" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.StatusBar.EventContent.Title"
+            android:singleLine="true" />
+
+        <TextView android:id="@+id/singing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.StatusBar.EventContent"
+            android:singleLine="true" />
+
+    </LinearLayout>
+
+	<ImageButton android:id="@+id/play_pause"
+        android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="2dp"
+		android:background="?android:attr/selectableItemBackground"
+		android:src="@android:drawable/ic_media_play" />
+
+	<ImageButton android:id="@+id/next"
+        android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="2dp"
+		android:background="?android:attr/selectableItemBackground"
+		android:src="@android:drawable/ic_media_next" />
+
+	<ImageButton android:id="@+id/close"
+        android:layout_height="wrap_content"
+		android:layout_width="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="2dp"
+		android:background="?android:attr/selectableItemBackground"
+		android:src="@android:drawable/ic_menu_close_clear_cancel" />
+
+</LinearLayout>
