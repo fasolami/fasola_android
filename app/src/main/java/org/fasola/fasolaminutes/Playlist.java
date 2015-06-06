@@ -10,9 +10,29 @@ import java.util.Collection;
 
 /**
  * Playlist of Songs
+ *
+ * <p>Songs should be added using {@link #add(Cursor)} or {@link #addAll(Cursor)} if possible,
+ * using asynchronous queries based on {@link #getSongQuery(Object, Object...)}.
+ *
+ * <p>Use a "now playing" cursor to move between Songs.
+ * <ul>
+ *     <li> {@link #moveToFirst()}
+ *     <li> {@link #moveToNext()}
+ *     <li> {@link #moveToNext()}
+ *     <li> {@link #moveToPosition(int)}
+ *     <li> {@link #getCurrent()}
+ * </ul>
+ *
+ * <p>Observers can be used to receive notifications on playlist changes and cursor changes.
+ * <ul>
+ *     <li> {@link #registerObserver(DataSetObserver)}
+ *     <li> {@link #unregisterObserver(DataSetObserver)}
+ *     <li> {@link #registerPlayingObserver(DataSetObserver)}
+ *     <li> {@link #unregisterPlayingObserver(DataSetObserver)}
+ * </ul>
  */
 public class Playlist extends ArrayList<Playlist.Song> {
-    // Song struct
+    /** Song data structure */
     public static class Song {
         public long leadId;
         public String name;
@@ -21,65 +41,110 @@ public class Playlist extends ArrayList<Playlist.Song> {
         public String date;
         public String url;
 
-        private Song(long leadId, String name, String leaders, String singing, String date, String url) {
-            this.leadId = leadId;
-            this.name = name;
-            this.leaders = leaders;
-            this.singing = singing;
-            this.date = date;
-            this.url = url;
+        /**
+         * Constructs a song from a cursor fetched from executing
+         * {@link #getSongQuery(Object, Object...)}
+         *
+         * @param cursor {@code Cursor}
+         */
+        public Song(Cursor cursor) {
+            this.leadId = cursor.getLong(0);
+            this.name = cursor.getString(1);
+            this.leaders = cursor.getString(2);
+            this.singing = cursor.getString(3);
+            this.date = cursor.getString(4);
+            this.url = cursor.getString(5);
         }
     }
 
-    int mPos;
+    /**
+     * Returns a query that can be used to construct a {@link Song} object.
+     *
+     * <p>Cursors fetched using this query can be passed to {@link #add(Cursor)},
+     * or {@link #addAll(Cursor)} to construct and add the {@link Song}
+     *
+     * @param column column name or {@link SQL.Column} for the WHERE clause
+     * @param args   values for the IN predicate for the WHERE clause
+     * @return {@link SQL.Query}
+     */
+    public static SQL.Query getSongQuery(Object column, Object... args) {
+        return SQL.select(
+                C.SongLeader.leadId, C.Song.fullName,
+                C.Leader.fullName.func("group_concat", "', '"),
+                C.Singing.name, C.Singing.startDate,
+                C.SongLeader.audioUrl)
+                .where(column, "IN", args)
+            .group(column);
+    }
 
     // Singleton
     static Playlist mInstance;
+
+    /** Returns the {@link Playlist} singleton */
     public static Playlist getInstance() {
         if (mInstance == null)
             mInstance = new Playlist();
         return mInstance;
     }
 
+    /** Cursor position */
+    int mPos;
+
+    /** Constructs an empty playlist */
     private Playlist() {
         mPos = -1;
     }
 
-    // Data observer
-    private final DataSetObservable mDataSetObservable = new DataSetObservable();
+    /** DataSet Observers */
+    private final DataSetObservable mObservable = new DataSetObservable();
     private final DataSetObservable mPlayingObservable = new DataSetObservable();
 
-    // Data observer
-    public void registerDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.registerObserver(observer);
+    /** Registers an observer that is notified when Songs are added or removed */
+    public void registerObserver(DataSetObserver observer) {
+        mObservable.registerObserver(observer);
     }
 
-    public void unregisterDataSetObserver(DataSetObserver observer) {
-        mDataSetObservable.unregisterObserver(observer);
+    /** Removes an observer added by {@link #registerObserver(DataSetObserver)} */
+    public void unregisterObserver(DataSetObserver observer) {
+        mObservable.unregisterObserver(observer);
     }
 
-    // Now playing observer
+    /**
+     * Registers an observer that is notified when the cursor position changes
+     *
+     * @see #getPosition
+     * @see #moveToPosition
+     */
     public void registerPlayingObserver(DataSetObserver observer) {
         mPlayingObservable.registerObserver(observer);
     }
 
+    /** Removes an observer added by {@link #registerPlayingObserver(DataSetObserver)} */
     public void unregisterPlayingObserver(DataSetObserver observer) {
         mPlayingObservable.unregisterObserver(observer);
     }
 
-    // Current Song
+    /** Returns the cursor position */
     public int getPosition() {
         return mPos;
     }
 
+    /** Returns the {@link Song} at the cursor */
     public Song getCurrent() {
         return get(mPos);
     }
 
-    public Song moveToPosition(int i) {
-        i = Math.max(-1, Math.min(i, size()));
-        boolean hasChanged = i != mPos;
-        mPos = i;
+    /**
+     * Moves the cursor to a new position
+     *
+     * @param pos    new position (0-based)
+     * @return {@link Song} at the new position
+     *      or {@code null} if {@code pos} is before the beginning or after the end
+     */
+    public Song moveToPosition(int pos) {
+        pos = Math.max(-1, Math.min(pos, size()));
+        boolean hasChanged = pos != mPos;
+        mPos = pos;
         if (hasChanged)
             mPlayingObservable.notifyChanged();
         if (mPos >= size() || mPos < 0)
@@ -87,48 +152,57 @@ public class Playlist extends ArrayList<Playlist.Song> {
         return get(mPos);
     }
 
+    /**
+     * Moves the cursor to the first Song
+     *
+     * @return {@link Song}
+     */
     public Song moveToFirst() {
         return moveToPosition(0);
     }
 
+    /**
+     * Moves the cursor to the next Song
+     *
+     * @return {@link Song}
+     */
     public Song moveToNext() {
         return moveToPosition(mPos + 1);
     }
 
-    // Add overrides for cursor objects
+    /** Adds a new {@link Song}
+     *
+     * @param cursor Cursor from {@link #getSongQuery(Object, Object...)}
+     * @return always {@code true}
+     * @see ArrayList#add(Object)
+     */
     public boolean add(Cursor cursor) {
-        return add(songFromCursor(cursor));
+        return add(new Song(cursor));
     }
 
+    /** Adds all {@link Song}s in a cursor
+     *
+     * <p>Observers are notified only once if the Playlist is changed, not for each song.
+     *
+     * @param cursor Cursor from {@link #getSongQuery(Object, Object...)}
+     * @return {@code true} if there any rows exist in the cursor, {@code false} otherwise
+     * @see ArrayList#addAll(Collection)
+     */
     public boolean addAll(Cursor cursor) {
         if (! cursor.moveToFirst())
             return false;
         do {
             // Don't notify for every song
-            super.add(songFromCursor(cursor));
+            super.add(new Song(cursor));
         } while(cursor.moveToNext());
-        return notifyChanged(true);
+        return notifyWrapper(true);
     }
 
-    // Overrides to maintain current song pointer and notify on data changed
-    private void notifyChanged() {
-        mDataSetObservable.notifyChanged();
-    }
-
-    private boolean notifyChanged(boolean value) {
-        if (value)
-            notifyChanged();
-        return value;
-    }
-
-    private Song notifyChanged(Song value) {
-        notifyChanged();
-        return value;
-    }
+    // ArrayList overrides to manage notifications
 
     @Override
     public boolean add(Song object) {
-        return notifyChanged(super.add(object));
+        return notifyWrapper(super.add(object));
     }
 
     @Override
@@ -143,7 +217,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
 
     @Override
     public boolean addAll(Collection<? extends Song> collection) {
-        return notifyChanged(super.addAll(collection));
+        return notifyWrapper(super.addAll(collection));
     }
 
     @Override
@@ -152,12 +226,12 @@ public class Playlist extends ArrayList<Playlist.Song> {
             mPos += collection.size();
             mPlayingObservable.notifyChanged();
         }
-        return notifyChanged(super.addAll(index, collection));
+        return notifyWrapper(super.addAll(index, collection));
     }
 
     @Override
     public Song set(int index, Song object) {
-        return notifyChanged(super.set(index, object));
+        return notifyWrapper(super.set(index, object));
     }
 
     @Override
@@ -166,18 +240,18 @@ public class Playlist extends ArrayList<Playlist.Song> {
             --mPos;
             mPlayingObservable.notifyChanged();
         }
-        return notifyChanged(super.remove(index));
+        return notifyWrapper(super.remove(index));
     }
 
     @Override
     public void clear() {
         mPos = -1;
-        mPlayingObservable.notifyChanged();
         super.clear();
-        mDataSetObservable.notifyChanged();
+        mPlayingObservable.notifyChanged();
+        notifyChanged();
     }
 
-    // A few methods that make managing the currentSong pointer tricky (which are now unsuppprted)
+    // These methods make managing the currentSong pointer tricky, so they are unsupported
     @Override
     public boolean remove(Object object) {
         throw new UnsupportedOperationException();
@@ -188,20 +262,21 @@ public class Playlist extends ArrayList<Playlist.Song> {
         throw new UnsupportedOperationException();
     }
 
-    // Return a query that can be used to construct the song object
-    public static SQL.Query getSongQuery(Object column, Object... args) {
-        return SQL.select(
-                C.SongLeader.leadId, C.Song.fullName,
-                C.Leader.fullName.func("group_concat", "', '"),
-                C.Singing.name, C.Singing.startDate,
-                C.SongLeader.audioUrl)
-                .where(column, "IN", args)
-            .group(column);
+    /** Notifies observers that the playlist has changed */
+    private void notifyChanged() {
+        mObservable.notifyChanged();
     }
 
-    // Create a song from a cursor returned from executing getSongQuery()
-    private static Song songFromCursor(Cursor cursor) {
-        return new Song(cursor.getLong(0), cursor.getString(1), cursor.getString(2),
-                        cursor.getString(3), cursor.getString(4), cursor.getString(5));
+    /** Wrapper for functions that should {@link #notifyChanged()} and return a value */
+    private boolean notifyWrapper(boolean value) {
+        if (value)
+            notifyChanged();
+        return value;
+    }
+
+    /** Wrapper for functions that should {@link #notifyChanged()} and return a {@link Song} */
+    private Song notifyWrapper(Song value) {
+        notifyChanged();
+        return value;
     }
 }

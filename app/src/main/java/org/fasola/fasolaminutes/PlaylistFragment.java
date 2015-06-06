@@ -149,14 +149,14 @@ public class PlaylistFragment extends ListFragment
         // Playlist change observers
         @Override
         public void registerDataSetObserver(DataSetObserver observer) {
-            mPlaylist.registerDataSetObserver(observer);
+            mPlaylist.registerObserver(observer);
             mPlaylist.registerPlayingObserver(observer);
             super.registerDataSetObserver(observer);
         }
 
         @Override
         public void unregisterDataSetObserver(DataSetObserver observer) {
-            mPlaylist.unregisterDataSetObserver(observer);
+            mPlaylist.unregisterObserver(observer);
             mPlaylist.unregisterPlayingObserver(observer);
             super.unregisterDataSetObserver(observer);
         }
