@@ -58,7 +58,7 @@ public class PlaylistFragment extends ListFragment
         // Setup listener
         mList.setDropListener(this);
         // Setup MediaController
-        mPlayer = new PlaybackService.Control();
+        mPlayer = new PlaybackService.Control(getActivity());
         mController.setMediaPlayer(mPlayer);
         Playlist.getInstance().registerPlayingObserver(mPlaylistObserver);
         mPlaylistObserver.onChanged(); // Initial setup

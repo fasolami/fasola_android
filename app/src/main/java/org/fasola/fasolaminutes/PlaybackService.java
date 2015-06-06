@@ -437,6 +437,17 @@ public class PlaybackService extends Service
         /** Above this threshold PREV actually restarts the current song */
         public static final int RESTART_THRESHOLD = 15;
 
+        Context mContext;
+
+        /**
+         * Constructs a new MediaPlayerControl
+         *
+         * @param context A {@link Context} that will be used to start {@link PlaybackService}
+         *                when {@link #start} is called.
+         */
+        public Control(Context context) {
+            mContext = context;
+        }
 
         /** NextListener for MediaController
          *
@@ -470,7 +481,14 @@ public class PlaybackService extends Service
 
         @Override
         public void start() {
-            if (isRunning()) getInstance().start();
+            if (isRunning())
+                getInstance().start();
+            else {
+                // Start the service and play
+                Intent intent = new Intent(mContext, PlaybackService.class);
+                intent.setAction(PlaybackService.ACTION_PLAY);
+                mContext.startService(intent);
+            }
         }
 
         @Override
