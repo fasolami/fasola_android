@@ -181,7 +181,13 @@ public class PlaybackService extends Service
     @Override
     public void start() {
         mShouldPlay = true;
-        ensurePlayer().start();
+        if (isPrepared())
+            ensurePlayer().start();
+        else {
+            if (Playlist.getInstance().getCurrent() == null)
+                Playlist.getInstance().moveToFirst();
+            prepare();
+        }
         updateNotification();
     }
 
