@@ -71,24 +71,22 @@ public class PlaybackService extends Service
     }
 
     public int onStartCommand(Intent intent, int flags, int startId) {
+        String action = intent.getAction();
         if (intent.getAction() == null)
             return START_STICKY;
-        else if (intent.getAction().equals(ACTION_PLAY_MEDIA)) {
-            mPlaylist.clear();
+        // Enqueue/play
+        else if (action.equals(ACTION_PLAY_MEDIA) || action.equals(ACTION_ENQUEUE_MEDIA)) {
+            boolean play = false;
+            if (action.equals(ACTION_PLAY_MEDIA)) {
+                mPlaylist.clear();
+                play = true;
+            }
             if (intent.hasExtra(EXTRA_LEAD_ID))
-                startLead(intent.getLongExtra(EXTRA_LEAD_ID, -1));
+                enqueueLead(play, C.SongLeader.leadId, intent.getLongExtra(EXTRA_LEAD_ID, -1));
             else if (intent.hasExtra(EXTRA_URL))
-                startLead(intent.getStringExtra(EXTRA_URL));
+                enqueueLead(play, C.SongLeader.audioUrl, intent.getStringExtra(EXTRA_URL));
             else if (intent.hasExtra(EXTRA_URL_LIST))
-                startLead(intent.getStringArrayExtra(EXTRA_URL_LIST));
-        }
-        else if (intent.getAction().equals(ACTION_ENQUEUE_MEDIA)) {
-            if (intent.hasExtra(EXTRA_LEAD_ID))
-                enqueueLead(intent.getLongExtra(EXTRA_LEAD_ID, -1));
-            else if (intent.hasExtra(EXTRA_URL))
-                enqueueLead(intent.getStringExtra(EXTRA_URL));
-            else if (intent.hasExtra(EXTRA_URL_LIST))
-                enqueueLead(intent.getStringArrayExtra(EXTRA_URL_LIST));
+                enqueueLead(play, C.SongLeader.audioUrl, intent.getStringArrayExtra(EXTRA_URL_LIST));
         }
         // Controls
         else if (intent.getAction().equals(ACTION_PLAY_PAUSE)) {
@@ -162,25 +160,19 @@ public class PlaybackService extends Service
         return true;
     }
 
-    // Start/Enqueue overloads
-    public void startLead(long leadId) {
-        enqueueLead(true, C.SongLeader.leadId, leadId);
-    }
-
-    public void startLead(String... urls) {
-        enqueueLead(true, C.SongLeader.audioUrl, (Object[])urls);
-    }
-
-    public void enqueueLead(long leadId) {
-        enqueueLead(false, C.SongLeader.leadId, leadId);
-    }
-
-    public void enqueueLead(String... urls) {
-        enqueueLead(false, C.SongLeader.audioUrl, (Object[])urls);
-    }
-
+    /**
+     * Enqueues and optionally starts playback of one or more songs
+     *
+     * <p>This method queries (async) the database for songs and adds them to the playlist
+     *
+     * @param start  {@code true} to start playback
+     * @param column {@link SQL.Column} or {@code String} column name for a WHERE clause
+     * @param args   values for the IN predicate for a WHERE clause
+     * @see Playlist
+     * @see Playlist#getSongQuery(Object, Object...)
+     * @see Playlist#addAll(Cursor)
+     */
     public void enqueueLead(final boolean start, Object column, Object... args) {
-        // Construct a Song and add to the playlist
         MinutesLoader loader = new MinutesLoader(Playlist.getSongQuery(column, args));
         loader.startLoading(new MinutesLoader.FinishedCallback() {
             @Override
