@@ -13,6 +13,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.MediaController;
 import android.widget.RemoteViews;
 
@@ -49,7 +50,7 @@ public class PlaybackService extends Service
     /** Play the next song */
     public static final String ACTION_NEXT = "org.fasola.fasolaminutes.action.NEXT";
     /** Play the previous song */
-    public static final String ACTION_PREVIOUS = "org.fasola.fasolaminutes.action.PREVIOUS";
+    public static final String ACTION_PREV = "org.fasola.fasolaminutes.action.PREV";
     /** Stop playback */
     public static final String ACTION_STOP = "org.fasola.fasolaminutes.action.STOP";
 
@@ -125,8 +126,8 @@ public class PlaybackService extends Service
         else if (intent.getAction().equals(ACTION_NEXT)) {
             prepareNext();
         }
-        else if (intent.getAction().equals(ACTION_PREVIOUS)) {
-            preparePrevious();
+        else if (intent.getAction().equals(ACTION_PREV)) {
+            preparePrev();
         }
         return START_STICKY;
     }
@@ -258,8 +259,8 @@ public class PlaybackService extends Service
      *
      * @see #prepare()
      */
-    public boolean preparePrevious() {
-        Playlist.getInstance().moveToPrevious();
+    public boolean preparePrev() {
+        Playlist.getInstance().moveToPrev();
         return prepare();
     }
 
@@ -426,4 +427,95 @@ public class PlaybackService extends Service
     }
     //---------------------------------------------------------------------------------------------
     //endregion
+
+    /**
+     * A MediaPlayerControl implementation that wraps the PlaybackService singleton
+     *
+     * <p>If PlaybackService is not running, methods are either a no-op or return default values
+     */
+    public static class Control implements MediaController.MediaPlayerControl {
+        /** Above this threshold PREV actually restarts the current song */
+        public static final int RESTART_THRESHOLD = 15;
+
+
+        /** NextListener for MediaController
+         *
+         * @see MediaController#setPrevNextListeners(View.OnClickListener, View.OnClickListener)
+         */
+        public View.OnClickListener nextListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isRunning()) getInstance().prepareNext();
+            }
+        };
+
+        /** NextListener for MediaController
+         *
+         * @see MediaController#setPrevNextListeners(View.OnClickListener, View.OnClickListener)
+         */
+        public View.OnClickListener prevListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getCurrentPosition() > RESTART_THRESHOLD)
+                    seekTo(0);
+                else if (isRunning())
+                    getInstance().preparePrev();
+            }
+        };
+
+        @Override
+        public boolean canPause() {
+            return isRunning() && getInstance().canPause();
+        }
+
+        @Override
+        public void start() {
+            if (isRunning()) getInstance().start();
+        }
+
+        @Override
+        public void pause() {
+            if (isRunning()) getInstance().pause();
+        }
+
+        @Override
+        public int getDuration() {
+            return isRunning() ? getInstance().getDuration() : 0;
+        }
+
+        @Override
+        public int getCurrentPosition() {
+            return isRunning() ? getInstance().getCurrentPosition() : 0;
+        }
+
+        @Override
+        public void seekTo(int pos) {
+            if (isRunning()) getInstance().seekTo(pos);
+        }
+
+        @Override
+        public boolean isPlaying() {
+            return isRunning() && getInstance().isPlaying();
+        }
+
+        @Override
+        public int getBufferPercentage() {
+            return isRunning() ? getInstance().getBufferPercentage() : 0;
+        }
+
+        @Override
+        public boolean canSeekBackward() {
+            return isRunning() && getInstance().canSeekBackward();
+        }
+
+        @Override
+        public boolean canSeekForward() {
+            return isRunning() && getInstance().canSeekForward();
+        }
+
+        @Override
+        public int getAudioSessionId() {
+            return isRunning() ? getInstance().getAudioSessionId() : 0;
+        }
+    }
 }

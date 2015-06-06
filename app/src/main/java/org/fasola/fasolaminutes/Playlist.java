@@ -175,7 +175,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
      *
      * @return {@link Song}
      */
-    public Song moveToPrevious() {
+    public Song moveToPrev() {
         return moveToPosition(mPos - 1);
     }
 

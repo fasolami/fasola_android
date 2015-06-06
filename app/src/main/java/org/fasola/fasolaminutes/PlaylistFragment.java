@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.DataSetObserver;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.content.LocalBroadcastManager;
@@ -22,11 +21,11 @@ import com.mobeta.android.dslv.DragSortListView;
  * A Fragment with a DragSortListView that shows a playlist
  */
 public class PlaylistFragment extends ListFragment
-        implements DragSortListView.DropListener,
-                   MediaController.MediaPlayerControl {
+        implements DragSortListView.DropListener {
 
     DragSortListView mList;
     MediaController mController;
+    PlaybackService.Control mPlayer;
     Playlist mPlaylist;
 
     public PlaylistFragment() {
@@ -59,7 +58,10 @@ public class PlaylistFragment extends ListFragment
         // Setup listener
         mList.setDropListener(this);
         // Setup MediaController
-        mController.setMediaPlayer(this);
+        mPlayer = new PlaybackService.Control();
+        mController.setMediaPlayer(mPlayer);
+        Playlist.getInstance().registerPlayingObserver(mPlaylistObserver);
+        mPlaylistObserver.onChanged(); // Initial setup
     }
 
     @Override
@@ -72,6 +74,7 @@ public class PlaylistFragment extends ListFragment
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Playlist.getInstance().unregisterObserver(mPlaylistObserver);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
@@ -92,6 +95,21 @@ public class PlaylistFragment extends ListFragment
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(PlaybackService.BROADCAST_PREPARED))
                 mController.show(0);
+        }
+    };
+
+    /**
+     * Observer that sets or removes PrevNext listeners based on playlist state
+     */
+    DataSetObserver mPlaylistObserver = new DataSetObserver() {
+        @Override
+        public void onChanged() {
+            Playlist playlist = Playlist.getInstance();
+            int pos = playlist.getPosition();
+            mController.setPrevNextListeners(
+                    pos < playlist.size() ? mPlayer.nextListener : null,
+                    pos > 0 ? mPlayer.prevListener : null
+            );
         }
     };
 
@@ -160,71 +178,5 @@ public class PlaylistFragment extends ListFragment
             mPlaylist.unregisterPlayingObserver(observer);
             super.unregisterDataSetObserver(observer);
         }
-    }
-
-    public MediaPlayer getMediaPlayer() {
-        return PlaybackService.getInstance().getMediaPlayer();
-    }
-
-    // MediaPlayerControls override
-    public boolean isPrepared() {
-        return PlaybackService.isRunning() && PlaybackService.getInstance().isPrepared();
-    }
-
-    @Override
-    public void start() {
-        getMediaPlayer().start();
-    }
-
-    @Override
-    public void pause() {
-        if (isPrepared())
-            getMediaPlayer().pause();
-    }
-
-    @Override
-    public int getDuration() {
-        return isPrepared() ? getMediaPlayer().getDuration() : 0;
-    }
-
-    @Override
-    public int getCurrentPosition() {
-        return isPrepared() ? getMediaPlayer().getCurrentPosition() : 0;
-    }
-
-    @Override
-    public void seekTo(int i) {
-        if (isPrepared())
-            getMediaPlayer().seekTo(i);
-    }
-
-    @Override
-    public boolean isPlaying() {
-        return isPrepared() && getMediaPlayer().isPlaying();
-    }
-
-    @Override
-    public int getBufferPercentage() {
-        return 0;
-    }
-
-    @Override
-    public boolean canPause() {
-        return true;
-    }
-
-    @Override
-    public boolean canSeekBackward() {
-        return true;
-    }
-
-    @Override
-    public boolean canSeekForward() {
-        return true;
-    }
-
-    @Override
-    public int getAudioSessionId() {
-        return 0;
     }
 }
