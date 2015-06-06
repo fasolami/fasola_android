@@ -385,8 +385,8 @@ public class PlaybackService extends Service
         Notification notification = getNotification();
         // Update content
         RemoteViews remote = notification.contentView;
-        remote.setTextViewText(R.id.title, song.name);
-        remote.setTextViewText(R.id.singing, song.singing);
+        remote.setTextViewText(R.id.title, song != null ? song.name : "");
+        remote.setTextViewText(R.id.singing, song != null ? song.singing : "");
         remote.setImageViewResource(R.id.play_pause, mMediaPlayer.isPlaying()
                 ? android.R.drawable.ic_media_pause
                 : android.R.drawable.ic_media_play);
