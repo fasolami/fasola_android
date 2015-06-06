@@ -207,12 +207,12 @@ public class Playlist extends ArrayList<Playlist.Song> {
 
     @Override
     public void add(int index, Song object) {
+        super.add(index, object);
+        notifyChanged();
         if (index <= mPos) {
             ++mPos;
             mPlayingObservable.notifyChanged();
         }
-        super.add(index, object);
-        notifyChanged();
     }
 
     @Override
@@ -222,25 +222,36 @@ public class Playlist extends ArrayList<Playlist.Song> {
 
     @Override
     public boolean addAll(int index, Collection<? extends Song> collection) {
-        if (index <= mPos && ! collection.isEmpty()) {
-            mPos += collection.size();
-            mPlayingObservable.notifyChanged();
+        if (super.addAll(index, collection)) {
+            notifyChanged();
+            if (index <= mPos && ! collection.isEmpty()) {
+                mPos += collection.size();
+                mPlayingObservable.notifyChanged();
+            }
+            return true;
         }
-        return notifyWrapper(super.addAll(index, collection));
+        return false;
     }
 
     @Override
     public Song set(int index, Song object) {
-        return notifyWrapper(super.set(index, object));
+        Song song = super.set(index, object);
+        if (song != null)
+            notifyChanged();
+        return song;
     }
 
     @Override
     public Song remove(int index) {
-        if (index <= mPos) {
-            --mPos;
-            mPlayingObservable.notifyChanged();
+        Song song = super.remove(index);
+        if (song != null) {
+            notifyChanged();
+            if (index <= mPos) {
+                --mPos;
+                mPlayingObservable.notifyChanged();
+            }
         }
-        return notifyWrapper(super.remove(index));
+        return song;
     }
 
     @Override
@@ -271,12 +282,6 @@ public class Playlist extends ArrayList<Playlist.Song> {
     private boolean notifyWrapper(boolean value) {
         if (value)
             notifyChanged();
-        return value;
-    }
-
-    /** Wrapper for functions that should {@link #notifyChanged()} and return a {@link Song} */
-    private Song notifyWrapper(Song value) {
-        notifyChanged();
         return value;
     }
 }
