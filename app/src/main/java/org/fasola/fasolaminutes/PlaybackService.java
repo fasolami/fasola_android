@@ -17,35 +17,69 @@ import android.widget.RemoteViews;
 
 import java.io.IOException;
 
+/**
+ * A singleton foreground service for music playback
+ */
 public class PlaybackService extends Service
-        implements MediaPlayer.OnPreparedListener, MediaPlayer.OnCompletionListener,
-                   MediaPlayer.OnErrorListener {
+        implements MediaPlayer.OnPreparedListener,
+            MediaPlayer.OnCompletionListener,
+            MediaPlayer.OnErrorListener {
 
     private static final String TAG = "PlaybackService";
 
-    public static final String ACTION_PLAY_MEDIA = "org.fasola.fasolaminutes.media.PLAY";
+    /** Enqueue songs */
     public static final String ACTION_ENQUEUE_MEDIA = "org.fasola.fasolaminutes.media.ENQUEUE";
+    /** Clear playlist, enqueue songs, and start playing from the top */
+    public static final String ACTION_PLAY_MEDIA = "org.fasola.fasolaminutes.media.PLAY";
+    /** Extra is {@code long leadId} */
     public static final String EXTRA_LEAD_ID = "org.fasola.fasolaminutes.media.EXTRA_LEAD_ID";
+    /** Extra is {@code String url} */
     public static final String EXTRA_URL = "org.fasola.fasolaminutes.media.EXTRA_URL";
+    /** Extra is {@code String[] urls} */
     public static final String EXTRA_URL_LIST = "org.fasola.fasolaminutes.media.EXTRA_URL_LIST";
-    private static final int NOTIFICATION_ID = 1;
 
+    /** Play */
+    public static final String ACTION_PLAY = "org.fasola.fasolaminutes.action.PLAY";
+    /** Pause */
+    public static final String ACTION_PAUSE = "org.fasola.fasolaminutes.action.PAUSE";
+    /** Play/Pause toggle */
     public static final String ACTION_PLAY_PAUSE = "org.fasola.fasolaminutes.action.PLAY_PAUSE";
+    /** Play the next song */
     public static final String ACTION_NEXT = "org.fasola.fasolaminutes.action.NEXT";
+    /** Play the previous song */
+    public static final String ACTION_PREVIOUS = "org.fasola.fasolaminutes.action.PREVIOUS";
+    /** Stop playback */
+    public static final String ACTION_STOP = "org.fasola.fasolaminutes.action.STOP";
 
+    /** Broadcast sent when the {@link MediaPlayer} is prepared */
     public static final String BROADCAST_PREPARED = "org.fasola.fasolaminutes.mediaBroadcast.PREPARED";
+    /** Broadcast sent when playback (of a single song) is completed */
     public static final String BROADCAST_COMPLETED = "org.fasola.fasolaminutes.mediaBroadcast.COMPLETED";
+    /** Broadcast sent on {@link MediaPlayer} error */
     public static final String BROADCAST_ERROR = "org.fasola.fasolaminutes.mediaBroadcast.ERROR";
 
     MediaPlayer mMediaPlayer;
     boolean mIsPrepared;
+    Playlist mPlaylist;
     NotificationManager mNotificationManager;
     Notification mNotification;
+    private static final int NOTIFICATION_ID = 1;
 
-    Playlist mPlaylist;
-
+    // Singleton
     static PlaybackService mInstance;
 
+    /**
+     * Returns the {@link PlaybackService} singleton or {@code null} if it is not running
+     *
+     * <p>Call {@link Context#startService(Intent)} to create a PlaybackService
+     */
+    public static PlaybackService getInstance() {
+        return mInstance;
+    }
+
+
+    //region Lifecycle functions
+    //---------------------------------------------------------------------------------------------
     @Override
     public void onCreate() {
         super.onCreate();
@@ -54,22 +88,7 @@ public class PlaybackService extends Service
         mPlaylist = Playlist.getInstance();
     }
 
-    public static PlaybackService getInstance() {
-        return mInstance;
-    }
-
-    public static boolean isRunning() {
-        return mInstance != null;
-    }
-
-    public boolean isPrepared() {
-        return mIsPrepared;
-    }
-
-    public MediaPlayer getMediaPlayer () {
-        return mMediaPlayer;
-    }
-
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
         if (intent.getAction() == null)
@@ -121,24 +140,35 @@ public class PlaybackService extends Service
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
+    //---------------------------------------------------------------------------------------------
+    //endregion
 
-    private void ensurePlayer() {
-        if (mMediaPlayer == null) {
-            mMediaPlayer = new MediaPlayer();
-            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setOnPreparedListener(this);
-            mMediaPlayer.setOnCompletionListener(this);
-            mMediaPlayer.setOnErrorListener(this);
-        }
+
+    /** Returns {@code true} if this service is running */
+    public static boolean isRunning() {
+        return mInstance != null;
     }
 
+    /** Returns {@code true} if the {@link MediaPlayer} is prepared and ready to play */
+    public boolean isPrepared() {
+        return mIsPrepared;
+    }
+
+    // TODO: create a MediaPlayerControl class that constrols this PlaybackService
+    // TODO: remove this method and delegate to the MediaPlayerControl
+    public MediaPlayer getMediaPlayer () {
+        return mMediaPlayer;
+    }
+
+    // TODO: use Playlist singleton
     public Playlist getPlaylist() {
         return mPlaylist;
     }
 
     /**
-     * Play the next song in the playlist
-     * @return true if there is a song to play; false if the playlist is empty
+     * Plays the current song in the playlist
+     *
+     * @return {@code true} if there is a song to play or {@code false} if the playlist is empty
      */
     public boolean playNext() {
         // Get the song
@@ -153,6 +183,7 @@ public class PlaybackService extends Service
         try {
             mMediaPlayer.setDataSource(song.url);
         } catch (IOException e) {
+            // TODO: something useful... a broadcast?
             Log.e(TAG, "IOException with url: " + song.url);
         }
         mMediaPlayer.prepareAsync();
@@ -184,8 +215,27 @@ public class PlaybackService extends Service
         });
     }
 
-    // Notification
-    public Notification getNotification() {
+    /**
+     * Constructs a MediaPlayer if necessary
+     *
+     * @return mMediaPlayer for simple uses
+     */
+    private MediaPlayer ensurePlayer() {
+        if (mMediaPlayer == null) {
+            mMediaPlayer = new MediaPlayer();
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mMediaPlayer.setOnPreparedListener(this);
+            mMediaPlayer.setOnCompletionListener(this);
+            mMediaPlayer.setOnErrorListener(this);
+        }
+        return mMediaPlayer;
+    }
+
+    /** Creates a new notification or returns an existing notification
+     *
+     * @return {@link Notification} that controls playback
+     */
+    private Notification getNotification() {
         if (mNotification != null)
             return mNotification;
         // RemoteViews
@@ -214,7 +264,14 @@ public class PlaybackService extends Service
             .getNotification(); // build() was added in API 16
     }
 
-    public void updateNotification() {
+    /** Updates the {@link Notification} with the current playing status
+     *
+     * <p>If no notification exists this service is in the background.  In this case,
+     * {@link #startForeground(int, Notification)} is called, and a new notificaiton is created.
+     *
+     * @see #getNotification()
+     */
+    private void updateNotification() {
         Playlist.Song song = mPlaylist.getCurrent();
         Notification notification = getNotification();
         // Update content
@@ -233,7 +290,8 @@ public class PlaybackService extends Service
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
     }
 
-    // Callbacks
+    //region MediaPlayer Callbacks
+    //---------------------------------------------------------------------------------------------
     @Override
     public void onPrepared(MediaPlayer mp) {
         Log.v(TAG, "Prepared; starting playback");
@@ -264,4 +322,6 @@ public class PlaybackService extends Service
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_ERROR));
         return false;
     }
+    //---------------------------------------------------------------------------------------------
+    //endregion
 }
