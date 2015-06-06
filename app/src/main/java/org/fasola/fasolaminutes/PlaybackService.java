@@ -13,6 +13,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.MediaController;
 import android.widget.RemoteViews;
 
 import java.io.IOException;
@@ -23,7 +24,8 @@ import java.io.IOException;
 public class PlaybackService extends Service
         implements MediaPlayer.OnPreparedListener,
             MediaPlayer.OnCompletionListener,
-            MediaPlayer.OnErrorListener {
+            MediaPlayer.OnErrorListener,
+            MediaController.MediaPlayerControl {
 
     private static final String TAG = "PlaybackService";
 
@@ -60,6 +62,7 @@ public class PlaybackService extends Service
 
     MediaPlayer mMediaPlayer;
     boolean mIsPrepared;
+    boolean mShouldPlay; // Should we play the song once it is prepared?
     Playlist mPlaylist;
     NotificationManager mNotificationManager;
     Notification mNotification;
@@ -76,7 +79,6 @@ public class PlaybackService extends Service
     public static PlaybackService getInstance() {
         return mInstance;
     }
-
 
     //region Lifecycle functions
     //---------------------------------------------------------------------------------------------
@@ -108,15 +110,23 @@ public class PlaybackService extends Service
                 enqueueLead(play, C.SongLeader.audioUrl, intent.getStringArrayExtra(EXTRA_URL_LIST));
         }
         // Controls
+        else if (intent.getAction().equals(ACTION_PLAY)) {
+            start();
+        }
+        else if (intent.getAction().equals(ACTION_PAUSE)) {
+            pause();
+        }
         else if (intent.getAction().equals(ACTION_PLAY_PAUSE)) {
-            if (mMediaPlayer.isPlaying())
-                mMediaPlayer.pause();
+            if (isPlaying())
+                pause();
             else
-                mMediaPlayer.start();
-            updateNotification();
+                start();
         }
         else if (intent.getAction().equals(ACTION_NEXT)) {
-            playNext();
+            prepareNext();
+        }
+        else if (intent.getAction().equals(ACTION_PREVIOUS)) {
+            preparePrevious();
         }
         return START_STICKY;
     }
@@ -165,14 +175,105 @@ public class PlaybackService extends Service
         return mPlaylist;
     }
 
+    // region MediaPlayerControl overrides
+    //---------------------------------------------------------------------------------------------
+    @Override
+    public void start() {
+        mShouldPlay = true;
+        ensurePlayer().start();
+        updateNotification();
+    }
+
+    @Override
+    public void pause() {
+        mShouldPlay = false;
+        if (isPrepared()) {
+            ensurePlayer().pause();
+            updateNotification();
+        }
+    }
+
+    @Override
+    public int getDuration() {
+        return isPrepared() ? ensurePlayer().getDuration() : 0;
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        return isPrepared() ? ensurePlayer().getCurrentPosition() : 0;
+    }
+
+    @Override
+    public void seekTo(int i) {
+        if (isPrepared()) {
+            ensurePlayer().seekTo(i);
+            updateNotification();
+        }
+    }
+
+    @Override
+    public boolean isPlaying() {
+        return isPrepared() && getMediaPlayer().isPlaying();
+    }
+
+    @Override
+    public int getBufferPercentage() {
+        return 0;
+    }
+
+    @Override
+    public boolean canPause() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekBackward() {
+        return isPrepared();
+    }
+
+    @Override
+    public boolean canSeekForward() {
+        return isPrepared();
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        return 0;
+    }
+    //---------------------------------------------------------------------------------------------
+    //endregion
+
     /**
-     * Plays the current song in the playlist
+     * Prepares the next song in the playlist
+     *
+     * @see #prepare()
+     */
+    public boolean prepareNext() {
+        Playlist.getInstance().moveToNext();
+        return prepare();
+    }
+
+    /**
+     * Prepares the previous song in the playlist
+     *
+     * @see #prepare()
+     */
+    public boolean preparePrevious() {
+        Playlist.getInstance().moveToPrevious();
+        return prepare();
+    }
+
+    /**
+     * Prepares the current song in the playlist
+     *
+     * <p>Unless pause() is called afterwards, the song will start playing once it is prepared
      *
      * @return {@code true} if there is a song to play or {@code false} if the playlist is empty
+     * @see #onPrepared(MediaPlayer)
      */
-    public boolean playNext() {
+    public boolean prepare() {
         // Get the song
-        Playlist.Song song = mPlaylist.moveToNext();
+        Playlist.Song song = Playlist.getInstance().getCurrent();
         if (song == null)
             return false;
         // Prepare player
@@ -186,6 +287,7 @@ public class PlaybackService extends Service
             // TODO: something useful... a broadcast?
             Log.e(TAG, "IOException with url: " + song.url);
         }
+        mShouldPlay = true;
         mMediaPlayer.prepareAsync();
         updateNotification();
         return true;
@@ -210,7 +312,7 @@ public class PlaybackService extends Service
             public void onLoadFinished(Cursor cursor) {
                 mPlaylist.addAll(cursor);
                 if (start)
-                    playNext();
+                    prepareNext();
             }
         });
     }
@@ -296,8 +398,8 @@ public class PlaybackService extends Service
     public void onPrepared(MediaPlayer mp) {
         Log.v(TAG, "Prepared; starting playback");
         mIsPrepared = true;
-        mp.start();
-        updateNotification();
+        if (mShouldPlay)
+            start();
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PREPARED));
     }
 
@@ -307,7 +409,7 @@ public class PlaybackService extends Service
         mIsPrepared = false;
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_COMPLETED));
         // Start the next
-        if (! playNext()) {
+        if (! prepareNext()) {
             Log.v(TAG, "End of playlist: stopping service");
             stopForeground(true);
             mNotification = null;
