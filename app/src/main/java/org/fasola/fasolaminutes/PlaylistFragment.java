@@ -107,7 +107,7 @@ public class PlaylistFragment extends ListFragment
             Playlist playlist = Playlist.getInstance();
             int pos = playlist.getPosition();
             mController.setPrevNextListeners(
-                    pos < playlist.size() ? mPlayer.nextListener : null,
+                    pos < playlist.size()-1 ? mPlayer.nextListener : null,
                     pos > 0 ? mPlayer.prevListener : null
             );
         }
