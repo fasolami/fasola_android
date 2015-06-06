@@ -170,6 +170,15 @@ public class Playlist extends ArrayList<Playlist.Song> {
         return moveToPosition(mPos + 1);
     }
 
+    /**
+     * Moves the cursor to the previous Song
+     *
+     * @return {@link Song}
+     */
+    public Song moveToPrevious() {
+        return moveToPosition(mPos - 1);
+    }
+
     /** Adds a new {@link Song}
      *
      * @param cursor Cursor from {@link #getSongQuery(Object, Object...)}
