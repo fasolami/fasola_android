@@ -129,8 +129,10 @@ public class Playlist extends ArrayList<Playlist.Song> {
         return mPos;
     }
 
-    /** Returns the {@link Song} at the cursor */
+    /** Returns the {@link Song} at the cursor or {@code null} */
     public Song getCurrent() {
+        if (mPos >= size() || mPos < 0)
+            return null;
         return get(mPos);
     }
 
@@ -147,9 +149,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
         mPos = pos;
         if (hasChanged)
             mPlayingObservable.notifyChanged();
-        if (mPos >= size() || mPos < 0)
-            return null;
-        return get(mPos);
+        return getCurrent();
     }
 
     /**
