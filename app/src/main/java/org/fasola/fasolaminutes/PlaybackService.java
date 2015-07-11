@@ -418,7 +418,7 @@ public class PlaybackService extends Service
      */
     public static class Control implements MediaController.MediaPlayerControl {
         /** Above this threshold PREV actually restarts the current song */
-        public static final int RESTART_THRESHOLD = 15;
+        public static final int RESTART_THRESHOLD = 15000;
 
         Context mContext;
 
