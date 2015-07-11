@@ -94,7 +94,7 @@ public class PlaybackService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
-        if (intent.getAction() == null)
+        if (action == null)
             return START_STICKY;
         // Enqueue/play
         else if (action.equals(ACTION_PLAY_MEDIA) || action.equals(ACTION_ENQUEUE_MEDIA)) {
@@ -111,22 +111,22 @@ public class PlaybackService extends Service
                 enqueueLead(play, C.SongLeader.audioUrl, intent.getStringArrayExtra(EXTRA_URL_LIST));
         }
         // Controls
-        else if (intent.getAction().equals(ACTION_PLAY)) {
+        else if (action.equals(ACTION_PLAY)) {
             start();
         }
-        else if (intent.getAction().equals(ACTION_PAUSE)) {
+        else if (action.equals(ACTION_PAUSE)) {
             pause();
         }
-        else if (intent.getAction().equals(ACTION_PLAY_PAUSE)) {
+        else if (action.equals(ACTION_PLAY_PAUSE)) {
             if (isPlaying())
                 pause();
             else
                 start();
         }
-        else if (intent.getAction().equals(ACTION_NEXT)) {
+        else if (action.equals(ACTION_NEXT)) {
             prepareNext();
         }
-        else if (intent.getAction().equals(ACTION_PREV)) {
+        else if (action.equals(ACTION_PREV)) {
             preparePrev();
         }
         return START_STICKY;
