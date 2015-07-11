@@ -93,7 +93,7 @@ public class PlaybackService extends Service
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String action = intent.getAction();
+        String action = intent != null ? intent.getAction(): null;
         if (action == null)
             return START_STICKY;
         // Enqueue/play
