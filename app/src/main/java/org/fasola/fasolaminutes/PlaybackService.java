@@ -64,7 +64,6 @@ public class PlaybackService extends Service
     MediaPlayer mMediaPlayer;
     boolean mIsPrepared;
     boolean mShouldPlay; // Should we play the song once it is prepared?
-    Playlist mPlaylist;
     NotificationManager mNotificationManager;
     Notification mNotification;
     private static final int NOTIFICATION_ID = 1;
@@ -88,7 +87,6 @@ public class PlaybackService extends Service
         super.onCreate();
         mInstance = this;
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        mPlaylist = Playlist.getInstance();
     }
 
     @Override
@@ -100,7 +98,7 @@ public class PlaybackService extends Service
         else if (action.equals(ACTION_PLAY_MEDIA) || action.equals(ACTION_ENQUEUE_MEDIA)) {
             boolean play = false;
             if (action.equals(ACTION_PLAY_MEDIA)) {
-                mPlaylist.clear();
+                Playlist.getInstance().clear();
                 play = true;
             }
             if (intent.hasExtra(EXTRA_LEAD_ID))
@@ -169,11 +167,6 @@ public class PlaybackService extends Service
     // TODO: remove this method and delegate to the MediaPlayerControl
     public MediaPlayer getMediaPlayer () {
         return mMediaPlayer;
-    }
-
-    // TODO: use Playlist singleton
-    public Playlist getPlaylist() {
-        return mPlaylist;
     }
 
     // region MediaPlayerControl overrides
@@ -317,7 +310,7 @@ public class PlaybackService extends Service
         loader.startLoading(new MinutesLoader.FinishedCallback() {
             @Override
             public void onLoadFinished(Cursor cursor) {
-                mPlaylist.addAll(cursor);
+                Playlist.getInstance().addAll(cursor);
                 if (start)
                     prepareNext();
             }
@@ -381,7 +374,7 @@ public class PlaybackService extends Service
      * @see #getNotification()
      */
     private void updateNotification() {
-        Playlist.Song song = mPlaylist.getCurrent();
+        Playlist.Song song = Playlist.getInstance().getCurrent();
         Notification notification = getNotification();
         // Update content
         RemoteViews remote = notification.contentView;
