@@ -74,7 +74,7 @@ public class PlaylistFragment extends ListFragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Playlist.getInstance().unregisterObserver(mPlaylistObserver);
+        Playlist.getInstance().unregisterPlayingObserver(mPlaylistObserver);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
