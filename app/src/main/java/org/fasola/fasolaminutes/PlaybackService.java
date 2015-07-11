@@ -29,6 +29,7 @@ public class PlaybackService extends Service
             MediaController.MediaPlayerControl {
 
     private static final String TAG = "PlaybackService";
+    private static final int ERROR_LIMIT = 10;
 
     /** Enqueue songs */
     public static final String ACTION_ENQUEUE_MEDIA = "org.fasola.fasolaminutes.media.ENQUEUE";
@@ -64,6 +65,7 @@ public class PlaybackService extends Service
     MediaPlayer mMediaPlayer;
     boolean mIsPrepared;
     boolean mShouldPlay; // Should we play the song once it is prepared?
+    int mErrorCount; // Number of sequential errors
     NotificationManager mNotificationManager;
     Notification mNotification;
     private static final int NOTIFICATION_ID = 1;
@@ -398,6 +400,7 @@ public class PlaybackService extends Service
     public void onPrepared(MediaPlayer mp) {
         Log.v(TAG, "Prepared; starting playback");
         mIsPrepared = true;
+        mErrorCount = 0;
         if (mShouldPlay)
             start();
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PREPARED));
@@ -409,7 +412,9 @@ public class PlaybackService extends Service
         mIsPrepared = false;
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_COMPLETED));
         // Start the next
-        if (! prepareNext()) {
+        if (mErrorCount < ERROR_LIMIT && Playlist.getInstance().moveToNext() != null)
+            prepare();
+        else {
             Log.v(TAG, "End of playlist: stopping service");
             stopForeground(true);
             mNotification = null;
@@ -421,6 +426,7 @@ public class PlaybackService extends Service
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Log.e(TAG, "Error: " + String.valueOf(what));
         mIsPrepared = false;
+        ++mErrorCount;
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_ERROR));
         return false;
     }
