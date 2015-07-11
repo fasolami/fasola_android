@@ -124,10 +124,12 @@ public class PlaybackService extends Service
                 start();
         }
         else if (action.equals(ACTION_NEXT)) {
-            prepareNext();
+            Playlist.getInstance().moveToNext();
+            prepare();
         }
         else if (action.equals(ACTION_PREV)) {
-            preparePrev();
+            Playlist.getInstance().moveToPrev();
+            prepare();
         }
         return START_STICKY;
     }
@@ -240,27 +242,7 @@ public class PlaybackService extends Service
     //endregion
 
     /**
-     * Prepares the next song in the playlist
-     *
-     * @see #prepare()
-     */
-    public boolean prepareNext() {
-        Playlist.getInstance().moveToNext();
-        return prepare();
-    }
-
-    /**
-     * Prepares the previous song in the playlist
-     *
-     * @see #prepare()
-     */
-    public boolean preparePrev() {
-        Playlist.getInstance().moveToPrev();
-        return prepare();
-    }
-
-    /**
-     * Prepares the current song in the playlist
+     * Prepares and plays the current song in the playlist (async)
      *
      * <p>Unless pause() is called afterwards, the song will start playing once it is prepared
      *
@@ -306,9 +288,11 @@ public class PlaybackService extends Service
         loader.startLoading(new MinutesLoader.FinishedCallback() {
             @Override
             public void onLoadFinished(Cursor cursor) {
-                Playlist.getInstance().addAll(cursor);
-                if (start)
-                    prepareNext();
+                int pos = Playlist.getInstance().size();
+                if (Playlist.getInstance().addAll(cursor) && start) {
+                    Playlist.getInstance().moveToPosition(pos);
+                    prepare();
+                }
             }
         });
     }
@@ -455,7 +439,9 @@ public class PlaybackService extends Service
         public View.OnClickListener nextListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isRunning()) getInstance().prepareNext();
+                Playlist.getInstance().moveToNext();
+                if (isRunning())
+                    getInstance().prepare();
             }
         };
 
@@ -468,8 +454,11 @@ public class PlaybackService extends Service
             public void onClick(View v) {
                 if (getCurrentPosition() > RESTART_THRESHOLD)
                     seekTo(0);
-                else if (isRunning())
-                    getInstance().preparePrev();
+                else {
+                    Playlist.getInstance().moveToPrev();
+                    if (isRunning())
+                        getInstance().prepare();
+                }
             }
         };
 
