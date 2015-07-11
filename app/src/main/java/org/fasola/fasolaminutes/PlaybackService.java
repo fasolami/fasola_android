@@ -479,6 +479,17 @@ public class PlaybackService extends Service
             }
         }
 
+        /**
+         * Play a particular song in the playlist
+         *
+         * @param pos playlist position
+         */
+        public void start(int pos) {
+            Playlist.getInstance().moveToPosition(pos);
+            if (isRunning())
+                getInstance().prepare();
+        }
+
         @Override
         public void pause() {
             if (isRunning()) getInstance().pause();
