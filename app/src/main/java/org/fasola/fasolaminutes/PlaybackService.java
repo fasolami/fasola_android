@@ -165,12 +165,6 @@ public class PlaybackService extends Service
         return mIsPrepared;
     }
 
-    // TODO: create a MediaPlayerControl class that constrols this PlaybackService
-    // TODO: remove this method and delegate to the MediaPlayerControl
-    public MediaPlayer getMediaPlayer () {
-        return mMediaPlayer;
-    }
-
     // region MediaPlayerControl overrides
     //---------------------------------------------------------------------------------------------
     @Override
@@ -215,7 +209,7 @@ public class PlaybackService extends Service
 
     @Override
     public boolean isPlaying() {
-        return isPrepared() && getMediaPlayer().isPlaying();
+        return isPrepared() && mMediaPlayer.isPlaying();
     }
 
     @Override
