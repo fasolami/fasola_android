@@ -300,7 +300,7 @@ public class PlaybackService extends Service
     /**
      * Constructs a MediaPlayer if necessary
      *
-     * @return mMediaPlayer for simple uses
+     * @return mMediaPlayer for chaining
      */
     private MediaPlayer ensurePlayer() {
         if (mMediaPlayer == null) {
@@ -349,7 +349,7 @@ public class PlaybackService extends Service
     /** Updates the {@link Notification} with the current playing status
      *
      * <p>If no notification exists this service is in the background.  In this case,
-     * {@link #startForeground(int, Notification)} is called, and a new notificaiton is created.
+     * {@link #startForeground(int, Notification)} is called, and a new notification is created.
      *
      * @see #getNotification()
      */
@@ -429,7 +429,7 @@ public class PlaybackService extends Service
          *                when {@link #start} is called.
          */
         public Control(Context context) {
-            mContext = context;
+            mContext = context.getApplicationContext();
         }
 
         /** NextListener for MediaController
