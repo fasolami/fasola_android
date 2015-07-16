@@ -1,13 +1,13 @@
 package org.fasola.fasolaminutes;
 
-import android.support.v4.app.Fragment;
 import android.database.Cursor;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.LeadingMarginSpan;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,15 +79,15 @@ public class SongActivity extends SimpleTabActivity {
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
             long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
-            SQL.Query query = C.Song.select(C.Song.lyrics)
+            SQL.Query query = C.Song.select(C.Song.lyrics, C.Song.poet, C.Song.composer)
                                     .whereEq(C.Song.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
                 @Override
                 public void onLoadFinished(Cursor cursor) {
                     C.SongDAO song = C.Song.fromCursor(cursor);
                     if (song != null) {
-                        String words = "PLACEHOLDER"; //song.poet.getString();
-                        String tune = "PLACEHOLDER"; //song.composer.getString();
+                        String words = song.poet.getString();
+                        String tune = song.composer.getString();
                         ((TextView) view.findViewById(R.id.words)).setText(words);
                         ((TextView) view.findViewById(R.id.tune)).setText(tune);
                         CharSequence lyrics = createIndentedText(song.lyrics.getString(), 0, 20);
