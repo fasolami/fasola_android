@@ -10,7 +10,7 @@ public class MinutesContract {
     protected MinutesContract() {
     }
 
-    public static final int DB_VERSION = 2;
+    public static final int DB_VERSION = 3;
     public static final String DB_NAME = "minutes.db";
 
     // Contract classes (see below for definitions
@@ -62,6 +62,8 @@ public class MinutesContract {
             title = column("Title");
             number = column("PageNum");
             lyrics = column("SongText");
+            composer = column("composer");
+            poet = column("poet");
         }
 
         @Override
@@ -72,7 +74,7 @@ public class MinutesContract {
             leadCount = column(LeaderStats.leadCount.sum());
         }
 
-        public SQL.Column title, number, COMPOSER, TUNE_YEAR, POET, WORDS_YEAR, lyrics;
+        public SQL.Column title, number, composer, poet, lyrics;
         public SQL.Column fullName, leaderCount, leadCount, pageSort;
     }
 
