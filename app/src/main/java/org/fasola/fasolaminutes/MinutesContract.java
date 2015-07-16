@@ -60,6 +60,7 @@ public class MinutesContract {
         protected SongDAO() {
             super("songs");
             title = column("Title");
+            titleOrdinal = column("TitleOrdinal");
             number = column("PageNum");
             lyrics = column("SongText");
             composer = column("composer");
@@ -69,12 +70,17 @@ public class MinutesContract {
         @Override
         protected void onCreate() {
             pageSort = column(number.format("{column} * 1"));
-            fullName = concat(number, "' '", title);
             leaderCount = column(LeaderStats.leaderId.countDistinct());
             leadCount = column(LeaderStats.leadCount.sum());
+            fullName = concat(number, "' '", title, titleOrdinal.format(
+                "(CASE WHEN {column} <> '' " +
+                    "THEN ' (' || {column} || ')' " +
+                    "ELSE '' " +
+                "END)"
+            ));
         }
 
-        public SQL.Column title, number, composer, poet, lyrics;
+        public SQL.Column title, titleOrdinal, number, composer, poet, lyrics;
         public SQL.Column fullName, leaderCount, leadCount, pageSort;
     }
 
