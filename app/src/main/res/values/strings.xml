@@ -49,5 +49,7 @@
         <item quantity="other">Playing %d songs</item>
     </plurals>
     <string name="title_activity_playlist">PlaylistActivity</string>
+    <string name="tune_label">Tune:</string>
+    <string name="words_label">Words:</string>
 
 </resources>
