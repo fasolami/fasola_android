@@ -7,12 +7,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
+import android.widget.SearchView;
 
 public class MainActivity extends SimpleTabActivity {
     public final static String ACTIVITY_POSITION = "org.fasola.fasolaminutes.POSITION";
@@ -169,6 +169,8 @@ public class MainActivity extends SimpleTabActivity {
         }
 
         // Change query/index based on the selected sort column
+
+        @Override
         public void updateQuery() {
             switch(mSortId) {
                 case R.id.menu_leader_sort_count:
@@ -201,8 +203,8 @@ public class MainActivity extends SimpleTabActivity {
 
         @Override
         public void onSearch(SQL.Query query, String searchTerm) {
-            query.where(C.Leader.fullName, "LIKE", "%" + searchTerm + "%")
-                    .or(C.LeaderAlias.alias, "LIKE", "%" + searchTerm + "%");
+            setQuery(query.where(C.Leader.fullName, "LIKE", "%" + searchTerm + "%")
+                    .or(C.LeaderAlias.alias, "LIKE", "%" + searchTerm + "%"));
         }
     }
 
@@ -254,38 +256,41 @@ public class MainActivity extends SimpleTabActivity {
             return super.onOptionsItemSelected(item);
         }
 
+        /**
+         * Get the default query for filtering or sorting
+         * @return {SQL.Query} Default song query
+         */
+        private SQL.Query songQuery() {
+            return C.Song.selectList(C.Song.number, C.Song.title,
+                                     C.SongStats.leadCount.sum().format("'(' || {column} || ')'"));
+        }
+
         // Change query/index based on the selected sort column
         public void updateQuery() {
             switch(mSortId) {
                 case R.id.menu_song_sort_title:
                     setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
                     showHeaders(true);
-                    setQuery(C.Song.selectList(C.Song.number, C.Song.title,
-                                      C.SongStats.leadCount.sum().format("'(' || {column} || ')'"))
-                                .sectionIndex(C.Song.title, "ASC"));
+                    setQuery(songQuery().sectionIndex(C.Song.title, "ASC"));
                     break;
                 case R.id.menu_song_sort_leads:
                     setBins(100, 500, 1000, 1500, 2000, 2500, 3000);
                     showHeaders(false);
-                    setQuery(C.Song.selectList(C.Song.number, C.Song.title,
-                                      C.SongStats.leadCount.sum().format("'(' || {column} || ')'"))
-                                .sectionIndex(C.SongStats.leadCount.sum(), "DESC"));
+                    setQuery(songQuery().sectionIndex(C.SongStats.leadCount.sum(), "DESC"));
                     break;
                 case R.id.menu_song_sort_page:
                 default:
                     setBins(0, 100, 200, 300, 400, 500);
                     showHeaders(false);
-                    setQuery(C.Song.selectList(C.Song.number, C.Song.title,
-                                      C.SongStats.leadCount.sum().format("'(' || {column} || ')'"))
-                                .sectionIndex(C.Song.pageSort, "ASC"));
+                    setQuery(songQuery().sectionIndex(C.Song.pageSort, "ASC"));
                     break;
             }
         }
 
         @Override
         public void onSearch(SQL.Query query, String searchTerm) {
-            query.where(C.Song.fullName, "LIKE", "%" + searchTerm + "%")
-                    .or(C.Song.lyrics, "LIKE", "%" + searchTerm + "%");
+            setQuery(query.where(C.Song.fullName, "LIKE", "%" + searchTerm + "%")
+                    .or(C.Song.lyrics, "LIKE", "%" + searchTerm + "%"));
         }
     }
 
@@ -302,8 +307,8 @@ public class MainActivity extends SimpleTabActivity {
 
         @Override
         public void onSearch(SQL.Query query, String searchTerm) {
-            query.where(C.Singing.name, "LIKE", "%" + searchTerm + "%")
-                    .or(C.Singing.location, "LIKE", "%" + searchTerm + "%");
+            setQuery(query.where(C.Singing.name, "LIKE", "%" + searchTerm + "%")
+                    .or(C.Singing.location, "LIKE", "%" + searchTerm + "%"));
         }
     }
 
