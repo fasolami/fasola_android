@@ -49,6 +49,7 @@ public class PlaylistFragment extends ListFragment
         mList = (DragSortListView)view.findViewById(android.R.id.list);
         mController = (MediaController)view.findViewById(R.id.media_controller);
         mPlaylist = Playlist.getInstance();
+        mList.setEmptyView(view.findViewById(android.R.id.empty));
         return view;
     }
 
