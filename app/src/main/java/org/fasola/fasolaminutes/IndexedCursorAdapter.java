@@ -148,8 +148,19 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         if (convertView == null || ! (convertView instanceof ViewGroup))
             convertView = mInflater.inflate(R.layout.sticky_list_header, parent, false);
         // Set the text
-        TextView text = (TextView) convertView.findViewById(android.R.id.text1);
-        text.setText(getSections()[getSectionForPosition(position)].toString());
+        TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
+        String text = getSections()[getSectionForPosition(position)].toString();
+        // Chop off [] at the beginning of the header string
+        // Use the following construct to sort StringIndexer:
+        // [1]One
+        // [2]Two
+        // [3]Three
+        if (! text.isEmpty() && text.charAt(0) == '[') {
+            int pos = text.indexOf(']');
+            if (pos != -1)
+                text = text.substring(pos+1);
+        }
+        textView.setText(text);
         return convertView;
     }
 
