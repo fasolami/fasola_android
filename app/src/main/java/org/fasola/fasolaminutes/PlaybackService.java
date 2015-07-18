@@ -41,6 +41,8 @@ public class PlaybackService extends Service
     public static final String EXTRA_URL = "org.fasola.fasolaminutes.media.EXTRA_URL";
     /** Extra is {@code String[] urls} */
     public static final String EXTRA_URL_LIST = "org.fasola.fasolaminutes.media.EXTRA_URL_LIST";
+    /** Index of EXTRA_URL_LIST that should start playing */
+    public static final String EXTRA_PLAY_INDEX = "org.fasola.fasolaminutes.media.EXTRA_INDEX";
 
     /** Play */
     public static final String ACTION_PLAY = "org.fasola.fasolaminutes.action.PLAY";
@@ -98,10 +100,10 @@ public class PlaybackService extends Service
             return START_STICKY;
         // Enqueue/play
         else if (action.equals(ACTION_PLAY_MEDIA) || action.equals(ACTION_ENQUEUE_MEDIA)) {
-            boolean play = false;
+            int play = -1;
             if (action.equals(ACTION_PLAY_MEDIA)) {
                 Playlist.getInstance().clear();
-                play = true;
+                play = intent.getIntExtra(EXTRA_PLAY_INDEX, 0);
             }
             if (intent.hasExtra(EXTRA_LEAD_ID))
                 enqueueLead(play, C.SongLeader.leadId, intent.getLongExtra(EXTRA_LEAD_ID, -1));
@@ -276,21 +278,21 @@ public class PlaybackService extends Service
      *
      * <p>This method queries (async) the database for songs and adds them to the playlist
      *
-     * @param start  {@code true} to start playback
+     * @param playIndex index in {@code args} to start playing, or -1 to ignore
      * @param column {@link SQL.Column} or {@code String} column name for a WHERE clause
      * @param args   values for the IN predicate for a WHERE clause
      * @see Playlist
      * @see Playlist#getSongQuery(Object, Object...)
      * @see Playlist#addAll(Cursor)
      */
-    public void enqueueLead(final boolean start, Object column, Object... args) {
+    public void enqueueLead(final int playIndex, Object column, Object... args) {
         MinutesLoader loader = new MinutesLoader(Playlist.getSongQuery(column, args));
         loader.startLoading(new MinutesLoader.FinishedCallback() {
             @Override
             public void onLoadFinished(Cursor cursor) {
                 int pos = Playlist.getInstance().size();
-                if (Playlist.getInstance().addAll(cursor) && start) {
-                    Playlist.getInstance().moveToPosition(pos);
+                if (Playlist.getInstance().addAll(cursor) && playIndex > -1) {
+                    Playlist.getInstance().moveToPosition(pos + playIndex);
                     prepare();
                 }
             }
