@@ -44,6 +44,8 @@ public class MainActivity extends SimpleTabActivity {
         // Initial settings
         setTitle(mSectionsPagerAdapter.getPageTitle(0));
         tabs.setSelection(0);
+        // Use sliding tabs for now
+        tabs.setVisibility(View.GONE);
     }
 
     @Override
