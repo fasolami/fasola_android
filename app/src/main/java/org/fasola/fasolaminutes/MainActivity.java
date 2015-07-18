@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -74,16 +75,17 @@ public class MainActivity extends SimpleTabActivity {
 
     public boolean onPreparePanel(int featureId, View view, Menu menu) {
         boolean ret = super.onPreparePanel(featureId, view, menu);
+        Fragment currentFragment = getCurrentFragment();
+        if (! (currentFragment instanceof CursorListFragment))
+            return ret;
         // Update the SearchView with the searchTerm from the current Fragment
-        final CursorListFragment fragment = (CursorListFragment) getCurrentFragment();
-        if (fragment != null) {
-            String searchTerm = fragment.getSearch();
-            if (searchTerm != null && ! searchTerm.isEmpty())
-                mSearchItem.expandActionView();
-            else
-                mSearchItem.collapseActionView();
-            mSearchView.setQuery(searchTerm, false);
-        }
+        final CursorListFragment fragment = (CursorListFragment) currentFragment;
+        String searchTerm = fragment.getSearch();
+        if (searchTerm != null && ! searchTerm.isEmpty())
+            mSearchItem.expandActionView();
+        else
+            mSearchItem.collapseActionView();
+        mSearchView.setQuery(searchTerm, false);
         // Forward searches to the Fragment (see onPageSelected for a full explanation)
         mAllowSearchUpdates = true;
         return ret;
@@ -109,9 +111,14 @@ public class MainActivity extends SimpleTabActivity {
 
             @Override
             public boolean onQueryTextChange(String query) {
-                CursorListFragment fragment = (CursorListFragment) getCurrentFragment();
-                if (mAllowSearchUpdates)
-                    fragment.setSearch(query);
+                try {
+                    CursorListFragment fragment = (CursorListFragment) getCurrentFragment();
+                    if (mAllowSearchUpdates)
+                        fragment.setSearch(query);
+                }
+                catch (ClassCastException ex) {
+                    // Do nothing
+                }
                 return true;
             }
 
@@ -181,7 +188,7 @@ public class MainActivity extends SimpleTabActivity {
                                         .sectionIndex(C.Leader.leadCount, "DESC"));
                     break;
                 case R.id.menu_leader_sort_entropy:
-                    setBins(0,10,20,30,40,50,60,70,80,90);
+                    setBins(0, 10, 20, 30, 40, 50, 60, 70, 80, 90);
                     showHeaders(false);
                     setQuery(C.Leader.selectList(C.Leader.fullName, C.Leader.entropyDisplay.format("'(' || {column} || ')'"))
                                      .sectionIndex(C.Leader.entropy.format("CAST({column} * 100 AS INT)"), "DESC"));
