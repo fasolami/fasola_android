@@ -51,5 +51,6 @@
     <string name="title_activity_playlist">PlaylistActivity</string>
     <string name="tune_label">Tune:</string>
     <string name="words_label">Words:</string>
+    <string name="tab_playlist">Playlist</string>
 
 </resources>

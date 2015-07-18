@@ -4,7 +4,6 @@ import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.SearchView;
 
 public class MainActivity extends SimpleTabActivity {
@@ -70,7 +68,7 @@ public class MainActivity extends SimpleTabActivity {
         addTab(getString(R.string.tab_leaders), LeaderListFragment.class);
         addTab(getString(R.string.tab_songs), SongListFragment.class);
         addTab(getString(R.string.tab_singings), SingingListFragment.class);
-        //addTab("SEARCH", SearchListFragment.class);
+        addTab(getString(R.string.tab_playlist), PlaylistFragment.class);
     }
 
     public boolean onPreparePanel(int featureId, View view, Menu menu) {
@@ -301,14 +299,14 @@ public class MainActivity extends SimpleTabActivity {
             showHeaders(true);
             setBins("[1]Title", "[2]Composer", "[3]Poet", "[4]Words");
             setQuery(songQuery().sectionIndex(
-                new SQL.QueryColumn(
-                    "CASE ",
-                        C.Song.fullName.format("WHEN {column} LIKE %s THEN '[1]Title' ", searchTerm),
-                        C.Song.composer.format("WHEN {column} LIKE %s THEN '[2]Composer' ", searchTerm),
-                        C.Song.poet.format("WHEN {column} LIKE %s THEN '[3]Poet' ", searchTerm),
-                        C.Song.lyrics.format("WHEN {column} LIKE %s THEN '[4]Words' ", searchTerm),
-                    "END"
-                ), "ASC")
+                    new SQL.QueryColumn(
+                            "CASE ",
+                            C.Song.fullName.format("WHEN {column} LIKE %s THEN '[1]Title' ", searchTerm),
+                            C.Song.composer.format("WHEN {column} LIKE %s THEN '[2]Composer' ", searchTerm),
+                            C.Song.poet.format("WHEN {column} LIKE %s THEN '[3]Poet' ", searchTerm),
+                            C.Song.lyrics.format("WHEN {column} LIKE %s THEN '[4]Words' ", searchTerm),
+                            "END"
+                    ), "ASC")
                 .where(SQL.INDEX_COLUMN, "IS NOT", "NULL"));
         }
     }
@@ -328,53 +326,6 @@ public class MainActivity extends SimpleTabActivity {
         public void onSearch(SQL.Query query, String searchTerm) {
             setQuery(query.where(C.Singing.name, "LIKE", "%" + searchTerm + "%")
                     .or(C.Singing.location, "LIKE", "%" + searchTerm + "%"));
-        }
-    }
-
-
-    public static class SearchListFragment extends CursorStickyListFragment {
-        public SearchListFragment() {
-            mIntentClass = LeaderActivity.class;
-            mItemLayoutId = android.R.layout.simple_list_item_1;
-            setQuery(new SQL.Query("", ""));
-        }
-
-        public void onSearch(String query) {
-            SQL.Query leaderQuery =
-                C.Leader.selectList(C.Leader.fullName)
-                    .sectionIndex(new SQL.QueryColumn("'Leader'"))
-                    .where(C.Leader.fullName, "LIKE", "%" + query + "%");
-            SQL.Query songQuery =
-                C.Song.selectList(C.Song.fullName)
-                    .sectionIndex(new SQL.QueryColumn("'Song'"))
-                    .where(C.Song.title, "LIKE", "%" + query + "%");
-            SQL.Query singingQuery =
-                C.Singing.selectList(C.Singing.name)
-                    .sectionIndex(new SQL.QueryColumn("'Singing'"))
-                    .where(C.Singing.name, "LIKE", "%" + query + "%").or(C.Singing.location, "LIKE", "%" + query + "%");
-            setQuery(SQL.union(leaderQuery, singingQuery, songQuery).order(SQL.INDEX_COLUMN));
-            setBins("Leader", "Singing", "Song");
-        }
-
-        @Override
-        public void onListItemClick(ListView l, View v, int position, long id) {
-            Cursor cursor = getListAdapter().getCursor();
-            cursor.moveToPosition(position);
-            Intent intent;
-            switch(cursor.getString(2)) {
-                case "Singing":
-                    intent = new Intent(getActivity(), SingingActivity.class);
-                    break;
-                case "Song":
-                    intent = new Intent(getActivity(), SongActivity.class);
-                    break;
-                case "Leader":
-                default:
-                    intent = new Intent(getActivity(), LeaderActivity.class);
-                    break;
-            }
-            intent.putExtra(EXTRA_ID, id);
-            startActivity(intent);
         }
     }
 }
