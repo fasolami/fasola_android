@@ -104,38 +104,34 @@ public class CursorListFragment extends ListFragment
     public void setQuery(SQL.Query query, String... queryArgs) {
         mMinutesLoader.setQuery(query, queryArgs);
         // Apply the current search term
-        if (! mSearchTerm.isEmpty()) {
-            String term = mSearchTerm;
-            mSearchTerm = ""; // Clear so setSearch knows we don't have an existing search term
-            setSearch(term); // This will call restartLoader
-        }
+        if (! mSearchTerm.isEmpty())
+            setSearch(mSearchTerm); // Expect setSearch() to call setQuery()
         else
             getLoaderManager().restartLoader(-1, null, mMinutesLoader);
     }
 
-    public SQL.Query getQuery() {
-        return mMinutesLoader.getQuery();
+    // Update the search term
+    public void setSearch(String searchTerm) {
+        mSearchTerm = ""; // Clear so we don't have infinite recursion in setQuery
+        if (searchTerm.isEmpty())
+            updateQuery();
+        else
+            onSearch(mMinutesLoader.getQuery().copy(), searchTerm);
+        mSearchTerm = searchTerm;
     }
 
-    // Override and change the query string
+    /**
+     * Override to respond to search events
+     * @param query A copy of the existing query
+     * @param searchTerm Search term (will not be empty)
+     */
     public void onSearch(SQL.Query query, String searchTerm) {
     }
 
-    public void setSearch(String searchTerm) {
-        if (mMinutesLoader.hasQuery()) {
-            SQL.Query query = mMinutesLoader.getQuery();
-            // Push or pop the new query filter
-            if (! mSearchTerm.isEmpty())
-                query = query.popFilter();
-            if (! searchTerm.isEmpty()) {
-                query = query.pushFilter();
-                onSearch(query, searchTerm); // Update the query
-            }
-            // Set the new query and update
-            mMinutesLoader.setQuery(query);
-            getLoaderManager().restartLoader(-1, null, mMinutesLoader);
-        }
-        mSearchTerm = searchTerm;
+    /**
+     * Override to reset query after cancelling a search
+     */
+    public void updateQuery() {
     }
 
     public String getSearch() {

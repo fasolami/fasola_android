@@ -58,8 +58,10 @@ public class SQL {
 
     /**
      * Base class for SQL table contracts
-     * Provides automatic TABLE_NAME and id fields
-     * Easy JOINs using the Query class
+     *
+     * <p>Provides automatic TABLE_NAME and id fields
+     *
+     * <p>Simple and complex JOINs can be made with {@link Query}
      */
     public static class BaseTable {
         public String TABLE_NAME;
@@ -79,12 +81,22 @@ public class SQL {
         protected void onCreate() {
         }
 
-        // Create a column
+        /**
+         * Create a simple column
+         *
+         * @param name Column name
+         * @return {@link Column}
+         */
         public Column column(String name) {
             return column(new Column(this, name));
         }
 
-        // Add an existing column
+        /**
+         * Add an existing column
+         *
+         * @param col {@link Column}
+         * @return The existing column
+         */
         public Column column(Column col) {
             _columns.put(col.key, col);
             return col;
@@ -236,8 +248,9 @@ public class SQL {
     }
 
     /**
-     * Single Column in a BaseTable
-     * See QueryColumn for more complex queries
+     * Single column in a {@link BaseTable}
+     *
+     * @see QueryColumn
      */
     public static class Column {
         private String name;
@@ -415,7 +428,6 @@ public class SQL {
         protected Object offset;
 
         protected List<Query> union;
-        protected Query mParentQuery; // The parent of the query in the filter chain
 
         protected Query(String type, Object... args) {
             queryType = type;
@@ -438,7 +450,6 @@ public class SQL {
             limit = other.limit;
             offset = other.offset;
             union = other.union; // Shouldn't need to change the other queries in the union
-            mParentQuery = other;
         }
 
         // SELECT
@@ -702,14 +713,8 @@ public class SQL {
         }
 
         // Filter: create a copy of the query to use as a filter
-        public Query pushFilter() {
+        public Query copy() {
             return new Query(this);
-        }
-
-        public Query popFilter() {
-            if (mParentQuery == null)
-                return this;
-            return mParentQuery;
         }
 
         // Assemble the query
