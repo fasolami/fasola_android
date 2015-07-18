@@ -62,13 +62,13 @@ public class PlaylistFragment extends ListFragment
         mPlayer = new PlaybackService.Control(getActivity());
         mController.setMediaPlayer(mPlayer);
         Playlist.getInstance().registerPlayingObserver(mPlaylistObserver);
-        mPlaylistObserver.onChanged(); // Initial setup
+        updateControls(); // Initial Setup
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mController.show(0); // Update controls
+        updateControls();
         ((BaseAdapter)getListAdapter()).notifyDataSetChanged();
     }
 
@@ -95,6 +95,21 @@ public class PlaylistFragment extends ListFragment
         ((BaseAdapter)getListAdapter()).notifyDataSetChanged();
     }
 
+    protected void updateControls() {
+        Playlist playlist = Playlist.getInstance();
+        if (playlist.isEmpty()) {
+            mController.setVisibility(View.GONE);
+        }
+        else {
+            mController.setVisibility(View.VISIBLE);
+            int pos = playlist.getPosition();
+            mController.setPrevNextListeners(
+                    pos < playlist.size() - 1 ? mPlayer.nextListener : null,
+                    pos > 0 ? mPlayer.prevListener : null
+            );
+        }
+    }
+
     // Receive PlaybackService broadcasts
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -110,12 +125,7 @@ public class PlaylistFragment extends ListFragment
     DataSetObserver mPlaylistObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
-            Playlist playlist = Playlist.getInstance();
-            int pos = playlist.getPosition();
-            mController.setPrevNextListeners(
-                    pos < playlist.size()-1 ? mPlayer.nextListener : null,
-                    pos > 0 ? mPlayer.prevListener : null
-            );
+            updateControls();
         }
     };
 
