@@ -48,7 +48,7 @@
         <item quantity="one">Playing %d song</item>
         <item quantity="other">Playing %d songs</item>
     </plurals>
-    <string name="title_activity_playlist">PlaylistActivity</string>
+    <string name="title_activity_playlist">Playlist</string>
     <string name="tune_label">Tune:</string>
     <string name="words_label">Words:</string>
     <string name="tab_playlist">Playlist</string>
