@@ -5,6 +5,7 @@ import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
@@ -289,8 +290,19 @@ public class MainActivity extends SimpleTabActivity {
 
         @Override
         public void onSearch(SQL.Query query, String searchTerm) {
-            setQuery(query.where(C.Song.fullName, "LIKE", "%" + searchTerm + "%")
-                    .or(C.Song.lyrics, "LIKE", "%" + searchTerm + "%"));
+            searchTerm = DatabaseUtils.sqlEscapeString("%" + searchTerm + "%");
+            showHeaders(true);
+            setBins("[1]Title", "[2]Composer", "[3]Poet", "[4]Words");
+            setQuery(songQuery().sectionIndex(
+                new SQL.QueryColumn(
+                    "CASE ",
+                        C.Song.fullName.format("WHEN {column} LIKE %s THEN '[1]Title' ", searchTerm),
+                        C.Song.composer.format("WHEN {column} LIKE %s THEN '[2]Composer' ", searchTerm),
+                        C.Song.poet.format("WHEN {column} LIKE %s THEN '[3]Poet' ", searchTerm),
+                        C.Song.lyrics.format("WHEN {column} LIKE %s THEN '[4]Words' ", searchTerm),
+                    "END"
+                ), "ASC")
+                .where(SQL.INDEX_COLUMN, "IS NOT", "NULL"));
         }
     }
 
