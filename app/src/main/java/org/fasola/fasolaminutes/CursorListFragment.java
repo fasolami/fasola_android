@@ -240,7 +240,7 @@ public class CursorListFragment extends ListFragment
     public void onPlayClick(View v, int position) {
         Cursor cursor = getListAdapter().getCursor();
         int urlColumn = cursor.getColumnIndex(AUDIO_COLUMN);
-        if (! cursor.moveToPosition(position))
+        if (! cursor.moveToFirst())
             return;
         if (cursor.isNull(urlColumn)) {
             Log.w("SingingActivity", "Clicked ImageView should have been hidden");
@@ -256,6 +256,7 @@ public class CursorListFragment extends ListFragment
         Intent intent = new Intent(getActivity(), PlaybackService.class);
         intent.setAction(PlaybackService.ACTION_PLAY_MEDIA);
         intent.putExtra(PlaybackService.EXTRA_URL_LIST, urls.toArray(new String[urls.size()]));
+        intent.putExtra(PlaybackService.EXTRA_PLAY_INDEX, position);
         getActivity().startService(intent);
         // Toast
         String message = getResources().getQuantityString(R.plurals.play_songs, urls.size(), urls.size());
