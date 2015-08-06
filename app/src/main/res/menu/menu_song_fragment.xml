@@ -2,6 +2,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="org.fasola.fasolaminutes.MainActivity">
 
+    <item android:id="@+id/menu_search"
+          android:title="@string/search_hint"
+          android:icon="@drawable/ic_action_search"
+          android:showAsAction="ifRoom|collapseActionView"
+          android:actionViewClass="android.widget.SearchView" />
+
     <item android:id="@+id/menu_song_sort"
         android:title="@string/menu_leader_sort"
         android:icon="@drawable/ic_action_sort_by_size"

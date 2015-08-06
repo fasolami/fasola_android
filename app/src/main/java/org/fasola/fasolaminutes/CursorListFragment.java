@@ -7,10 +7,13 @@ import android.os.Parcelable;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import junit.framework.Assert;
@@ -32,7 +35,8 @@ import java.util.List;
 public class CursorListFragment extends ListFragment
                                 implements MinutesLoader.Callbacks,
                                            View.OnClickListener,
-                                           View.OnLongClickListener {
+                                           View.OnLongClickListener,
+                                           SimpleTabActivity.FragmentPagerListener {
     public final static String EXTRA_ID = "org.fasola.fasolaminutes.LIST_ID";
     public static final String AUDIO_COLUMN = "__sql_audio_column";
 
@@ -40,6 +44,7 @@ public class CursorListFragment extends ListFragment
     protected Class<?> mIntentClass;
     protected MinutesLoader mMinutesLoader;
     protected String mSearchTerm = "";
+    boolean mPreventSearch = false; // See onPageBlurred/From
     protected SQL.Query mOriginalQuery;
     protected boolean mNeedsRangeIndexer;
     protected LetterIndexer mDeferredIndexer;
@@ -142,6 +147,56 @@ public class CursorListFragment extends ListFragment
 
     public String getSearch() {
         return mSearchTerm;
+    }
+
+    /**
+     * Set SearchView callbacks if a SearchView is found in the menu.
+     */
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // Get the SearchView
+        final MenuItem searchItem = menu.findItem(R.id.menu_search);
+        if (searchItem == null)
+            return;
+        final SearchView searchView = (SearchView) searchItem.getActionView();
+        // Update search results as you type
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                searchView.clearFocus(); // Hide the keyboard
+                onQueryTextChange(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                if (! mPreventSearch)
+                    setSearch(query);
+                return true;
+            }
+        });
+        searchView.setIconifiedByDefault(true); // Do not iconify the widget; expand it by default
+        // Update search visibility and values
+        if (mSearchTerm != null && ! mSearchTerm.isEmpty())
+            searchItem.expandActionView();
+        else
+            searchItem.collapseActionView();
+        mPreventSearch = false; // Allow setting the query again
+        searchView.setQuery(mSearchTerm, false);
+    }
+
+    // Prevent the search text from changing
+    // Used to persist mSearchTerm when paging away from this fragment
+
+    @Override
+    public void onPageFocused() {
+        mPreventSearch = true;
+    }
+
+    @Override
+    public void onPageBlurred() {
+        mPreventSearch = true;
     }
 
     public void setIndexer(LetterIndexer indexer) {
