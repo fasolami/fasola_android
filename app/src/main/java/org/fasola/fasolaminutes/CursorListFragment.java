@@ -40,6 +40,7 @@ public class CursorListFragment extends ListFragment
     protected Class<?> mIntentClass;
     protected MinutesLoader mMinutesLoader;
     protected String mSearchTerm = "";
+    protected SQL.Query mOriginalQuery;
     protected boolean mNeedsRangeIndexer;
     protected LetterIndexer mDeferredIndexer;
     private String BUNDLE_SEARCH = "SEARCH_TERM";
@@ -113,10 +114,15 @@ public class CursorListFragment extends ListFragment
     // Update the search term
     public void setSearch(String searchTerm) {
         mSearchTerm = ""; // Clear so we don't have infinite recursion in setQuery
-        if (searchTerm.isEmpty())
+        if (searchTerm.isEmpty()) {
             updateQuery();
-        else
-            onSearch(mMinutesLoader.getQuery().copy(), searchTerm);
+            mOriginalQuery = mMinutesLoader.getQuery();
+        }
+        else {
+            if (mOriginalQuery == null)
+                mOriginalQuery = mMinutesLoader.getQuery();
+            onSearch(mOriginalQuery.copy(), searchTerm);
+        }
         mSearchTerm = searchTerm;
     }
 
