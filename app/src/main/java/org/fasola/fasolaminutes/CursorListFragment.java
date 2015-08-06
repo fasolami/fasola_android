@@ -143,6 +143,8 @@ public class CursorListFragment extends ListFragment
      * Override to reset query after cancelling a search
      */
     public void updateQuery() {
+        if (mOriginalQuery != null)
+            setQuery(mOriginalQuery);
     }
 
     public String getSearch() {
