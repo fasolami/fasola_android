@@ -1,19 +1,19 @@
 package org.fasola.fasolaminutes;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.astuetz.PagerSlidingTabStrip;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *  A base class for an activity with tabs
@@ -89,14 +89,66 @@ public abstract class SimpleTabActivity extends FragmentActivity {
         if (mTabStrip != null) {
             mTabStrip.setViewPager(mViewPager);
         }
+
+        // Setup page change listener
+        if (mTabStrip != null)
+            mTabStrip.setOnPageChangeListener(mOwnPageChangeListener);
+        else
+            mViewPager.setOnPageChangeListener(mOwnPageChangeListener);
+
     }
 
-    public void setOnPageChangeListener(ViewPager.OnPageChangeListener listener) {
-        if (mTabStrip != null)
-            mTabStrip.setOnPageChangeListener(listener);
-        else
-            mViewPager.setOnPageChangeListener(listener);
+    /**
+     * Interface for fragments to detect when paging occurs
+     */
+    public interface FragmentPagerListener {
+        void onPageFocused();
+        void onPageBlurred();
     }
+
+    ViewPager.OnPageChangeListener mPageChangeListener = null;
+
+    public void setOnPageChangeListener(ViewPager.OnPageChangeListener listener) {
+        mPageChangeListener = listener;
+    }
+
+    /**
+     * Custom OnPageChangeListener that handles {@link FragmentPagerListener} events.
+     * All events pass through to listener set with {@link #setOnPageChangeListener}
+     */
+    ViewPager.OnPageChangeListener mOwnPageChangeListener = new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            if (mPageChangeListener != null)
+                mPageChangeListener.onPageScrolled(position, positionOffset, positionOffsetPixels);
+        }
+
+        // Save old position for onPageBlurred
+        int lastPos = 0;
+
+        /**
+         * Call {@link FragmentPagerListener#onPageFocused()}
+         * and {@link FragmentPagerListener#onPageBlurred()}
+         */
+        @Override
+        public void onPageSelected(int position) {
+            if (mPageChangeListener != null)
+                mPageChangeListener.onPageSelected(position);
+            Fragment from = getFragmentByPosition(lastPos);
+            if (from instanceof FragmentPagerListener)
+                ((FragmentPagerListener)from).onPageFocused();
+            Fragment to = getFragmentByPosition(position);
+            if (to instanceof FragmentPagerListener)
+                ((FragmentPagerListener)to).onPageBlurred();
+            lastPos = position;
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+            if (mPageChangeListener != null)
+                mPageChangeListener.onPageScrollStateChanged(state);
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
