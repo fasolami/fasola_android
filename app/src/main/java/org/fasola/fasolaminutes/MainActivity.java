@@ -17,19 +17,20 @@ public class MainActivity extends SimpleTabActivity {
         super.onCreate(savedInstanceState);
         // Save all the pages since the queries may take some time to run
         mViewPager.setOffscreenPageLimit(mSectionsPagerAdapter.getCount());
-        // Change title, FaSoLa tabs, and search when the page changes
-        final FasolaTabView tabs = (FasolaTabView) findViewById(R.id.fasola_tabs);
-        setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+        // Set page change listener and initial settings
+        setOnPageChangeListener(mPageChangeListener);
+        mPageChangeListener.onPageSelected(0);
+    }
+
+    // Change title and FaSoLa tabs when the page changes
+    ViewPager.SimpleOnPageChangeListener mPageChangeListener =
+        new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 setTitle(mSectionsPagerAdapter.getPageTitle(position));
-                tabs.setSelection(position);
+                ((FasolaTabView) findViewById(R.id.fasola_tabs)).setSelection(position);
             }
-        });
-        // Initial settings
-        setTitle(mSectionsPagerAdapter.getPageTitle(0));
-        tabs.setSelection(0);
-    }
+        };
 
     @Override
     protected void onDestroy() {
@@ -43,8 +44,14 @@ public class MainActivity extends SimpleTabActivity {
         super.onNewIntent(intent);
         // Change to the requested fragment (by position)
         int position = intent.getIntExtra(ACTIVITY_POSITION, -1);
-        if (position != -1)
-            mViewPager.setCurrentItem(position, true);
+        if (position != -1) {
+            // Change page, or at least force the Activity to think the page was
+            // changed so it updates fasola tabs and title
+            if (mViewPager.getCurrentItem() != position)
+                mViewPager.setCurrentItem(position, true);
+            else
+                mPageChangeListener.onPageSelected(position);
+        }
     }
 
 
