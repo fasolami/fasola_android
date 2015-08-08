@@ -65,6 +65,21 @@ public class MinutesContract {
             lyrics = column("SongText");
             composer = column("composer");
             poet = column("poet");
+            time = column("Times");
+            // Format keys (which are in the db as "D" or "A min")
+            // 1. Some keys have extraneous spaces at the end, hence trim()
+            // 2. Minor keys are written "min"; major keys are blank; key changes list "min" first
+            //    The replace function catches all occurrences of "min", while a check that a key
+            //    does not end in "min" catches major keys.
+            key = column(column("Keys").format(
+                    "replace(" +
+                        "CASE WHEN substr({column}, length({column})-2) <> 'min' " +
+                            "THEN trim({column}) || ' Major' " +
+                            "ELSE trim({column}) " +
+                        "END, " +
+                        "'min', 'Minor'" +
+                    ")"
+            ));
         }
 
         @Override
@@ -80,7 +95,7 @@ public class MinutesContract {
             ));
         }
 
-        public SQL.Column title, titleOrdinal, number, composer, poet, lyrics;
+        public SQL.Column title, titleOrdinal, number, composer, poet, lyrics, key, time;
         public SQL.Column fullName, leaderCount, leadCount, pageSort;
     }
 
