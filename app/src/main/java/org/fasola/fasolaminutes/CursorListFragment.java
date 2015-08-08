@@ -284,33 +284,49 @@ public class CursorListFragment extends ListFragment
 
     // Default onPlayClick: play the song
     public void onPlayClick(View v, int position) {
-        Cursor cursor = getListAdapter().getCursor();
+        playSongs(getListAdapter().getCursor(), position);
+    }
+
+    public boolean onPlayLongClick(View v, int position) {
+        return false;
+    }
+
+    /**
+     * Play a list of songs
+     * @param cursor Cursor with {@link #AUDIO_COLUMN} column
+     * @param position position in {@code cursor} to start playback
+     */
+    public void playSongs(Cursor cursor, int position) {
         int urlColumn = cursor.getColumnIndex(AUDIO_COLUMN);
         if (! cursor.moveToFirst())
             return;
         if (cursor.isNull(urlColumn)) {
-            Log.w("SingingActivity", "Clicked ImageView should have been hidden");
+            Log.w("CursorListFragment", "Clicked ImageView should have been hidden");
             return;
         }
         // Make a list of urls to add
         List<String> urls = new ArrayList<>();
         urls.add(cursor.getString(urlColumn));
-        while (cursor.moveToNext())
-            if (! cursor.isNull(urlColumn))
+        // Index of song to play in urls list
+        // NB: If any songs are missing urls, they will not be added to the urls list, and thus
+        // playIndex is not always the same as (list) position
+        int playIndex = 0;
+        while (cursor.moveToNext()) {
+            if (!cursor.isNull(urlColumn)) {
                 urls.add(cursor.getString(urlColumn)); // Enqueue next songs
+                if (cursor.getPosition() == position)
+                    playIndex = urls.size() - 1;
+            }
+        }
         // Send the intent
         Intent intent = new Intent(getActivity(), PlaybackService.class);
         intent.setAction(PlaybackService.ACTION_PLAY_MEDIA);
         intent.putExtra(PlaybackService.EXTRA_URL_LIST, urls.toArray(new String[urls.size()]));
-        intent.putExtra(PlaybackService.EXTRA_PLAY_INDEX, position);
+        intent.putExtra(PlaybackService.EXTRA_PLAY_INDEX, playIndex);
         getActivity().startService(intent);
         // Toast
         String message = getResources().getQuantityString(R.plurals.play_songs, urls.size(), urls.size());
         Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
-    }
-
-    public boolean onPlayLongClick(View v, int position) {
-        return false;
     }
 
     @Override
