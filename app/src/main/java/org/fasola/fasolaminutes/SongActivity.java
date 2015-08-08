@@ -79,17 +79,18 @@ public class SongActivity extends SimpleTabActivity {
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
             long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
-            SQL.Query query = C.Song.select(C.Song.lyrics, C.Song.poet, C.Song.composer)
+            SQL.Query query = C.Song.select(C.Song.lyrics, C.Song.poet, C.Song.composer,
+                                            C.Song.key, C.Song.time)
                                     .whereEq(C.Song.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
                 @Override
                 public void onLoadFinished(Cursor cursor) {
                     C.SongDAO song = C.Song.fromCursor(cursor);
                     if (song != null) {
-                        String words = song.poet.getString();
-                        String tune = song.composer.getString();
-                        ((TextView) view.findViewById(R.id.words)).setText(words);
-                        ((TextView) view.findViewById(R.id.tune)).setText(tune);
+                        ((TextView) view.findViewById(R.id.words)).setText(song.poet.getString());
+                        ((TextView) view.findViewById(R.id.tune)).setText(song.composer.getString());
+                        ((TextView) view.findViewById(R.id.key)).setText(song.key.getString());
+                        ((TextView) view.findViewById(R.id.time)).setText(song.time.getString());
                         CharSequence lyrics = createIndentedText(song.lyrics.getString(), 0, 20);
                         ((TextView) view.findViewById(R.id.lyrics)).setText(lyrics);
                     }

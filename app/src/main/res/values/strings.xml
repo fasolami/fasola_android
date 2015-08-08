@@ -57,5 +57,7 @@
     <string name="empty_playlist"><b>Playlist is empty.</b>\n\nAdd recordings by browsing Leaders, Songs, or Singings.</string>
     <string name="menu_singing_sort_year">By year</string>
     <string name="menu_singing_sort_recordings">By recording count</string>
+    <string name="key_label">Key:</string>
+    <string name="time_label">Time:</string>
 
 </resources>
