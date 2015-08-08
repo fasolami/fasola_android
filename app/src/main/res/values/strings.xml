@@ -20,7 +20,9 @@
 
     <string name="song_label">Songs</string>
     <string name="singing_label">Singings</string>
-    <string name="search_hint">Search songs</string>
+    <string name="search_leaders">Search Leaders</string>
+    <string name="search_songs">Search songs</string>
+    <string name="search_singings">Search Singings</string>
     <string name="menu_leader_sort_first_name">By first name</string>
     <string name="menu_song_sort_page">By page number</string>
     <string name="menu_song_sort_title">By title</string>
