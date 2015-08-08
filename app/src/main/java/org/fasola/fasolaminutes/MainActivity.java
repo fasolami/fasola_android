@@ -257,25 +257,78 @@ public class MainActivity extends SimpleTabActivity {
     }
 
     public static class SingingListFragment extends CursorStickyListFragment {
+        protected int mSortId = R.id.menu_singing_sort_year;
+        protected final static String BUNDLE_SORT = "SORT_ID";
+
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setIntentActivity(SingingActivity.class);
             setItemLayout(R.layout.singing_list_item);
-            setQuery(C.Singing.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location)
-                    .select(C.Singing.recordingCount.format(
-                            "CASE WHEN {column} = 0 THEN NULL ELSE {column} END"
-                    )).as(CursorListFragment.AUDIO_COLUMN)
-                    .sectionIndex(C.Singing.year));
-            setRangeIndexer();
+            if (savedInstanceState != null)
+                mSortId = savedInstanceState.getInt(BUNDLE_SORT, mSortId);
             setHasOptionsMenu(true);
+        }
+
+        @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            updateQuery();
+        }
+
+        @Override
+        public void onSaveInstanceState(final Bundle saveInstanceState) {
+            super.onSaveInstanceState(saveInstanceState);
+            saveInstanceState.putSerializable(BUNDLE_SORT, mSortId);
         }
 
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
             inflater.inflate(R.menu.menu_singing_fragment, menu);
+            // Check the initial sort
+            MenuItem item = menu.findItem(mSortId);
+            if (item != null)
+                item.setChecked(true);
         }
 
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            // Sort
+            if (item.getGroupId() == R.id.menu_group_singing_sort) {
+                item.setChecked(true);
+                mSortId = item.getItemId();
+                updateQuery();
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+
+        /**
+         * Get the default query for filtering or sorting
+         * @return {SQL.Query} Default singing query
+         */
+        private SQL.Query singingQuery() {
+            return C.Singing.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location)
+                            .select(C.Singing.recordingCount.format(
+                                    "CASE WHEN {column} = 0 THEN NULL ELSE {column} END"
+                            )).as(CursorListFragment.AUDIO_COLUMN);
+        }
+
+        public void updateQuery() {
+            switch(mSortId) {
+                case R.id.menu_singing_sort_recordings:
+                    showHeaders(false);
+                    setQuery(singingQuery().orderDesc(C.Singing.recordingCount)
+                                           .orderAsc(C.Singing.year));
+                    break;
+                case R.id.menu_singing_sort_year:
+                default:
+                    setRangeIndexer();
+                    showHeaders(true);
+                    setQuery(singingQuery().sectionIndex(C.Singing.year));
+                    break;
+            }
+        }
 
         @Override
         public void onSearch(SQL.Query query, String searchTerm) {
