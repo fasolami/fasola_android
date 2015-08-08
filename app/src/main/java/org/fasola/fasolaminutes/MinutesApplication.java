@@ -5,9 +5,9 @@ import android.content.Context;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.BarLineChartBase;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.utils.ValueFormatter;
-import com.github.mikephil.charting.utils.XLabels;
 
 /**
  * Application Override
@@ -30,27 +30,43 @@ public class MinutesApplication extends Application {
     }
 
     public static void applyDefaultChartStyle(BarLineChartBase chart) {
-        chart.setDrawLegend(false);
-        chart.getXLabels().setCenterXLabelText(true);
-        chart.getXLabels().setPosition(XLabels.XLabelPosition.BOTTOM);
-        chart.setDrawHorizontalGrid(false);
-        chart.setDrawVerticalGrid(false);
+        //chart.getXLabels().setCenterXLabelText(true);
+        chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        chart.getXAxis().setDrawGridLines(false);
+        chart.getXAxis().setDrawAxisLine(false);
+        chart.getAxisRight().setDrawGridLines(false);
+        chart.getAxisRight().setDrawAxisLine(false);
+        chart.getAxisRight().setDrawLabels(false);
+        chart.getAxisLeft().setDrawGridLines(false);
+        chart.getAxisLeft().setDrawAxisLine(false);
+        chart.getAxisLeft().setDrawLabels(false);
         chart.setDrawGridBackground(false);
         if (chart instanceof BarChart)
             ((BarChart) chart).setDrawBarShadow(false);
         // Avoid decimals
-        int labelCount = (int)(chart.getYChartMax() - chart.getYChartMin());
-        if (labelCount < chart.getYLabels().getLabelCount())
-            chart.getYLabels().setLabelCount(labelCount);
-        chart.setValueFormatter(new ValueFormatter() {
+        ValueFormatter formatter = new ValueFormatter() {
             @Override
             public String getFormattedValue(float v) {
                 return String.format("%d", (long) v);
             }
-        });
+        };
+        int labelCount = (int)(chart.getYChartMax() - chart.getYChartMin());
+        if (labelCount < chart.getAxisLeft().getLabelCount())
+            chart.getAxisLeft().setLabelCount(labelCount, true);
+        if (labelCount < chart.getAxisRight().getLabelCount())
+            chart.getAxisRight().setLabelCount(labelCount, true);
+        chart.getAxisRight().setValueFormatter(formatter);
+        chart.getAxisLeft().setValueFormatter(formatter);
+        chart.getData().setValueFormatter(formatter);
         // Data color
         DataSet data = chart.getData().getDataSetByIndex(0);
         if (data != null)
-            data.setColor(getContext().getResources().getColor(R.color.fasola_foreground));
+            data.setColors(new int[]{
+                    getContext().getResources().getColor(R.color.fasola_foreground),
+                    getContext().getResources().getColor(R.color.tab_background)
+            });
+        data = chart.getData().getDataSetByIndex(1);
+        if (data != null)
+            data.setColor(getContext().getResources().getColor(R.color.tab_background));
     }
 }
