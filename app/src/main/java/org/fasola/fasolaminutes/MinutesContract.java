@@ -10,7 +10,7 @@ public class MinutesContract {
     protected MinutesContract() {
     }
 
-    public static final int DB_VERSION = 3;
+    public static final int DB_VERSION = 4;
     public static final String DB_NAME = "minutes.db";
 
     // Contract classes (see below for definitions
@@ -153,6 +153,7 @@ public class MinutesContract {
             startDate = column("Date");
             location = column("Location");
             fullText = column("Minutes");
+            recordingCount = column("RecordingCt");
             year = column("Year");
         }
 
@@ -162,7 +163,7 @@ public class MinutesContract {
             leaderCount = column(SongLeader.leaderId.countDistinct());
         }
 
-        public SQL.Column name, startDate, location, fullText, year, songCount, leaderCount;
+        public SQL.Column name, startDate, location, fullText, year, recordingCount, songCount, leaderCount;
     }
 
     /* Song-Singing-Leader join table table */
