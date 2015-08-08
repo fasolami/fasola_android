@@ -1,6 +1,7 @@
 package org.fasola.fasolaminutes;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -262,7 +263,10 @@ public class MainActivity extends SimpleTabActivity {
             setIntentActivity(SingingActivity.class);
             setItemLayout(R.layout.singing_list_item);
             setQuery(C.Singing.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location)
-                                .sectionIndex(C.Singing.year));
+                    .select(C.Singing.recordingCount.format(
+                            "CASE WHEN {column} = 0 THEN NULL ELSE {column} END"
+                    )).as(CursorListFragment.AUDIO_COLUMN)
+                    .sectionIndex(C.Singing.year));
             setRangeIndexer();
             setHasOptionsMenu(true);
         }
@@ -277,6 +281,27 @@ public class MainActivity extends SimpleTabActivity {
         public void onSearch(SQL.Query query, String searchTerm) {
             setQuery(query.where(C.Singing.name, "LIKE", "%" + searchTerm + "%")
                     .or(C.Singing.location, "LIKE", "%" + searchTerm + "%"));
+        }
+
+        @Override
+        public void onPlayClick(View v, int position) {
+            // Get singing id
+            Cursor cursor = getListAdapter().getCursor();
+            cursor.moveToPosition(position);
+            int singingId = cursor.getInt(0);
+            // Query for songs
+            SQL.Query query = C.SongLeader.select(C.SongLeader.audioUrl)
+                                .as(CursorListFragment.AUDIO_COLUMN)
+                                .distinct()
+                                .where(C.SongLeader.singingId, "=", singingId)
+                                .order(C.SongLeader.singingOrder, "ASC");
+            // Start query and play when finished
+            getLoaderManager().initLoader(100, null, new MinutesLoader(query) {
+                @Override
+                public void onLoadFinished(Cursor cursor) {
+                    playSongs(cursor, 0);
+                }
+            });
         }
     }
 }
