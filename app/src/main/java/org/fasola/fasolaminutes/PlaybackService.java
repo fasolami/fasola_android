@@ -26,7 +26,8 @@ public class PlaybackService extends Service
         implements MediaPlayer.OnPreparedListener,
             MediaPlayer.OnCompletionListener,
             MediaPlayer.OnErrorListener,
-            MediaController.MediaPlayerControl {
+            MediaController.MediaPlayerControl,
+            AudioManager.OnAudioFocusChangeListener {
 
     private static final String TAG = "PlaybackService";
     private static final int ERROR_LIMIT = 10;
@@ -59,6 +60,8 @@ public class PlaybackService extends Service
 
     /** Broadcast sent when the {@link MediaPlayer} is prepared */
     public static final String BROADCAST_PREPARED = "org.fasola.fasolaminutes.mediaBroadcast.PREPARED";
+    /** Broadcast sent when the {@link MediaPlayer} has started playing */
+    public static final String BROADCAST_PLAYING = "org.fasola.fasolaminutes.mediaBroadcast.PLAYING";
     /** Broadcast sent when playback (of a single song) is completed */
     public static final String BROADCAST_COMPLETED = "org.fasola.fasolaminutes.mediaBroadcast.COMPLETED";
     /** Broadcast sent on {@link MediaPlayer} error */
@@ -71,6 +74,7 @@ public class PlaybackService extends Service
     NotificationManager mNotificationManager;
     Notification mNotification;
     private static final int NOTIFICATION_ID = 1;
+    AudioManager mAudioManager;
 
     // Singleton
     static PlaybackService mInstance;
@@ -91,6 +95,7 @@ public class PlaybackService extends Service
         super.onCreate();
         mInstance = this;
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
     }
 
     @Override
@@ -110,7 +115,7 @@ public class PlaybackService extends Service
             else if (intent.hasExtra(EXTRA_URL))
                 enqueueLead(play, C.SongLeader.audioUrl, intent.getStringExtra(EXTRA_URL));
             else if (intent.hasExtra(EXTRA_URL_LIST))
-                enqueueLead(play, C.SongLeader.audioUrl, intent.getStringArrayExtra(EXTRA_URL_LIST));
+                enqueueLead(play, C.SongLeader.audioUrl, (Object[])intent.getStringArrayExtra(EXTRA_URL_LIST));
         }
         // Controls
         else if (action.equals(ACTION_PLAY)) {
@@ -137,10 +142,21 @@ public class PlaybackService extends Service
     }
 
     @Override
+    public void onAudioFocusChange(int focusChange) {
+        if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+            pause();
+        }
+        else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+            start();
+        }
+        else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+            stop();
+        }
+    }
+
+    @Override
     public void onDestroy() {
-       if (mMediaPlayer != null)
-           mMediaPlayer.release();
-       mIsPrepared = false;
+       stop();
        mInstance = null;
     }
 
@@ -174,8 +190,15 @@ public class PlaybackService extends Service
     @Override
     public void start() {
         mShouldPlay = true;
-        if (isPrepared())
-            ensurePlayer().start();
+        if (isPrepared()) {
+            int result = mAudioManager.requestAudioFocus(this,
+                                                         AudioManager.STREAM_MUSIC,
+                                                         AudioManager.AUDIOFOCUS_GAIN);
+            if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                ensurePlayer().start();
+                LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PLAYING));
+            }
+        }
         else {
             if (Playlist.getInstance().getCurrent() == null)
                 Playlist.getInstance().moveToFirst();
@@ -191,6 +214,20 @@ public class PlaybackService extends Service
             ensurePlayer().pause();
             updateNotification();
         }
+    }
+
+    /**
+     * Stop playback and release resources
+     * This is not a MediaPlayerControl override
+     */
+    public void stop() {
+        mAudioManager.abandonAudioFocus(this);
+        if (mMediaPlayer != null) {
+            mMediaPlayer.release();
+            mMediaPlayer = null;
+        }
+        mShouldPlay = false;
+        mIsPrepared = false;
     }
 
     @Override
