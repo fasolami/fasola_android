@@ -9,6 +9,7 @@ import android.support.v4.view.ViewPager;
 import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.SearchView;
 
 import com.astuetz.PagerSlidingTabStrip;
 
@@ -113,6 +114,27 @@ public abstract class SimpleTabActivity extends FragmentActivity {
     }
 
     /**
+     * Save a reference to a Fragment's SearchView so we can gracefully deactivate
+     * any lingering handlers in the OnPageChangeListener
+     */
+    SearchView mSearchView = null;
+    boolean mHasActivitySearchView = false;
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean ret = super.onPrepareOptionsMenu(menu);
+        // Don't save the search view if it belongs to the Activity
+        if (mHasActivitySearchView)
+            return ret;
+        MenuItem searchItem = menu.findItem(R.id.menu_search);
+        if (getCurrentFragment() == null && searchItem != null)
+            mHasActivitySearchView = true;
+        else
+            mSearchView = searchItem != null ? (SearchView)searchItem.getActionView() : null;
+        return ret;
+    }
+
+    /**
      * Custom OnPageChangeListener that handles {@link FragmentPagerListener} events.
      * All events pass through to listener set with {@link #setOnPageChangeListener}
      */
@@ -127,13 +149,14 @@ public abstract class SimpleTabActivity extends FragmentActivity {
         int lastPos = 0;
 
         /**
-         * Call {@link FragmentPagerListener#onPageFocused()}
+         * Remove SearchView listeners (because the SearchView will be collapsed and
+         * cleared) before the page changes, and call {@link FragmentPagerListener#onPageFocused()}
          * and {@link FragmentPagerListener#onPageBlurred()}
          */
         @Override
         public void onPageSelected(int position) {
-            if (mPageChangeListener != null)
-                mPageChangeListener.onPageSelected(position);
+            if (! mHasActivitySearchView && mSearchView != null)
+                mSearchView.setOnQueryTextListener(null);
             Fragment from = getFragmentByPosition(lastPos);
             if (from instanceof FragmentPagerListener)
                 ((FragmentPagerListener)from).onPageFocused();
@@ -141,6 +164,8 @@ public abstract class SimpleTabActivity extends FragmentActivity {
             if (to instanceof FragmentPagerListener)
                 ((FragmentPagerListener)to).onPageBlurred();
             lastPos = position;
+            if (mPageChangeListener != null)
+                mPageChangeListener.onPageSelected(position);
         }
 
         @Override

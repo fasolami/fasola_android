@@ -35,8 +35,7 @@ import java.util.List;
 public class CursorListFragment extends ListFragment
                                 implements MinutesLoader.Callbacks,
                                            View.OnClickListener,
-                                           View.OnLongClickListener,
-                                           SimpleTabActivity.FragmentPagerListener {
+                                           View.OnLongClickListener {
     public final static String EXTRA_ID = "org.fasola.fasolaminutes.LIST_ID";
     public static final String AUDIO_COLUMN = "__sql_audio_column";
 
@@ -44,7 +43,6 @@ public class CursorListFragment extends ListFragment
     protected Class<?> mIntentClass;
     protected MinutesLoader mMinutesLoader;
     protected String mSearchTerm = "";
-    boolean mPreventSearch = false; // See onPageBlurred/From
     protected SQL.Query mOriginalQuery;
     protected boolean mNeedsRangeIndexer;
     protected LetterIndexer mDeferredIndexer;
@@ -173,32 +171,17 @@ public class CursorListFragment extends ListFragment
 
             @Override
             public boolean onQueryTextChange(String query) {
-                if (! mPreventSearch)
-                    setSearch(query);
+                setSearch(query);
                 return true;
             }
         });
-        searchView.setIconifiedByDefault(true); // Do not iconify the widget; expand it by default
+        searchView.setIconifiedByDefault(true);
         // Update search visibility and values
         if (mSearchTerm != null && ! mSearchTerm.isEmpty())
             searchItem.expandActionView();
         else
             searchItem.collapseActionView();
-        mPreventSearch = false; // Allow setting the query again
         searchView.setQuery(mSearchTerm, false);
-    }
-
-    // Prevent the search text from changing
-    // Used to persist mSearchTerm when paging away from this fragment
-
-    @Override
-    public void onPageFocused() {
-        mPreventSearch = true;
-    }
-
-    @Override
-    public void onPageBlurred() {
-        mPreventSearch = true;
     }
 
     public void setIndexer(LetterIndexer indexer) {
