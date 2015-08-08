@@ -13,13 +13,16 @@ import java.util.List;
  */
 public class LetterIndexer extends AlphabetIndexer {
     boolean mIsDesc;
+    int mTotalCount = 0;
     public LetterIndexer(Cursor cursor, int sortedColumnIndex, CharSequence alphabet) {
         super(cursor, sortedColumnIndex, alphabet);
         mIsDesc = alphabet.length() > 0 && alphabet.charAt(0) > alphabet.charAt(alphabet.length() - 1);
+        mTotalCount = cursor != null ? cursor.getCount() : 0;
     }
 
     public void setCursor(Cursor cursor, int column) {
         mColumnIndex = column;
+        mTotalCount = cursor != null ? cursor.getCount() : 0;
         setCursor(cursor);
     }
 
@@ -65,5 +68,18 @@ public class LetterIndexer extends AlphabetIndexer {
                 sectionReverser.toArray(sections);
             }
         }
+    }
+
+    /**
+     * Returns the number of items in a section
+     * @param section Section index
+     * @return number of items in the section
+     */
+    int getCountForSection(int section) {
+        int pos = getPositionForSection(section);
+        if (section >= getSections().length - 1)
+            return mTotalCount - pos;
+        else
+            return getPositionForSection(section + 1) - pos;
     }
 }
