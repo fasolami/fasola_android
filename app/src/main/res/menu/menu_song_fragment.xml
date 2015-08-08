@@ -29,6 +29,10 @@
                 android:title="@string/menu_song_sort_leads"
                 android:showAsAction="never" />
 
+            <item android:id="@+id/menu_song_sort_key"
+                android:title="@string/menu_song_sort_key"
+                android:showAsAction="never" />
+
         </group>
         </menu>
 

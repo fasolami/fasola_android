@@ -59,5 +59,6 @@
     <string name="menu_singing_sort_recordings">By recording count</string>
     <string name="key_label">Key:</string>
     <string name="time_label">Time:</string>
+    <string name="menu_song_sort_key">By key signature</string>
 
 </resources>
