@@ -234,6 +234,11 @@ public class MainActivity extends SimpleTabActivity {
                     showHeaders(true);
                     setQuery(songQuery().sectionIndex(C.Song.key, "ASC"));
                     break;
+                case R.id.menu_song_sort_time:
+                    setStringIndexer();
+                    showHeaders(true);
+                    setQuery(songQuery().sectionIndex(C.Song.time, "ASC"));
+                    break;
                 case R.id.menu_song_sort_page:
                 default:
                     setBins(0, 100, 200, 300, 400, 500);

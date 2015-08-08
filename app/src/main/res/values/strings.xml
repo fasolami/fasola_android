@@ -60,5 +60,6 @@
     <string name="key_label">Key:</string>
     <string name="time_label">Time:</string>
     <string name="menu_song_sort_key">By key signature</string>
+    <string name="menu_song_sort_time">By time signature</string>
 
 </resources>
