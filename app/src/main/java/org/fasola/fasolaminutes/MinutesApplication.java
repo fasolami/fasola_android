@@ -30,7 +30,7 @@ public class MinutesApplication extends Application {
     }
 
     public static void applyDefaultChartStyle(BarLineChartBase chart) {
-        //chart.getXLabels().setCenterXLabelText(true);
+        chart.getLegend().setEnabled(false);
         chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         chart.getXAxis().setDrawGridLines(false);
         chart.getXAxis().setDrawAxisLine(false);
@@ -61,10 +61,7 @@ public class MinutesApplication extends Application {
         // Data color
         DataSet data = chart.getData().getDataSetByIndex(0);
         if (data != null)
-            data.setColors(new int[]{
-                    getContext().getResources().getColor(R.color.fasola_foreground),
-                    getContext().getResources().getColor(R.color.tab_background)
-            });
+            data.setColor(getContext().getResources().getColor(R.color.fasola_foreground));
         data = chart.getData().getDataSetByIndex(1);
         if (data != null)
             data.setColor(getContext().getResources().getColor(R.color.tab_background));
