@@ -160,6 +160,13 @@ public class CursorListFragment extends ListFragment
         if (searchItem == null)
             return;
         final SearchView searchView = (SearchView) searchItem.getActionView();
+        // Expand/collapse before setting callbacks, because both expanding and collapsing
+        // reset search text to blank
+        searchView.setIconifiedByDefault(true);
+        if (mSearchTerm != null && ! mSearchTerm.isEmpty())
+            searchItem.expandActionView();
+        else
+            searchItem.collapseActionView();
         // Update search results as you type
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -175,12 +182,7 @@ public class CursorListFragment extends ListFragment
                 return true;
             }
         });
-        searchView.setIconifiedByDefault(true);
-        // Update search visibility and values
-        if (mSearchTerm != null && ! mSearchTerm.isEmpty())
-            searchItem.expandActionView();
-        else
-            searchItem.collapseActionView();
+        // Set cached search text
         searchView.setQuery(mSearchTerm, false);
     }
 
