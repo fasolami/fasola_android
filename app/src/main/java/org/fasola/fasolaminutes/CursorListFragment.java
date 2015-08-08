@@ -39,12 +39,17 @@ public class CursorListFragment extends ListFragment
     public final static String EXTRA_ID = "org.fasola.fasolaminutes.LIST_ID";
     public static final String AUDIO_COLUMN = "__sql_audio_column";
 
+    // Indexers that must be constructed after we have a Cursor
+    public final static int NO_INDEXER = 0;
+    public final static int RANGE_INDEXER = 1;
+    public final static int STRING_INDEXER = 2;
+
     protected int mItemLayoutId = android.R.layout.simple_list_item_1;
     protected Class<?> mIntentClass;
     protected MinutesLoader mMinutesLoader;
     protected String mSearchTerm = "";
     protected SQL.Query mOriginalQuery;
-    protected boolean mNeedsRangeIndexer;
+    protected int mDeferredIndexerType = NO_INDEXER;
     protected LetterIndexer mDeferredIndexer;
     private String BUNDLE_SEARCH = "SEARCH_TERM";
     private String LIST_STATE = "LIST_STATE";
@@ -187,7 +192,7 @@ public class CursorListFragment extends ListFragment
     }
 
     public void setIndexer(LetterIndexer indexer) {
-        mNeedsRangeIndexer = false;
+        mDeferredIndexerType = NO_INDEXER;
         // Defer til onLoadFinished so we don't apply this indexer to the previous query
         mDeferredIndexer = indexer;
     }
@@ -212,7 +217,12 @@ public class CursorListFragment extends ListFragment
 
     // Delay until the query is performed and we can find a range
     public void setRangeIndexer() {
-        mNeedsRangeIndexer = true;
+        mDeferredIndexerType = RANGE_INDEXER;
+    }
+
+    // Delay until the query is performed and we can find a range
+    public void setStringIndexer() {
+        mDeferredIndexerType = STRING_INDEXER;
     }
 
     public int getHighlight() {
@@ -353,9 +363,11 @@ public class CursorListFragment extends ListFragment
     public void onLoadFinished(Cursor cursor) {
         IndexedCursorAdapter adapter = getListAdapter();
         // Setup any deferred section indexers
-        if (mNeedsRangeIndexer) {
+        if (mDeferredIndexerType == RANGE_INDEXER)
             mDeferredIndexer = new RangeIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
-        }
+        else if (mDeferredIndexerType == STRING_INDEXER)
+            mDeferredIndexer = new StringIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
+        // Set the new indexer
         if (mDeferredIndexer != null) {
             adapter.setIndexer(mDeferredIndexer);
             mDeferredIndexer = null;
