@@ -37,6 +37,7 @@ public class PlaylistFragment extends ListFragment
         super.onCreate(savedInstanceState);
         IntentFilter filter = new IntentFilter();
         filter.addAction(PlaybackService.BROADCAST_PREPARED);
+        filter.addAction(PlaybackService.BROADCAST_PLAYING);
         filter.addAction(PlaybackService.BROADCAST_COMPLETED);
         filter.addAction(PlaybackService.BROADCAST_ERROR);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
@@ -116,6 +117,8 @@ public class PlaylistFragment extends ListFragment
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(PlaybackService.BROADCAST_PREPARED))
+                mController.show(0);
+            else if (intent.getAction().equals(PlaybackService.BROADCAST_PLAYING))
                 mController.show(0);
         }
     };
