@@ -71,7 +71,8 @@ public class MinutesContract {
             // 2. Minor keys are written "min"; major keys are blank; key changes list "min" first
             //    The replace function catches all occurrences of "min", while a check that a key
             //    does not end in "min" catches major keys.
-            key = column(column("Keys").format(
+            rawKey = column("Keys");
+            key = column(rawKey.format(
                     "replace(" +
                         "CASE WHEN substr({column}, length({column})-2) <> 'min' " +
                             "THEN trim({column}) || ' Major' " +
@@ -95,7 +96,7 @@ public class MinutesContract {
             ));
         }
 
-        public SQL.Column title, titleOrdinal, number, composer, poet, lyrics, key, time;
+        public SQL.Column title, titleOrdinal, number, composer, poet, lyrics, rawKey, key, time;
         public SQL.Column fullName, leaderCount, leadCount, pageSort;
     }
 
