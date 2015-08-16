@@ -131,9 +131,23 @@ public class MinutesContract {
             songCount = column(SongLeader.songId.countDistinct());
             singingCount = column(SongLeader.singingId.countDistinct());
             aka = column(LeaderAlias.alias.func("group_concat", true));
+            majorPercent = column(
+                Song.rawKey.format(
+                    "CASE " +
+                        // Key changes = 0.5
+                        "WHEN {} LIKE ',' THEN 0.5 " +
+                        // Minor = 0
+                        "WHEN {} LIKE '%%min' THEN 0 " +
+                        // Major = 1
+                        "ELSE 1.0 " +
+                    "END")
+                // Turn into percent of total leads
+                .format("SUM({}) / %s", leadCount)
+            );
         }
 
-        public SQL.Column fullName, lastName, leadCount, entropy, entropyDisplay, singingCount, songCount, aka;
+        public SQL.Column fullName, lastName, leadCount, entropy, entropyDisplay,
+                          singingCount, songCount, aka, majorPercent;
     }
 
     /* LeaderNameAliases table */
