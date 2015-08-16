@@ -111,9 +111,16 @@ public class LeaderActivity extends SimpleTabActivity {
                     // Chart data
                     ArrayList<BarEntry> entries = new ArrayList<>();
                     ArrayList<String> labels = new ArrayList<>();
+                    int year = -1;
                     while (cursor.moveToNext()) {
-                        entries.add(new BarEntry(cursor.getInt(0), entries.size()));
-                        labels.add(cursor.getString(1));
+                        int thisYear = cursor.getInt(1);
+                        if (year == -1)
+                            year = thisYear;
+                        // Add x labels up to the current year (in cas of gaps between years)
+                        for (; year <= thisYear; ++year)
+                            labels.add(String.valueOf(year));
+                        // Add y value for the current year
+                        entries.add(new BarEntry(cursor.getInt(0), labels.size()-1));
                     }
                     // Set data
                     BarDataSet dataset = new BarDataSet(entries, "Singings Attended");
