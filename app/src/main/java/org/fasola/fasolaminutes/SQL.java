@@ -374,7 +374,8 @@ public class SQL {
             QueryColumn q = new QueryColumn(col);
             q.addTables(args);
             // fmt should use {column} as the column placeholder
-            q.setName(String.format(fmt.replace("{column}", col.toString()), args));
+            String colName = col.toString().replace("%", "%%");
+            q.setName(String.format(fmt.replace("{column}", colName), args));
             return q;
         }
 
