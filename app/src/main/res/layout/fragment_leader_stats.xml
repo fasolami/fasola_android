@@ -37,11 +37,21 @@
 
     <TextView
         android:id="@+id/entropy"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_below="@+id/singings"
-        android:gravity="center_horizontal"
+        android:layout_alignParentRight="true"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin" />
+
+    <TextView
+        android:id="@+id/major_pct"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_below="@+id/singings"
+        android:layout_alignParentLeft="true"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin" />
 

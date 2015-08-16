@@ -66,7 +66,7 @@ public class LeaderActivity extends SimpleTabActivity {
             // Query for stats
             SQL.Query query = SQL.select(C.Leader.aka, C.Leader.songCount,
                                          C.Leader.leadCount, C.Leader.singingCount,
-                                         C.Leader.entropyDisplay)
+                                         C.Leader.entropyDisplay, C.Leader.majorPercent)
                                  .whereEq(C.Leader.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
                 @Override
@@ -88,9 +88,14 @@ public class LeaderActivity extends SimpleTabActivity {
                         String songsLed = getResources().getQuantityString(R.plurals.songsLed, nSongs, nSongs);
                         String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
                         String singings = getResources().getQuantityString(R.plurals.singingsAttended, nSingings, nSingings);
+                        float major = leader.majorPercent.getFloat();
+                        String majorText = major >= 0.5 ?
+                                Math.round(100 * major) + "% Major" :
+                                Math.round(100 * (1-major)) + "% Minor";
                         String entropy = "Entropy: " + leader.entropyDisplay.getString();
                         ((TextView) view.findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
                         ((TextView) view.findViewById(R.id.singings)).setText(singings);
+                        ((TextView) view.findViewById(R.id.major_pct)).setText(majorText);
                         ((TextView) view.findViewById(R.id.entropy)).setText(entropy);
                     }
                 }
