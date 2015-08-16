@@ -341,6 +341,10 @@ public class SQL {
             return value;
         }
 
+        public float getFloat() {
+            return Float.parseFloat(value);
+        }
+
         public int getInt() {
             return Integer.parseInt(value);
         }
