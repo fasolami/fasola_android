@@ -377,9 +377,12 @@ public class SQL {
         protected static Column fromFormat(String fmt, Column col, Object... args) {
             QueryColumn q = new QueryColumn(col);
             q.addTables(args);
-            // fmt should use {column} as the column placeholder
+            // fmt uses {} or {column} as the column placeholder
             String colName = col.toString().replace("%", "%%");
-            q.setName(String.format(fmt.replace("{column}", colName), args));
+            q.setName(String.format(
+                fmt.replace("{}", colName).replace("{column}", colName),
+                args
+            ));
             return q;
         }
 
