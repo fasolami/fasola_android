@@ -109,49 +109,63 @@ public class CursorListFragment extends ListFragment
         mIntentClass = cls;
     }
 
-    // Set the query and restart the loader
+    /**
+     * Set a new query and start loading it
+     * @param query
+     * @param queryArgs
+     */
     public void setQuery(SQL.Query query, String... queryArgs) {
         mMinutesLoader.setQuery(query, queryArgs);
-        // Apply the current search term
-        if (! mSearchTerm.isEmpty())
-            setSearch(mSearchTerm); // Expect setSearch() to call setQuery()
-        else
-            getLoaderManager().restartLoader(-1, null, mMinutesLoader);
+        getLoaderManager().restartLoader(-1, null, mMinutesLoader);
     }
 
-    // Update the search term
+    /**
+     * Set a new search term using the given query
+     * @param searchTerm
+     * @see #onUpdateSearch(SQL.Query, String)
+     */
     public void setSearch(String searchTerm) {
-        mSearchTerm = ""; // Clear so we don't have infinite recursion in setQuery
-        if (searchTerm.isEmpty()) {
+        if (searchTerm.isEmpty())
             updateQuery();
-            mOriginalQuery = mMinutesLoader.getQuery();
-        }
-        else {
-            if (mOriginalQuery == null)
-                mOriginalQuery = mMinutesLoader.getQuery();
-            onSearch(mOriginalQuery.copy(), searchTerm);
-        }
+        else
+            setQuery(onUpdateSearch(mOriginalQuery.copy(), searchTerm));
         mSearchTerm = searchTerm;
+    }
+
+    public String getSearch() {
+        return mSearchTerm;
     }
 
     /**
      * Override to respond to search events
      * @param query A copy of the existing query
      * @param searchTerm Search term (will not be empty)
+     * @return {@link SQL.Query} that incorporates the search term
      */
-    public void onSearch(SQL.Query query, String searchTerm) {
+    public SQL.Query onUpdateSearch(SQL.Query query, String searchTerm) {
+        return query;
+    }
+
+
+    /**
+     * Update the query and start loading
+     * Calls {@link #setSearch(String)} if there is an existing search term
+     */
+    public void updateQuery() {
+        mOriginalQuery = onUpdateQuery();
+        // Apply the current search term
+        if (mSearchTerm.isEmpty())
+            setQuery(mOriginalQuery);
+        else
+            setSearch(mSearchTerm); // Expect setSearch() to call setQuery()
     }
 
     /**
      * Override to reset query after cancelling a search
+     * @return new {@link SQL.Query}
      */
-    public void updateQuery() {
-        if (mOriginalQuery != null)
-            setQuery(mOriginalQuery);
-    }
-
-    public String getSearch() {
-        return mSearchTerm;
+    public SQL.Query onUpdateQuery() {
+        return mOriginalQuery;
     }
 
     /**
