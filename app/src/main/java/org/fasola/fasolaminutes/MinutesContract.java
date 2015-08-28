@@ -123,7 +123,7 @@ public class MinutesContract {
             // Raw entropy
             entropy = column("song_entropy");
             // Rounded entropy
-            entropyDisplay = column(entropy.format("ROUND({column}, 4)"));
+            entropyDisplay = column(entropy.format("SUBSTR(ROUND({column}, 4) || '000', 0, 7)"));
         }
 
         @Override
