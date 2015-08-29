@@ -130,7 +130,7 @@ public class MinutesContract {
         protected void onCreate() {
             songCount = column(SongLeader.songId.countDistinct());
             singingCount = column(SongLeader.singingId.countDistinct());
-            aka = column(LeaderAlias.alias.func("group_concat", true));
+            aka = subQuery(LeaderAlias.alias.func("group_concat", true));
             majorPercent = column(
                 Song.rawKey.format(
                     "CASE " +
