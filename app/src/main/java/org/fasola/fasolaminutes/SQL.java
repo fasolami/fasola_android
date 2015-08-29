@@ -642,11 +642,12 @@ public class SQL {
             return this;
         }
 
-        private String escapeWhere(String val) {
-            String cmp = val.toUpperCase();
-            if (!(cmp.equals("?") || cmp.equals("NULL")))
-                return DatabaseUtils.sqlEscapeString(val);
-            return val;
+        private String escapeWhere(Object val) {
+            String strVal = val.toString();
+            String cmp = strVal.toUpperCase();
+            if (!(cmp.equals("?") || cmp.equals("NULL") || val instanceof SQL.Column))
+                return DatabaseUtils.sqlEscapeString(strVal);
+            return strVal;
         }
 
         protected Query _addWhere(Object bool, Object col, Object oper, Object val) {
@@ -664,7 +665,7 @@ public class SQL {
                 val = "(" + TextUtils.join(",", escapedVals) + ")";
             }
             else {
-                val = escapeWhere(val.toString());
+                val = escapeWhere(val);
             }
             q.append(bool, " ", col, oper, val);
             // Add join
