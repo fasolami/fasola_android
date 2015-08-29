@@ -68,6 +68,7 @@ public class SQL {
         public Column id;
         protected Map<String, Column> _columns; // Make escaped column key to Column
         protected static JoinMap joinMap = new JoinMap();
+        private static final int MAX_KEY_LENGTH = 20;
 
         protected BaseTable(String tableName) {
             TABLE_NAME = tableName;
@@ -98,6 +99,9 @@ public class SQL {
          * @return The existing column
          */
         public Column column(Column col) {
+            // Keep long column names down
+            if (col.key.length() > TABLE_NAME.length() + MAX_KEY_LENGTH)
+                col.key = TABLE_NAME + "_col" + _columns.values().size();
             _columns.put(col.key, col);
             return col;
         }
