@@ -106,6 +106,35 @@ public class SQL {
             return col;
         }
 
+        /**
+         * Add a subquery as a column
+         * @param query {@link Query}
+         * @return The query as a new column
+         */
+        public Column subQuery(Query query) {
+            Column col = new Column(this, "");
+            col.setName("(" + query + ")"); // Column constructor adds table prefix to name
+            return column(col);
+        }
+
+        /**
+         * Add a subquery as a column
+         * @param col {@link Column} single column from a related table
+         * @return The query as a new column
+         */
+        public Column subQuery(Column col) {
+            // Pretend that this is a normal query that joins to this table, then pull off
+            // the JOIN ON clause and turn it into a WHERE clause for the subuery
+            Query query = col.getTable().select(col).as("col").join(col.getTable(), this);
+            String thisJoin = query.joins.get(TABLE_NAME);
+            // thisJoin should have a value, since join() will throw an exception
+            // if no join is defined between the two tables
+            String whereClause = thisJoin.substring(thisJoin.indexOf(" ON ") + 4);
+            query.whereList.add(new Query.QueryStringBuilder().append(whereClause));
+            query.joins.remove(TABLE_NAME);
+            return subQuery(query);
+        }
+
         // Create a stored query as a column
         public Column queryColumn(Object... args) {
             return column(new QueryColumn(args));
