@@ -124,11 +124,11 @@ public class SQL {
 
         // Add an entry to the joinMap, joining two tables by their columns
         public static void join(Column col1, Column col2) {
-            join(col1.table, col2.table, col1 + " = " + col2, false);
+            join(col1.getTable(), col2.getTable(), col1 + " = " + col2, false);
         }
 
         public static void leftJoin(Column col1, Column col2) {
-            join(col1.table, col2.table, col1 + " = " + col2, true);
+            join(col1.getTable(), col2.getTable(), col1 + " = " + col2, true);
         }
 
         public static void join(BaseTable t1, BaseTable t2, String text) {
@@ -399,6 +399,11 @@ public class SQL {
                     else
                         tables.add(((Column) arg).table);
             }
+        }
+
+        @Override
+        public BaseTable getTable() {
+            return tables.get(0);
         }
 
         // Override to add all joins in the tables list
