@@ -41,9 +41,18 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         mLongClickListener = longClick;
     }
 
-    // Custom labels for the indexer
-    public void setSections(String... sections) {
-        mSections = sections;
+    /**
+     * Override SectionIndexer labels
+     * Example:
+     *   Using AlphabetIndexer with "0123"
+     *   setSectionLabels("First", "Second", "Third", "Fourth")
+     * @param sections
+     */
+    public void setSectionLabels(String... sections) {
+        if (sections.length == 0)
+            mSections = null;
+        else
+            mSections = sections;
     }
 
     // Set a SectionIndexer
@@ -150,16 +159,6 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         // Set the text
         int section = getSectionForPosition(position);
         String text = getSections()[section].toString();
-        // Chop off [] at the beginning of the header string
-        // Use the following construct to sort StringIndexer:
-        // [1]One
-        // [2]Two
-        // [3]Three
-        if (! text.isEmpty() && text.charAt(0) == '[') {
-            int pos = text.indexOf(']');
-            if (pos != -1)
-                text = text.substring(pos+1);
-        }
         TextView headerView = (TextView) convertView.findViewById(R.id.list_header_text);
         headerView.setText(text);
         // Set count
