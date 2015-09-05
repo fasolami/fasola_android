@@ -125,11 +125,11 @@ public class CursorListFragment extends ListFragment
      * @see #onUpdateSearch(SQL.Query, String)
      */
     public void setSearch(String searchTerm) {
+        mSearchTerm = searchTerm;
         if (searchTerm.isEmpty())
             updateQuery();
         else
             setQuery(onUpdateSearch(mOriginalQuery.copy(), searchTerm));
-        mSearchTerm = searchTerm;
     }
 
     public String getSearch() {
@@ -206,9 +206,15 @@ public class CursorListFragment extends ListFragment
     }
 
     public void setIndexer(LetterIndexer indexer) {
-        mDeferredIndexerType = NO_INDEXER;
         // Defer til onLoadFinished so we don't apply this indexer to the previous query
+        setDeferredIndexer(NO_INDEXER);
         mDeferredIndexer = indexer;
+    }
+
+    public void setDeferredIndexer(int type) {
+        mDeferredIndexerType = type;
+        // Clear custom labels any time a new indexer is set
+        setSectionLabels();
     }
 
     // Indexer shortcuts
@@ -231,12 +237,16 @@ public class CursorListFragment extends ListFragment
 
     // Delay until the query is performed and we can find a range
     public void setRangeIndexer() {
-        mDeferredIndexerType = RANGE_INDEXER;
+        setDeferredIndexer(RANGE_INDEXER);
     }
 
     // Delay until the query is performed and we can find a range
     public void setStringIndexer() {
-        mDeferredIndexerType = STRING_INDEXER;
+        setDeferredIndexer(STRING_INDEXER);
+    }
+
+    public void setSectionLabels(String... sections) {
+        getListAdapter().setSectionLabels(sections);
     }
 
     public int getHighlight() {
