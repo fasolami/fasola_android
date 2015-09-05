@@ -244,14 +244,15 @@ public class MainActivity extends SimpleTabActivity {
         public SQL.Query onUpdateSearch(SQL.Query query, String searchTerm) {
             searchTerm = DatabaseUtils.sqlEscapeString("%" + searchTerm + "%");
             showHeaders(true);
-            setBins("[1]Title", "[2]Composer", "[3]Poet", "[4]Words");
+            setAlphabet("0123");
+            setSectionLabels("Title", "Composer", "Poet", "Words");
             return songQuery().sectionIndex(
                     new SQL.QueryColumn(
                             "CASE ",
-                            C.Song.fullName.format("WHEN {column} LIKE %s THEN '[1]Title' ", searchTerm),
-                            C.Song.composer.format("WHEN {column} LIKE %s THEN '[2]Composer' ", searchTerm),
-                            C.Song.poet.format("WHEN {column} LIKE %s THEN '[3]Poet' ", searchTerm),
-                            C.Song.lyrics.format("WHEN {column} LIKE %s THEN '[4]Words' ", searchTerm),
+                            C.Song.fullName.format("WHEN {column} LIKE %s THEN 0 ", searchTerm),
+                            C.Song.composer.format("WHEN {column} LIKE %s THEN 1 ", searchTerm),
+                            C.Song.poet.format("WHEN {column} LIKE %s THEN 2  ", searchTerm),
+                            C.Song.lyrics.format("WHEN {column} LIKE %s THEN 3 ", searchTerm),
                             "END"
                     ), "ASC")
                 .where(SQL.INDEX_COLUMN, "IS NOT", "NULL");
