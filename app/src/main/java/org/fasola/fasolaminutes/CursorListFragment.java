@@ -51,6 +51,7 @@ public class CursorListFragment extends ListFragment
     protected SQL.Query mOriginalQuery;
     protected int mDeferredIndexerType = NO_INDEXER;
     protected LetterIndexer mDeferredIndexer;
+    protected String[] mSectionLabels;
     private String BUNDLE_SEARCH = "SEARCH_TERM";
     private String LIST_STATE = "LIST_STATE";
     private Parcelable mListState;
@@ -246,7 +247,7 @@ public class CursorListFragment extends ListFragment
     }
 
     public void setSectionLabels(String... sections) {
-        getListAdapter().setSectionLabels(sections);
+        mSectionLabels = sections;
     }
 
     public int getHighlight() {
@@ -392,6 +393,8 @@ public class CursorListFragment extends ListFragment
         else if (mDeferredIndexerType == STRING_INDEXER)
             mDeferredIndexer = new StringIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
         // Set the new indexer
+        adapter.setSectionLabels(mSectionLabels);
+        mSectionLabels = null;
         if (mDeferredIndexer != null) {
             adapter.setIndexer(mDeferredIndexer);
             mDeferredIndexer = null;
