@@ -46,10 +46,10 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
      * Example:
      *   Using AlphabetIndexer with "0123"
      *   setSectionLabels("First", "Second", "Third", "Fourth")
-     * @param sections
+     * @param sections Section labels
      */
     public void setSectionLabels(String... sections) {
-        if (sections.length == 0)
+        if (sections == null || sections.length == 0)
             mSections = null;
         else
             mSections = sections;
@@ -200,8 +200,18 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
                 image.setOnLongClickListener(mLongClickListener);
             }
             // Change image visibility by audioUrl column
-            view.findViewById(R.id.play_image).setVisibility(
-                    getCursor().isNull(mAudioColumn) ? View.GONE : View.VISIBLE);
+            String label = getCursor().getString(mAudioColumn);
+            TextView recordingView = (TextView)view.findViewById(R.id.play_image);
+            if (label == null || label.equals("0")) {
+                recordingView.setVisibility(View.GONE);
+            }
+            else {
+                recordingView.setVisibility(View.VISIBLE);
+                // label is either a recording count or a url, but we only want to display counts.
+                // Assume urls are longer and numbers are shorter.
+                recordingView.setText(label.length() < 10 ? label : "");
+            }
+
         }
         else if (view.getId() == R.id.play_image_layout) {
             // Remove the layout and return the original layout
