@@ -5,15 +5,29 @@
     android:orientation="horizontal"
     android:id="@+id/play_image_layout" >
 
-    <ImageView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:paddingRight="?android:attr/listPreferredItemPaddingRight"
-        android:paddingLeft="?android:attr/listPreferredItemPaddingRight"
-        android:id="@+id/play_image"
-        android:src="@drawable/ic_action_play_over_video"
-        android:contentDescription="@string/play_recording_text"
-        android:clickable="true" />
+        android:layout_gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingRight="?android:attr/listPreferredItemPaddingRight"
+            android:paddingLeft="?android:attr/listPreferredItemPaddingRight"
+            android:id="@+id/play_image"
+            android:src="@drawable/ic_action_play_over_video"
+            android:contentDescription="@string/play_recording_text"
+            android:clickable="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/recording_count"
+            android:gravity="center_horizontal" />
+    </LinearLayout>
 
 </LinearLayout>

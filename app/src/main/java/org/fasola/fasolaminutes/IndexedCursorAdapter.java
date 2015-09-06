@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SectionIndexer;
 import android.widget.SimpleCursorAdapter;
@@ -201,15 +202,23 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
             }
             // Change image visibility by audioUrl column
             String label = getCursor().getString(mAudioColumn);
-            TextView recordingView = (TextView)view.findViewById(R.id.play_image);
+            ImageView playImage = (ImageView)view.findViewById(R.id.play_image);
+            TextView recordingCount = (TextView)view.findViewById(R.id.recording_count);
             if (label == null || label.equals("0")) {
-                recordingView.setVisibility(View.GONE);
+                playImage.setVisibility(View.GONE);
+                recordingCount.setVisibility(View.GONE);
             }
             else {
-                recordingView.setVisibility(View.VISIBLE);
+                playImage.setVisibility(View.VISIBLE);
                 // label is either a recording count or a url, but we only want to display counts.
                 // Assume urls are longer and numbers are shorter.
-                recordingView.setText(label.length() < 10 ? label : "");
+                if (label.length() < 10) {
+                    recordingCount.setText(label);
+                    recordingCount.setVisibility(View.VISIBLE);
+                }
+                else {
+                    recordingCount.setVisibility(View.GONE);
+                }
             }
 
         }
