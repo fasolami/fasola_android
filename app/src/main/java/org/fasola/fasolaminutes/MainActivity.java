@@ -344,10 +344,11 @@ public class MainActivity extends SimpleTabActivity {
             cursor.moveToPosition(position);
             int singingId = cursor.getInt(0);
             // Query for songs
-            SQL.Query query = C.SongLeader.select(C.SongLeader.audioUrl)
-                                .as(CursorListFragment.AUDIO_COLUMN)
-                                .distinct()
+            SQL.Query query = C.SongLeader.select(C.SongLeader.leadId)
+                                .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
                                 .where(C.SongLeader.singingId, "=", singingId)
+                                    .and(C.SongLeader.audioUrl, "IS NOT", "NULL")
+                                .group(C.SongLeader.leadId)
                                 .order(C.SongLeader.singingOrder, "ASC");
             // Start query and play when finished
             getLoaderManager().initLoader(100, null, new MinutesLoader(query) {
