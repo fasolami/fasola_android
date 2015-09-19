@@ -312,16 +312,15 @@ public class MainActivity extends SimpleTabActivity {
          */
         private SQL.Query singingQuery() {
             return C.Singing.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location)
-                            .select(C.Singing.recordingCount.format(
-                                    "CASE WHEN {column} = 0 THEN NULL ELSE {column} END"
-                            )).as(CursorListFragment.AUDIO_COLUMN);
+                            .select(C.Singing.recordingCount).as(CursorListFragment.AUDIO_COLUMN);
         }
 
         public SQL.Query onUpdateQuery() {
             switch(mSortId) {
                 case R.id.menu_singing_sort_recordings:
                     showHeaders(false);
-                    return singingQuery().orderDesc(C.Singing.recordingCount)
+                    return singingQuery().where(C.Singing.recordingCount, ">", "0")
+                                         .orderDesc(C.Singing.recordingCount)
                                          .orderAsc(C.Singing.year);
                 case R.id.menu_singing_sort_year:
                 default:
