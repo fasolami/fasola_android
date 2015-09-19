@@ -321,11 +321,23 @@ public class CursorListFragment extends ListFragment
 
     // Default onPlayClick: play the song
     public void onPlayClick(View v, int position) {
-        playSongs(getListAdapter().getCursor(), position);
+        Cursor cursor = getListAdapter().getCursor();
+        int urlColumn = cursor.getColumnIndex(AUDIO_COLUMN);
+        if (! cursor.moveToPosition(position))
+            return;
+        // Send the intent
+        playSongs(PlaybackService.ACTION_PLAY_MEDIA, cursor.getString(urlColumn));
     }
 
+    // Default onPlayLongClick: enqueue song
     public boolean onPlayLongClick(View v, int position) {
-        return false;
+        Cursor cursor = getListAdapter().getCursor();
+        int urlColumn = cursor.getColumnIndex(AUDIO_COLUMN);
+        if (! cursor.moveToPosition(position))
+            return true;
+        // Send the intent
+        playSongs(PlaybackService.ACTION_ENQUEUE_MEDIA, cursor.getString(urlColumn));
+        return true;
     }
 
     /**
@@ -356,13 +368,42 @@ public class CursorListFragment extends ListFragment
             }
         }
         // Send the intent
+        playSongs(PlaybackService.ACTION_PLAY_MEDIA, playIndex, urls.toArray(new String[urls.size()]));
+    }
+
+    /**
+     * Play or enqueue a list of urls from the beginning
+     * @param action PlaybackService.ACTION enums (Usually PLAY_MEDIA or ENQUEUE_MEDIA)
+     * @param urls array of urls
+     */
+    public void playSongs(String action, String... urls) {
+        playSongs(action, 0, urls);
+    }
+
+    /**
+     * Play or enqueue a list of songs and notify the user with a toast
+     * @param action PlaybackService.ACTION enums (Usually PLAY_MEDIA or ENQUEUE_MEDIA)
+     * @param playIndex index in the url list of the first song to play
+     * @param urls array of urls
+     */
+    public void playSongs(String action, int playIndex, String... urls) {
+        // Send the intent
         Intent intent = new Intent(getActivity(), PlaybackService.class);
-        intent.setAction(PlaybackService.ACTION_PLAY_MEDIA);
-        intent.putExtra(PlaybackService.EXTRA_URL_LIST, urls.toArray(new String[urls.size()]));
+        intent.setAction(action);
+        if (urls.length > 1)
+            intent.putExtra(PlaybackService.EXTRA_URL_LIST, urls);
+        else
+            intent.putExtra(PlaybackService.EXTRA_URL, urls[0]);
         intent.putExtra(PlaybackService.EXTRA_PLAY_INDEX, playIndex);
         getActivity().startService(intent);
-        // Toast
-        String message = getResources().getQuantityString(R.plurals.play_songs, urls.size(), urls.size());
+        // Show toast
+        String message = getResources().getQuantityString(
+            action.equals(PlaybackService.ACTION_PLAY_MEDIA) ?
+                R.plurals.play_songs :
+                R.plurals.enqueue_songs,
+            urls.length,
+            urls.length
+        );
         Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
     }
 
