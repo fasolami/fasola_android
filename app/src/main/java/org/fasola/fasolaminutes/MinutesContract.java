@@ -200,11 +200,11 @@ public class MinutesContract {
     public static final class SongLeaderDAO extends MinutesBaseTable {
         protected SongLeaderDAO() {
             super("song_leader_joins");
-            singingOrder = id.toString();
             songId = column("song_id");
             singingId = column("minutes_id");
             leaderId = column("leader_id");
             leadId = column("lead_id");
+            singingOrder = leadId.toString();
             audioUrl = column("audio_url");
         }
 
