@@ -18,6 +18,8 @@ import android.widget.MediaController;
 import android.widget.RemoteViews;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * A singleton foreground service for music playback
@@ -322,14 +324,34 @@ public class PlaybackService extends Service
      * @see Playlist#getSongQuery(Object, Object...)
      * @see Playlist#addAll(Cursor)
      */
-    public void enqueueLead(final int playIndex, Object column, Object... args) {
+    public void enqueueLead(final int playIndex, final SQL.Column column, final Object... args) {
         MinutesLoader loader = new MinutesLoader(Playlist.getSongQuery(column, args));
         loader.startLoading(new MinutesLoader.FinishedCallback() {
             @Override
             public void onLoadFinished(Cursor cursor) {
-                int pos = Playlist.getInstance().size();
-                if (Playlist.getInstance().addAll(cursor) && playIndex > -1) {
-                    Playlist.getInstance().moveToPosition(pos + playIndex);
+                // Add all songs in args to the playlist in order.
+                // Doing this using SQL would require a temp table and an extra join.
+                // Creating a map and sorting manually is a lot faster.
+
+                // Map audioUrl or leadId to Playlist.Song
+                if (! cursor.moveToFirst())
+                    return;
+                int colIndex = cursor.getColumnIndex(column.getKey());
+                HashMap<Object, Playlist.Song> songMap = new HashMap<>();
+                do {
+                    songMap.put(cursor.getString(colIndex), new Playlist.Song(cursor));
+                } while (cursor.moveToNext());
+
+                // Put songs in order
+                ArrayList<Playlist.Song> songs = new ArrayList<>(args.length);
+                for (Object arg : args)
+                    songs.add(songMap.get(arg));
+
+                // Add to the playlist and start playback
+                Playlist pl = Playlist.getInstance();
+                int pos = pl.size();
+                if (pl.addAll(songs) && playIndex > -1) {
+                    pl.moveToPosition(pos + playIndex);
                     prepare();
                 }
             }

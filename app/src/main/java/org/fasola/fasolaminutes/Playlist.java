@@ -73,8 +73,8 @@ public class Playlist extends ArrayList<Playlist.Song> {
                 C.Leader.fullName.func("group_concat", "', '"),
                 C.Singing.name, C.Singing.startDate,
                 C.SongLeader.audioUrl)
-                .where(column, "IN", args)
-            .group(column);
+            .where(column, "IN", args) // This makes for a verbose but efficient query
+            .group(C.SongLeader.leadId);
     }
 
     // Singleton
