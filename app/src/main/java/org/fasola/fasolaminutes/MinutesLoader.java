@@ -63,7 +63,12 @@ public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>,
         return new CursorLoader(MinutesApplication.getContext()) {
             @Override
             public Cursor loadInBackground() {
-                return MinutesLoader.this.onLoadInBackground(MinutesDb.getInstance());
+                Cursor cursor = MinutesLoader.this.onLoadInBackground(MinutesDb.getInstance());
+                // The query isn't executed until data is accessed in some way.
+                // Since the whole point of using a cursor loader is to do the heavy lifting in
+                // the background, we force the query to execute here.
+                cursor.getCount();
+                return cursor;
             }
         };
     }
