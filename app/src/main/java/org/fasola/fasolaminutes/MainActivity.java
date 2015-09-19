@@ -351,7 +351,7 @@ public class MainActivity extends SimpleTabActivity {
                                 .group(C.SongLeader.leadId)
                                 .order(C.SongLeader.singingOrder, "ASC");
             // Start query and play when finished
-            getLoaderManager().initLoader(100, null, new MinutesLoader(query) {
+            getLoaderManager().restartLoader(100, null, new MinutesLoader(query) {
                 @Override
                 public void onLoadFinished(Cursor cursor) {
                     playSongs(cursor, 0);
