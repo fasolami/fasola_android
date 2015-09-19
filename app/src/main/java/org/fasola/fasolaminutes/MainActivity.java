@@ -131,6 +131,7 @@ public class MainActivity extends SimpleTabActivity {
                                    .sectionIndex(C.Leader.leadCount, "DESC");
                 case R.id.menu_leader_sort_entropy:
                     setBins(0, 10, 20, 30, 40, 50, 60, 70, 80, 90);
+                    setSectionLabels("0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9");
                     showHeaders(false);
                     return C.Leader.selectList(C.Leader.fullName, C.Leader.entropyDisplay.format("'(' || {column} || ')'"))
                                    .sectionIndex(C.Leader.entropy.format("CAST({column} * 100 AS INT)"), "DESC")
