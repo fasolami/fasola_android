@@ -4,7 +4,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -656,7 +655,7 @@ public class SQL {
                 oper = "=";
             if (val == null)
                 val = "?";
-            else if (oper.toString().toUpperCase().equals("IN")) {
+            else if (oper.toString().toUpperCase().equals("IN") && val.getClass().isArray()) {
                 // Treat val as an array of objects to be escaped
                 Object[] valArray = (Object[]) val;
                 String[] escapedVals = new String[valArray.length];
@@ -819,7 +818,6 @@ public class SQL {
                 q.append(" LIMIT ").append(limit);
             if (offset != null)
                 q.append(" OFFSET ").append(offset);
-            Log.v("SQL", q.toString());
             return q.toString();
         }
 

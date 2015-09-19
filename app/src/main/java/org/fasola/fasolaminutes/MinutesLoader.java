@@ -5,6 +5,11 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
+
+import java.lang.reflect.Field;
+
+import static java.lang.System.nanoTime;
 
 /**
  * A helper class that handles LoaderManager callbacks for a CursorLoader
@@ -21,6 +26,8 @@ interface _MinutesLoaderCallbacksInterface {
 public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>,
                                       Loader.OnLoadCompleteListener<Cursor>,
                                       _MinutesLoaderCallbacksInterface {
+    private static final boolean DEBUG_QUERIES = true;
+
     public interface Callbacks extends _MinutesLoaderCallbacksInterface {
     }
 
@@ -67,7 +74,20 @@ public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>,
                 // The query isn't executed until data is accessed in some way.
                 // Since the whole point of using a cursor loader is to do the heavy lifting in
                 // the background, we force the query to execute here.
-                cursor.getCount();
+                if (! DEBUG_QUERIES)
+                    cursor.getCount();
+                else {
+                    long start = nanoTime();
+                    cursor.getCount();
+                    try {
+                        Field f = cursor.getClass().getDeclaredField("mQuery");
+                        f.setAccessible(true);
+                        Log.v("SQL", f.get(cursor).toString().substring(13));
+                        Log.v("SQL", "query time (secs): " + (nanoTime() - start)/1000000000.);
+                    } catch (Exception e) {
+                        Log.v("SQL", "[error fetching query]");
+                    }
+                }
                 return cursor;
             }
         };
