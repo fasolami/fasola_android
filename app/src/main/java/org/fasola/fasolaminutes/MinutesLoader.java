@@ -63,9 +63,17 @@ public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>,
         return new CursorLoader(MinutesApplication.getContext()) {
             @Override
             public Cursor loadInBackground() {
-                return MinutesDb.getInstance().query(mQuery != null ? mQuery : "", mQueryArgs);
+                return MinutesLoader.this.onLoadInBackground(MinutesDb.getInstance());
             }
         };
+    }
+
+    /**
+     * Override to provide custom loading behavior
+     * @return Cursor
+     */
+    protected Cursor onLoadInBackground(MinutesDb db) {
+        return db.query(mQuery != null ? mQuery : "", mQueryArgs);
     }
 
     // Either override these using an anonymous subclass of MinutesLoader, or pass an
