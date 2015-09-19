@@ -8,7 +8,7 @@ from __future__ import print_function
 import sqlite3
 import re, string
 
-DATABASE_PATH = r'app/src/main/assets_/databases/minutes.db'
+DATABASE_PATH = r'app/src/main/assets/databases/minutes.db'
 
 # ('Description', 'pattern', 'replace")
 STEPS = (
