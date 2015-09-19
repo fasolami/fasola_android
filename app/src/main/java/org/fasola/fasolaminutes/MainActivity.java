@@ -300,7 +300,7 @@ public class MainActivity extends SimpleTabActivity {
             if (item.getGroupId() == R.id.menu_group_singing_sort) {
                 item.setChecked(true);
                 mSortId = item.getItemId();
-                onUpdateQuery();
+                updateQuery();
                 return true;
             }
             return super.onOptionsItemSelected(item);
