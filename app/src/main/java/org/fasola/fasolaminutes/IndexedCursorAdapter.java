@@ -19,7 +19,6 @@ import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
  */
 public class IndexedCursorAdapter extends SimpleCursorAdapter implements SectionIndexer, StickyListHeadersAdapter {
     protected LetterIndexer mIndexer;
-    protected Object[] mSections;
     protected LayoutInflater mInflater;
     boolean mAreHeadersVisible = true;
     int mHighlight = -1;
@@ -40,20 +39,6 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
     public void setPlayClickListeners(View.OnClickListener click, View.OnLongClickListener longClick) {
         mClickListener = click;
         mLongClickListener = longClick;
-    }
-
-    /**
-     * Override SectionIndexer labels
-     * Example:
-     *   Using AlphabetIndexer with "0123"
-     *   setSectionLabels("First", "Second", "Third", "Fourth")
-     * @param sections Section labels
-     */
-    public void setSectionLabels(String... sections) {
-        if (sections == null || sections.length == 0)
-            mSections = null;
-        else
-            mSections = sections;
     }
 
     // Set a SectionIndexer
@@ -135,9 +120,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
 
     @Override
     public Object[] getSections() {
-        if (mSections != null)
-            return mSections;
-        return mIndexer.getSections();
+        return mIndexer.getSectionLabels();
     }
 
     public void showHeaders(boolean show) {

@@ -14,6 +14,8 @@ import java.util.List;
 public class LetterIndexer extends AlphabetIndexer {
     boolean mIsDesc;
     int mTotalCount = 0;
+    String[] mSections;
+
     public LetterIndexer(Cursor cursor, int sortedColumnIndex, CharSequence alphabet) {
         super(cursor, sortedColumnIndex, alphabet);
         mIsDesc = alphabet.length() > 0 && alphabet.charAt(0) > alphabet.charAt(alphabet.length() - 1);
@@ -33,6 +35,24 @@ public class LetterIndexer extends AlphabetIndexer {
     // mAlphabetArray is private in AlphabetIndexer, but we get get at it through getSections()
     protected void setSections(String[] sections) {
         System.arraycopy(sections, 0, (String[])getSections(), 0, sections.length);
+    }
+
+    /**
+     * Override SectionIndexer labels
+     * Example:
+     *   Using AlphabetIndexer with "0123"
+     *   setSectionLabels("First", "Second", "Third", "Fourth")
+     * @param sections Section labels
+     */
+    public void setSectionLabels(String... sections) {
+        if (sections == null || sections.length == 0)
+            mSections = null;
+        else
+            mSections = sections;
+    }
+
+    public Object[] getSectionLabels() {
+        return mSections != null ? mSections : getSections();
     }
 
     // Handle descending sort order
@@ -61,11 +81,15 @@ public class LetterIndexer extends AlphabetIndexer {
                 mIsDesc = isDesc;
                 // Reverse alphabet
                 mAlphabet = new StringBuilder(mAlphabet).reverse().toString();
-                // Reverse section headers
+                // Reverse sections
                 String[] sections = (String[])getSections();
                 List<String> sectionReverser = Arrays.asList(sections);
                 Collections.reverse(sectionReverser);
                 sectionReverser.toArray(sections);
+                // Reverse section labels
+                sectionReverser = Arrays.asList(mSections);
+                Collections.reverse(sectionReverser);
+                sectionReverser.toArray(mSections);
             }
         }
     }

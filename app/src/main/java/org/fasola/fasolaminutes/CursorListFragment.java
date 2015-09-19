@@ -434,11 +434,11 @@ public class CursorListFragment extends ListFragment
         else if (mDeferredIndexerType == STRING_INDEXER)
             mDeferredIndexer = new StringIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
         // Set the new indexer
-        adapter.setSectionLabels(mSectionLabels);
-        mSectionLabels = null;
         if (mDeferredIndexer != null) {
             adapter.setIndexer(mDeferredIndexer);
+            mDeferredIndexer.setSectionLabels(mSectionLabels);
             mDeferredIndexer = null;
+            mSectionLabels = null;
         }
         // Setup the CursorAdapter
         if (cursor.getColumnCount() == 0) {
