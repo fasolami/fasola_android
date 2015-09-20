@@ -40,6 +40,10 @@ public class Playlist extends ArrayList<Playlist.Song> {
         public String singing;
         public String date;
         public String url;
+        public int status;
+
+        public static final int STATUS_OK = 0;
+        public static final int STATUS_ERROR = 1;
 
         /**
          * Constructs a song from a cursor fetched from executing
@@ -54,6 +58,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
             this.singing = cursor.getString(3);
             this.date = cursor.getString(4);
             this.url = cursor.getString(5);
+            this.status = STATUS_OK;
         }
     }
 
