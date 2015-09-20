@@ -88,6 +88,14 @@ public class PlaylistFragment extends ListFragment
         mPlayer.start(position);
     }
 
+    View.OnClickListener mRemoveClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            int position = getListView().getPositionForView(v);
+            mPlaylist.remove(position);
+        }
+    };
+
     @Override
     public void drop(int from, int to) {
         mPlaylist.move(from, to);
@@ -136,7 +144,7 @@ public class PlaylistFragment extends ListFragment
     /**
      * Custom ListAdapter backed by the PlaybackService's playlist
      */
-    static class PlaylistListAdapter extends BaseAdapter {
+    class PlaylistListAdapter extends BaseAdapter {
         Context mContext;
         LayoutInflater mInflater;
         Playlist mPlaylist;
@@ -181,6 +189,8 @@ public class PlaylistFragment extends ListFragment
                 nowPlaying = R.drawable.ic_play_indicator;
             ((TextView) view.findViewById(android.R.id.text1))
                     .setCompoundDrawablesWithIntrinsicBounds(nowPlaying, 0, 0, 0);
+            View image = view.findViewById(R.id.close);
+            image.setOnClickListener(mRemoveClickListener);
             return view;
         }
 
