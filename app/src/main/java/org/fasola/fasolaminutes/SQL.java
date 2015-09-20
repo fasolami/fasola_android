@@ -110,7 +110,7 @@ public class SQL {
          * @param query {@link Query}
          * @return The query as a new column
          */
-        public Column subQuery(Query query) {
+        public Column subQuery(String query) {
             Column col = new Column(this, "");
             col.setName("(" + query + ")"); // Column constructor adds table prefix to name
             return column(col);
@@ -131,7 +131,7 @@ public class SQL {
             String whereClause = thisJoin.substring(thisJoin.indexOf(" ON ") + 4);
             query.whereList.add(new Query.QueryStringBuilder().append(whereClause));
             query.joins.remove(TABLE_NAME);
-            return subQuery(query);
+            return subQuery(query.toString());
         }
 
         // Create a stored query as a column
