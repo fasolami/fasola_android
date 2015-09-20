@@ -101,6 +101,8 @@ public class LeaderActivity extends SimpleTabActivity {
                 }
             });
             // Query for BarChart
+            final BarChart chart = (BarChart)view.findViewById(R.id.chart);
+            chart.setNoDataText("");
             SQL.Query chartQuery = SQL.select(C.Leader.singingCount, C.Singing.year)
                                         .whereEq(C.Leader.id)
                                         .group(C.Singing.year)
@@ -124,11 +126,13 @@ public class LeaderActivity extends SimpleTabActivity {
                     }
                     // Set data
                     BarDataSet dataset = new BarDataSet(entries, "Singings Attended");
-                    BarChart chart = (BarChart)view.findViewById(R.id.chart);
                     chart.setDescription("");
                     chart.setData(new BarData(labels, dataset));
                     // Style the chart
                     MinutesApplication.applyDefaultChartStyle(chart);
+                    // Update -- if the query took a little while, sometimes the chart doesn't
+                    // want to redraw, so we force it here.
+                    chart.invalidate();
                 }
             });
         }

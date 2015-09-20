@@ -147,6 +147,8 @@ public class SongActivity extends SimpleTabActivity {
                 }
             });
             // Chart data
+            final BarChart chart = (BarChart)view.findViewById(R.id.chart);
+            chart.setNoDataText("");
             query = C.SongStats.select(C.SongStats.year, C.SongStats.leadCount)
                                            .whereEq(C.SongStats.songId)
                                            .order(C.SongStats.year, "ASC");
@@ -167,11 +169,13 @@ public class SongActivity extends SimpleTabActivity {
                     dataSets.add(countSet);
                     // Set chart data
                     BarData data = new BarData(xVals, dataSets);
-                    BarChart chart = (BarChart)view.findViewById(R.id.chart);
                     chart.setDescription("");
                     chart.setData(data);
                     // Style chart
                     MinutesApplication.applyDefaultChartStyle(chart);
+                    // Update -- if the query took a little while, sometimes the chart doesn't
+                    // want to redraw, so we force it here.
+                    chart.invalidate();
                 }
             });
         }
