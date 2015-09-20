@@ -11,6 +11,7 @@ import android.database.DataSetObserver;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -33,7 +34,8 @@ public class PlaybackService extends Service
             AudioManager.OnAudioFocusChangeListener {
 
     private static final String TAG = "PlaybackService";
-    private static final int ERROR_LIMIT = 10;
+    private static final int ERROR_LIMIT = 5;
+    private static final int ERROR_DELAY_MS = 500;
 
     /** Enqueue songs */
     public static final String ACTION_ENQUEUE_MEDIA = "org.fasola.fasolaminutes.media.ENQUEUE";
@@ -471,7 +473,7 @@ public class PlaybackService extends Service
         mIsPrepared = false;
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_COMPLETED));
         // Start the next
-        if (mErrorCount < ERROR_LIMIT && Playlist.getInstance().moveToNext() != null)
+        if (Playlist.getInstance().moveToNext() != null)
             prepare();
         else {
             Log.v(TAG, "End of playlist: stopping service");
@@ -486,10 +488,22 @@ public class PlaybackService extends Service
         Log.e(TAG, "Error: " + String.valueOf(what));
         if (mSong != null)
             mSong.status = Playlist.Song.STATUS_ERROR;
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_ERROR));
         mIsPrepared = false;
         ++mErrorCount;
-        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_ERROR));
-        return false;
+        if (mErrorCount >= ERROR_LIMIT) {
+            mErrorCount = 0;
+            return false; // Give up on this song; move to the next
+        }
+        // Try to load the same song a few times
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                prepare();
+            }
+        }, ERROR_DELAY_MS);
+        return true;
     }
     //---------------------------------------------------------------------------------------------
     //endregion
