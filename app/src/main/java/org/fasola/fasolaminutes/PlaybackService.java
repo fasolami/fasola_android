@@ -148,9 +148,7 @@ public class PlaybackService extends Service
             prepare();
         }
         else if (action.equals(ACTION_CLOSE)) {
-            stopForeground(true);
-            mNotification = null;
-            stopSelf();
+            stop();
         }
         return START_STICKY;
     }
@@ -232,7 +230,7 @@ public class PlaybackService extends Service
     }
 
     /**
-     * Stop playback and release resources
+     * Stop playback, release resources, and stop the service
      * This is not a MediaPlayerControl override
      */
     public void stop() {
@@ -244,7 +242,9 @@ public class PlaybackService extends Service
         }
         mShouldPlay = false;
         mIsPrepared = false;
-        updateNotification();
+        mNotification = null;
+        stopForeground(true);
+        stopSelf();
     }
 
     @Override
@@ -489,9 +489,7 @@ public class PlaybackService extends Service
             prepare();
         else {
             Log.v(TAG, "End of playlist: stopping service");
-            stopForeground(true);
-            mNotification = null;
-            stopSelf();
+            stop();
         }
     }
 
@@ -512,7 +510,8 @@ public class PlaybackService extends Service
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                prepare();
+                if (mMediaPlayer != null)
+                    prepare();
             }
         }, ERROR_DELAY_MS);
         return true;
