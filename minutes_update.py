@@ -157,6 +157,58 @@ if not has_lead_id or FORCE_UPDATE:
 
 
 # ----------------------------------------------------------------------------
+# Fix song stats (distinct lead_id = one lead, instead of each leader_id)
+# ----------------------------------------------------------------------------
+# NB: The actual query should look something like this, but
+#  (a) it takes a while to execute; and 
+#  (b) it's very hard to get the yearly rank as part of the query,
+# so we'll take a different approach
+#        SELECT song_id, minutes.Year, count(DISTINCT lead_id)
+#        FROM song_leader_joins
+#        JOIN minutes ON minutes.id = song_leader_joins.minutes_id
+#        GROUP BY song_id, minutes.Year
+#        ORDER BY minutes.Year ASC, count(DISTINCT lead_id) DESC
+
+from collections import defaultdict
+
+print "Fixing table 'song_stats'"
+# Setup stats dict
+stats = {}
+years = db.execute("SELECT DISTINCT year FROM minutes").fetchall()
+for song_id, in db.execute("SELECT id FROM songs"):
+    stats[song_id] = {}
+    for year, in years:
+        stats[song_id][year] = 0
+# Get leads by song and year: compute counts
+cursor = db.execute("""
+    SELECT DISTINCT lead_id, song_id, minutes.Year
+    FROM song_leader_joins
+    JOIN minutes ON song_leader_joins.minutes_id = minutes.id""")
+for lead_id, song_id, year in cursor:
+    stats[song_id][year] += 1
+# Compute ranks
+ranks = defaultdict(list)
+for song_id, yearcount in stats.iteritems():
+    for year, count in yearcount.iteritems():
+        ranks[year].append((count, song_id))
+for data in ranks.itervalues():
+    data.sort(reverse=True)
+# Gather data
+values = []
+for year in sorted(ranks.keys()):
+    rank = 1
+    last_count = 0
+    for i, (count, song_id) in enumerate(ranks[year]):
+        if count != last_count:
+            rank = i + 1
+        last_count = count
+        values.append((song_id, year, count, rank))
+# Clear and repopulate table
+db.execute("DELETE FROM song_stats")
+db.executemany("INSERT INTO song_stats (song_id, year, lead_count, rank) VALUES (?, ?, ?, ?)", values)
+
+
+# ----------------------------------------------------------------------------
 # Add RecordingCt
 # ----------------------------------------------------------------------------
 has_recording_ct = col_exists(db, 'minutes', 'RecordingCt')
