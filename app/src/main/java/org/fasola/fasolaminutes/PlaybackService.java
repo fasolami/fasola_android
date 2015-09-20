@@ -597,6 +597,7 @@ public class PlaybackService extends Service
             Playlist.getInstance().moveToPosition(pos);
             if (isRunning())
                 getInstance().prepare();
+            start();
         }
 
         @Override
