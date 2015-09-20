@@ -63,7 +63,8 @@ public class PlaylistFragment extends ListFragment
         // Setup MediaController
         mPlayer = new PlaybackService.Control(getActivity());
         mController.setMediaPlayer(mPlayer);
-        Playlist.getInstance().registerPlayingObserver(mPlaylistObserver);
+        mPlaylist.registerObserver(mPlaylistObserver);
+        mPlaylist.registerPlayingObserver(mPlaylistObserver);
         updateControls(); // Initial Setup
     }
 
@@ -77,7 +78,8 @@ public class PlaylistFragment extends ListFragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Playlist.getInstance().unregisterPlayingObserver(mPlaylistObserver);
+        mPlaylist.unregisterObserver(mPlaylistObserver);
+        mPlaylist.unregisterPlayingObserver(mPlaylistObserver);
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
     }
 
@@ -104,6 +106,7 @@ public class PlaylistFragment extends ListFragment
                     pos < playlist.size() - 1 ? mPlayer.nextListener : null,
                     pos > 0 ? mPlayer.prevListener : null
             );
+            mController.show(0); // Update status
         }
     }
 
@@ -112,9 +115,11 @@ public class PlaylistFragment extends ListFragment
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(PlaybackService.BROADCAST_PREPARED))
-                mController.show(0);
+                updateControls();
             else if (intent.getAction().equals(PlaybackService.BROADCAST_PLAYING))
-                mController.show(0);
+                updateControls();
+            else if (intent.getAction().equals(PlaybackService.BROADCAST_COMPLETED))
+                updateControls();
         }
     };
 
