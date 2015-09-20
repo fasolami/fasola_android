@@ -404,7 +404,7 @@ public class CursorListFragment extends ListFragment
             urls.length,
             urls.length
         );
-        Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
     }
 
     @Override
