@@ -263,6 +263,13 @@ public class Playlist extends ArrayList<Playlist.Song> {
         return song;
     }
 
+    public void move(int from, int to) {
+        super.add(to, super.remove(from));
+        notifyChanged();
+        moveToPosition(to);
+    }
+
+
     @Override
     public void clear() {
         mPos = -1;

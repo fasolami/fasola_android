@@ -88,12 +88,7 @@ public class PlaylistFragment extends ListFragment
 
     @Override
     public void drop(int from, int to) {
-        int lastPos = mPlaylist.getPosition();
-        mPlaylist.add(to, mPlaylist.remove(from));
-        // Update now playing if we just moved the currently playing song
-        // (otherwise Playlist handles it)
-        if (lastPos == from)
-            mPlaylist.moveToPosition(to);
+        mPlaylist.move(from, to);
         ((BaseAdapter)getListAdapter()).notifyDataSetChanged();
     }
 
