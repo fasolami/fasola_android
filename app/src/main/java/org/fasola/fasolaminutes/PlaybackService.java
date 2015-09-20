@@ -62,6 +62,8 @@ public class PlaybackService extends Service
     public static final String ACTION_PREV = "org.fasola.fasolaminutes.action.PREV";
     /** Stop playback */
     public static final String ACTION_STOP = "org.fasola.fasolaminutes.action.STOP";
+    /** Close notification */
+    public static final String ACTION_CLOSE = "org.fasola.fasolaminutes.action.STOP";
 
     /** Broadcast sent when the {@link MediaPlayer} is prepared */
     public static final String BROADCAST_PREPARED = "org.fasola.fasolaminutes.mediaBroadcast.PREPARED";
@@ -144,6 +146,11 @@ public class PlaybackService extends Service
         else if (action.equals(ACTION_PREV)) {
             Playlist.getInstance().moveToPrev();
             prepare();
+        }
+        else if (action.equals(ACTION_CLOSE)) {
+            stopForeground(true);
+            mNotification = null;
+            stopSelf();
         }
         return START_STICKY;
     }
@@ -400,6 +407,11 @@ public class PlaybackService extends Service
         nextIntent.setAction(ACTION_NEXT);
         remote.setOnClickPendingIntent(R.id.next, PendingIntent.getService(
                 this, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT
+        ));
+        Intent closeIntent = new Intent(this, PlaybackService.class);
+        closeIntent.setAction(ACTION_CLOSE);
+        remote.setOnClickPendingIntent(R.id.close, PendingIntent.getService(
+                this, 0, closeIntent, PendingIntent.FLAG_UPDATE_CURRENT
         ));
         // Main Notification Intent
         Intent intent = new Intent(this, PlaylistActivity.class);
