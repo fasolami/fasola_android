@@ -86,8 +86,16 @@ public class MinutesContract {
         @Override
         protected void onCreate() {
             pageSort = column(number.format("{column} * 1"));
-            leaderCount = column(LeaderStats.leaderId.countDistinct());
-            leadCount = column(LeaderStats.leadCount.sum());
+            leaderCount = subQuery(LeaderStats.leaderId.countDistinct());
+            leadCount = column(SongStats.leadCount.sum());
+            coleadCount = subQuery(
+                "SELECT COUNT(*) FROM (" +
+                    SQL.select("1")
+                       .from(SongLeader)
+                       .group(SongLeader.leadId)
+                       .where(SongLeader.songId, "=", Song.id)
+                       .having(SongLeader.leaderId.count(), ">" , 1) +
+                ")");
             fullName = concat(number, "' '", title, titleOrdinal.format(
                 "(CASE WHEN {column} <> '' " +
                     "THEN ' (' || {column} || ')' " +
@@ -97,7 +105,7 @@ public class MinutesContract {
         }
 
         public SQL.Column title, titleOrdinal, number, composer, poet, lyrics, rawKey, key, time;
-        public SQL.Column fullName, leaderCount, leadCount, pageSort;
+        public SQL.Column fullName, leaderCount, leadCount, coleadCount, pageSort;
     }
 
     /* SongStats table */

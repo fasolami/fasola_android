@@ -128,7 +128,7 @@ public class SongActivity extends SimpleTabActivity {
             super.onViewCreated(view, savedInstanceState);
             long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
             // Stats summary
-            SQL.Query query = C.Song.select(C.Song.leaderCount, C.Song.leadCount)
+            SQL.Query query = C.Song.select(C.Song.leaderCount, C.Song.leadCount, C.Song.coleadCount)
                                     .whereEq(C.Song.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
                 @Override
@@ -137,9 +137,12 @@ public class SongActivity extends SimpleTabActivity {
                     if (song != null) {
                         int nLeaders = song.leaderCount.getInt();
                         int nTimes = song.leadCount.getInt();
+                        int nColeads = song.coleadCount.getInt();
                         String leaders = getResources().getQuantityString(R.plurals.leaders, nLeaders, nLeaders);
                         String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
-                        ((TextView) view.findViewById(R.id.stats)).setText("Led " + timesLed + ", by " + leaders);
+                        String coleads = getResources().getQuantityString(R.plurals.coleads, nColeads, nColeads);
+                        ((TextView) view.findViewById(R.id.stats)).setText(
+                                "Led " + timesLed + ", by " + leaders + " (" + coleads + ")");
                     }
                 }
             });
