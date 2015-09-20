@@ -120,7 +120,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
 
     @Override
     public Object[] getSections() {
-        return mIndexer.getSectionLabels();
+        return mIndexer != null ? mIndexer.getSectionLabels() : null;
     }
 
     public void showHeaders(boolean show) {
