@@ -7,6 +7,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
@@ -72,6 +73,7 @@ public class PlaybackService extends Service
     MediaPlayer mMediaPlayer;
     boolean mIsPrepared;
     boolean mShouldPlay; // Should we play the song once it is prepared?
+    Playlist.Song mSong; // Prepared song
     int mErrorCount; // Number of sequential errors
     NotificationManager mNotificationManager;
     Notification mNotification;
@@ -98,6 +100,7 @@ public class PlaybackService extends Service
         mInstance = this;
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        Playlist.getInstance().registerObserver(mPlaylistObserver);
     }
 
     @Override
@@ -159,6 +162,7 @@ public class PlaybackService extends Service
     @Override
     public void onDestroy() {
        stop();
+       Playlist.getInstance().unregisterObserver(mPlaylistObserver);
        mInstance = null;
     }
 
@@ -223,6 +227,7 @@ public class PlaybackService extends Service
      * This is not a MediaPlayerControl override
      */
     public void stop() {
+        mSong = null;
         mAudioManager.abandonAudioFocus(this);
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
@@ -230,6 +235,7 @@ public class PlaybackService extends Service
         }
         mShouldPlay = false;
         mIsPrepared = false;
+        updateNotification();
     }
 
     @Override
@@ -292,8 +298,8 @@ public class PlaybackService extends Service
      */
     public boolean prepare() {
         // Get the song
-        Playlist.Song song = Playlist.getInstance().getCurrent();
-        if (song == null)
+        mSong = Playlist.getInstance().getCurrent();
+        if (mSong == null)
             return false;
         // Prepare player
         mIsPrepared = false;
@@ -301,10 +307,10 @@ public class PlaybackService extends Service
         mMediaPlayer.stop();
         mMediaPlayer.reset();
         try {
-            mMediaPlayer.setDataSource(song.url);
+            mMediaPlayer.setDataSource(mSong.url);
         } catch (IOException e) {
             // TODO: something useful... a broadcast?
-            Log.e(TAG, "IOException with url: " + song.url);
+            Log.e(TAG, "IOException with url: " + mSong.url);
         }
         mShouldPlay = true;
         mMediaPlayer.prepareAsync();
@@ -421,7 +427,7 @@ public class PlaybackService extends Service
         RemoteViews remote = notification.contentView;
         remote.setTextViewText(R.id.title, song != null ? song.name : "");
         remote.setTextViewText(R.id.singing, song != null ? song.singing : "");
-        remote.setImageViewResource(R.id.play_pause, mMediaPlayer.isPlaying()
+        remote.setImageViewResource(R.id.play_pause, isPlaying()
                 ? android.R.drawable.ic_media_pause
                 : android.R.drawable.ic_media_play);
         // Show or update notification
@@ -432,6 +438,18 @@ public class PlaybackService extends Service
         } else
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
     }
+
+    /**
+     * Observer that stops playback if the song is removed from the playlist
+     */
+    DataSetObserver mPlaylistObserver = new DataSetObserver() {
+        @Override
+        public void onChanged() {
+            if (mSong != null && ! Playlist.getInstance().contains(mSong))
+                stop();
+        }
+    };
+
 
     //region MediaPlayer Callbacks
     //---------------------------------------------------------------------------------------------
