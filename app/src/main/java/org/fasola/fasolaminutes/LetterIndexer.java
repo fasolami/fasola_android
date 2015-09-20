@@ -87,9 +87,11 @@ public class LetterIndexer extends AlphabetIndexer {
                 Collections.reverse(sectionReverser);
                 sectionReverser.toArray(sections);
                 // Reverse section labels
-                sectionReverser = Arrays.asList(mSections);
-                Collections.reverse(sectionReverser);
-                sectionReverser.toArray(mSections);
+                if (mSections != null) {
+                    sectionReverser = Arrays.asList(mSections);
+                    Collections.reverse(sectionReverser);
+                    sectionReverser.toArray(mSections);
+                }
             }
         }
     }

@@ -435,8 +435,8 @@ public class CursorListFragment extends ListFragment
             mDeferredIndexer = new StringIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
         // Set the new indexer
         if (mDeferredIndexer != null) {
-            adapter.setIndexer(mDeferredIndexer);
             mDeferredIndexer.setSectionLabels(mSectionLabels);
+            adapter.setIndexer(mDeferredIndexer);
             mDeferredIndexer = null;
             mSectionLabels = null;
         }
