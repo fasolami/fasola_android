@@ -183,12 +183,14 @@ public class PlaylistFragment extends ListFragment
             ((TextView) view.findViewById(android.R.id.text1)).setText(song.name);
             ((TextView) view.findViewById(android.R.id.text2)).setText(song.singing);
             ((TextView) view.findViewById(R.id.text3)).setText(song.leaders);
-            // Playing indicator
-            int nowPlaying = 0;
+            // Status indicator
+            int iconResource = 0;
             if (mPlaylist.getPosition() == i)
-                nowPlaying = R.drawable.ic_play_indicator;
+                iconResource = R.drawable.ic_play_indicator;
+            else if (mPlaylist.get(i) != null && mPlaylist.get(i).status == Playlist.Song.STATUS_ERROR)
+                iconResource = R.drawable.ic_warning_amber_18dp;
             ((TextView) view.findViewById(android.R.id.text1))
-                    .setCompoundDrawablesWithIntrinsicBounds(nowPlaying, 0, 0, 0);
+                    .setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0);
             View image = view.findViewById(R.id.close);
             image.setOnClickListener(mRemoveClickListener);
             return view;

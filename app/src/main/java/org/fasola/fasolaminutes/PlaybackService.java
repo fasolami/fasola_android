@@ -458,6 +458,8 @@ public class PlaybackService extends Service
         Log.v(TAG, "Prepared; starting playback");
         mIsPrepared = true;
         mErrorCount = 0;
+        if (mSong != null)
+            mSong.status = Playlist.Song.STATUS_OK;
         if (mShouldPlay)
             start();
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PREPARED));
@@ -482,6 +484,8 @@ public class PlaybackService extends Service
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Log.e(TAG, "Error: " + String.valueOf(what));
+        if (mSong != null)
+            mSong.status = Playlist.Song.STATUS_ERROR;
         mIsPrepared = false;
         ++mErrorCount;
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_ERROR));
