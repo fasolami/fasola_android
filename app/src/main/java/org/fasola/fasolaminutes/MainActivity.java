@@ -218,31 +218,56 @@ public class MainActivity extends SimpleTabActivity {
                                      C.SongStats.leadCount.sum().format("'(' || {column} || ')'"));
         }
 
-        // Change query/index based on the selected sort column
-        public SQL.Query onUpdateQuery() {
+        // Code common to onUpdateQuery and onUpdateSearch
+        private SQL.Query setQueryOrder(SQL.Query query, boolean setSectionIndex) {
             switch(mSortId) {
                 case R.id.menu_song_sort_title:
-                    setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-                    showHeaders(true);
-                    return songQuery().sectionIndex(C.Song.title, "ASC");
+                    if (setSectionIndex) {
+                        setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                        showHeaders(true);
+                        return query.sectionIndex(C.Song.title, "ASC");
+                    }
+                    else
+                        return query.order(C.Song.title, "ASC");
                 case R.id.menu_song_sort_leads:
-                    setBins(100, 500, 1000, 1500, 2000, 2500, 3000);
-                    showHeaders(false);
-                    return songQuery().sectionIndex(C.SongStats.leadCount.sum(), "DESC");
+                    if (setSectionIndex) {
+                        setBins(100, 500, 1000, 1500, 2000, 2500, 3000);
+                        showHeaders(false);
+                        return query.sectionIndex(C.SongStats.leadCount.sum(), "DESC");
+                    }
+                    else
+                        return query.order(C.SongStats.leadCount.sum(), "DESC");
                 case R.id.menu_song_sort_key:
-                    setStringIndexer();
-                    showHeaders(true);
-                    return songQuery().sectionIndex(C.Song.key, "ASC");
+                    if (setSectionIndex) {
+                        setStringIndexer();
+                        showHeaders(true);
+                        return query.sectionIndex(C.Song.key, "ASC");
+                    }
+                    else
+                        return query.order(C.Song.key, "ASC");
                 case R.id.menu_song_sort_time:
-                    setStringIndexer();
-                    showHeaders(true);
-                    return songQuery().sectionIndex(C.Song.time, "ASC");
+                    if (setSectionIndex) {
+                        setStringIndexer();
+                        showHeaders(true);
+                        return query.sectionIndex(C.Song.time, "ASC");
+                    }
+                    else
+                        return query.order(C.Song.time, "ASC");
                 case R.id.menu_song_sort_page:
                 default:
-                    setBins(0, 100, 200, 300, 400, 500);
-                    showHeaders(false);
-                    return songQuery().sectionIndex(C.Song.pageSort, "ASC");
+                    if (setSectionIndex) {
+                        setBins(0, 100, 200, 300, 400, 500);
+                        showHeaders(false);
+                        return query.sectionIndex(C.Song.pageSort);
+                    }
+                    else
+                        return query.order(C.Song.pageSort, "ASC");
             }
+        }
+
+        // Change query/index based on the selected sort column
+        public SQL.Query onUpdateQuery() {
+            return setQueryOrder(songQuery(), true);
         }
 
         @Override
@@ -251,7 +276,7 @@ public class MainActivity extends SimpleTabActivity {
             showHeaders(true);
             setAlphabet("0123");
             setSectionLabels("Title", "Composer", "Poet", "Words");
-            return songQuery().sectionIndex(
+            query = songQuery().sectionIndex(
                     new SQL.QueryColumn(
                             "CASE ",
                             C.Song.fullName.format("WHEN {column} LIKE %s THEN 0 ", searchTerm),
@@ -261,6 +286,8 @@ public class MainActivity extends SimpleTabActivity {
                             "END"
                     ), "ASC")
                 .where(SQL.INDEX_COLUMN, "IS NOT", "NULL");
+            // Add the additional order clause
+            return setQueryOrder(query, false);
         }
     }
 
