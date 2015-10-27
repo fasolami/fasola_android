@@ -1,18 +1,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="org.fasola.fasolaminutes.MainActivity">
 
     <item android:id="@+id/menu_search"
           android:title="@string/search_singings"
           android:icon="@drawable/ic_action_search"
-          android:showAsAction="ifRoom|collapseActionView"
+          app:showAsAction="ifRoom|collapseActionView"
           android:actionViewClass="android.widget.SearchView" />
 
 
     <item android:id="@+id/menu_singing_sort"
         android:title="@string/menu_leader_sort"
         android:icon="@drawable/ic_action_sort_by_size"
-        android:showAsAction="ifRoom">
+        app:showAsAction="always">
 
         <menu>
         <group android:id="@+id/menu_group_singing_sort"
@@ -20,11 +21,11 @@
 
             <item android:id="@+id/menu_singing_sort_year"
                 android:title="@string/menu_singing_sort_year"
-                android:showAsAction="never" />
+                app:showAsAction="never" />
 
             <item android:id="@+id/menu_singing_sort_recordings"
                 android:title="@string/menu_singing_sort_recordings"
-                android:showAsAction="never" />
+                app:showAsAction="never" />
 
         </group>
         </menu>
