@@ -1,18 +1,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="org.fasola.fasolaminutes.MainActivity">
 
     <item android:id="@+id/menu_search"
           android:title="@string/search_songs"
           android:icon="@drawable/ic_action_search"
-          app:showAsAction="ifRoom|collapseActionView"
+          android:showAsAction="ifRoom|collapseActionView"
           android:actionViewClass="android.widget.SearchView" />
 
     <item android:id="@+id/menu_song_sort"
         android:title="@string/menu_leader_sort"
         android:icon="@drawable/ic_action_sort_by_size"
-        app:showAsAction="always">
+        android:showAsAction="always">
 
         <menu>
         <group android:id="@+id/menu_group_song_sort"
@@ -20,11 +19,11 @@
 
             <item android:id="@+id/menu_song_sort_page"
                 android:title="@string/menu_song_sort_page"
-                app:showAsAction="never" />
+                android:showAsAction="never" />
 
             <item android:id="@+id/menu_song_sort_title"
                 android:title="@string/menu_song_sort_title"
-                app:showAsAction="never" />
+                android:showAsAction="never" />
 
             <item android:id="@+id/menu_song_sort_leads"
                 android:title="@string/menu_song_sort_leads"
@@ -32,11 +31,11 @@
 
             <item android:id="@+id/menu_song_sort_key"
                 android:title="@string/menu_song_sort_key"
-                app:showAsAction="never" />
+                android:showAsAction="never" />
 
             <item android:id="@+id/menu_song_sort_time"
                 android:title="@string/menu_song_sort_time"
-                app:showAsAction="never" />
+                android:showAsAction="never" />
 
         </group>
         </menu>

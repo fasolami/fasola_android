@@ -5,6 +5,9 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -12,6 +15,7 @@ import android.view.View;
 
 public class MainActivity extends SimpleTabActivity {
     public final static String ACTIVITY_POSITION = "org.fasola.fasolaminutes.POSITION";
+    DrawerLayout mDrawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +25,44 @@ public class MainActivity extends SimpleTabActivity {
         // Set page change listener and initial settings
         setOnPageChangeListener(mPageChangeListener);
         mPageChangeListener.onPageSelected(0);
+        // Setup drawer
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        // Drawer toggle callbacks
+        mDrawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                //getActionBar().setTitle(mDrawerTitle);
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                //getActionBar().setTitle(mDrawerTitle);
+                invalidateOptionsMenu();
+            }
+        });
+
+        findViewById(R.id.tab_playlist).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDrawerLayout.openDrawer(findViewById(R.id.playlist_drawer));
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Close drawers first
+        if (mDrawerLayout.isDrawerOpen(Gravity.LEFT))
+            mDrawerLayout.closeDrawer(Gravity.LEFT);
+        else if (mDrawerLayout.isDrawerOpen(Gravity.RIGHT))
+            mDrawerLayout.closeDrawer(Gravity.RIGHT);
+        else
+            super.onBackPressed();
     }
 
     // Change title and FaSoLa tabs when the page changes
@@ -67,9 +109,17 @@ public class MainActivity extends SimpleTabActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        menu.clear();
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        Log.v("MainActivity", "onPrepareOptionsMenu called");
+        Log.v("MainActivity", String.valueOf(menu.hasVisibleItems()));
+        return super.onPrepareOptionsMenu(menu);
     }
 
     public static class LeaderListFragment extends CursorStickyListFragment {
