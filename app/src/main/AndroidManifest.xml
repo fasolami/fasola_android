@@ -23,24 +23,21 @@
         </activity>
         <activity
             android:name=".LeaderActivity"
-            android:label="@string/title_activity_leader"
-            android:parentActivityName=".MainActivity" >
+            android:label="@string/title_activity_leader" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.fasola.fasolaminutes.MainActivity" />
         </activity>
         <activity
             android:name=".SongActivity"
-            android:label="@string/title_activity_song"
-            android:parentActivityName=".MainActivity" >
+            android:label="@string/title_activity_song" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.fasola.fasolaminutes.MainActivity" />
         </activity>
         <activity
             android:name=".SingingActivity"
-            android:label="@string/title_activity_singing"
-            android:parentActivityName=".MainActivity" >
+            android:label="@string/title_activity_singing" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.fasola.fasolaminutes.MainActivity" />
@@ -55,8 +52,7 @@
         <activity
             android:name=".PlaylistActivity"
             android:label="@string/title_activity_playlist"
-            android:launchMode="singleTop"
-            android:parentActivityName=".MainActivity" >
+            android:launchMode="singleTop" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.fasola.fasolaminutes.MainActivity" />
