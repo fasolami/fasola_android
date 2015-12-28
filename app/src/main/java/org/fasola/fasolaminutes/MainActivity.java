@@ -26,9 +26,7 @@ public class MainActivity extends SimpleTabActivity {
         setOnPageChangeListener(mPageChangeListener);
         mPageChangeListener.onPageSelected(0);
         // Setup drawer
-
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-
         // Drawer toggle callbacks
         mDrawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
             @Override
@@ -43,13 +41,6 @@ public class MainActivity extends SimpleTabActivity {
                 super.onDrawerOpened(drawerView);
                 //getActionBar().setTitle(mDrawerTitle);
                 invalidateOptionsMenu();
-            }
-        });
-
-        findViewById(R.id.tab_playlist).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mDrawerLayout.openDrawer(findViewById(R.id.playlist_drawer));
             }
         });
     }

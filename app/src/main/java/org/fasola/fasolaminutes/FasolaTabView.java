@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
+import android.support.v4.widget.DrawerLayout;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,17 @@ public class FasolaTabView extends LinearLayout {
                 }
             });
         }
+        // Make playlist tab open the drawer
+        findViewById(R.id.tab_playlist).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                View root = view.getRootView();
+                DrawerLayout drawerLayout = (DrawerLayout)root.findViewById(R.id.drawer_layout);
+                View playlistDrawer = root.findViewById(R.id.playlist_drawer);
+                if (drawerLayout != null && playlistDrawer != null)
+                    drawerLayout.openDrawer(playlistDrawer);
+            }
+        });
     }
 
     private void setIconColor(View textView, int color) {
