@@ -1,8 +1,13 @@
 package org.fasola.fasolaminutes;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.DataSetObserver;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -12,6 +17,7 @@ import android.widget.TextView;
 public class NowPlayingView extends LinearLayout {
     ImageButton mPlayPause;
     TextView mText;
+    PlaybackService.Control mPlayer;
 
     public NowPlayingView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -23,26 +29,64 @@ public class NowPlayingView extends LinearLayout {
         mText = (TextView) findViewById(R.id.song_title);
         mPlayPause = (ImageButton) findViewById(R.id.play_pause);
         // Events
+        mPlayer = new PlaybackService.Control(getContext());
         mPlayPause.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                if (mPlayer.isPlaying())
+                    mPlayer.pause();
+                else
+                    mPlayer.start();
             }
         });
+    }
+
+    protected void updateButton(boolean isPlaying) {
+        mPlayPause.setImageResource(isPlaying ? R.drawable.ic_pause : R.drawable.ic_play_arrow);
+    }
+
+    protected void updateButton() {
+        updateButton(mPlayer.isPlaying());
     }
 
     DataSetObserver mPlaylistObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
-        Playlist playlist = Playlist.getInstance();
-        if (! playlist.isEmpty()) {
-            setVisibility(View.VISIBLE);
-            Playlist.Song song = playlist.getCurrent();
-            mText.setText(song != null ? song.name : "");
+            Playlist playlist = Playlist.getInstance();
+            if (! playlist.isEmpty()) {
+                setVisibility(View.VISIBLE);
+                Playlist.Song song = playlist.getCurrent();
+                if (song == null)
+                    mText.setText("");
+                else
+                    mText.setText(String.format("%s  -  %s %s", song.name, song.year, song.singing));
+            }
+            else {
+                setVisibility(View.GONE);
+            }
         }
-        else {
-            setVisibility(View.GONE);
-        }
+    };
+
+    IntentFilter filter = new IntentFilter();
+    {
+        filter.addAction(PlaybackService.BROADCAST_PREPARED);
+        filter.addAction(PlaybackService.BROADCAST_PLAYING);
+        filter.addAction(PlaybackService.BROADCAST_COMPLETED);
+        filter.addAction(PlaybackService.BROADCAST_ERROR);
+        filter.addAction(PlaybackService.BROADCAST_PAUSED);
+    }
+
+    BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.v("NOW PLAYING broadcast", intent.getAction());
+            Log.v("NOW PLAYING isPlaying?", String.valueOf(mPlayer.isPlaying()));
+            updateButton();
+            // Add error indicator
+            int iconResource = 0;
+            if (intent.getAction().equals(PlaybackService.BROADCAST_ERROR))
+                iconResource = R.drawable.ic_warning_amber_18dp;
+            mText.setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0);
         }
     };
 
@@ -51,13 +95,16 @@ public class NowPlayingView extends LinearLayout {
         super.onAttachedToWindow();
         Playlist.getInstance().registerObserver(mPlaylistObserver);
         Playlist.getInstance().registerPlayingObserver(mPlaylistObserver);
-        mPlaylistObserver.onChanged(); // Update
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mReceiver, filter);
+        mPlaylistObserver.onChanged();
+        updateButton();
     }
 
     @Override
     protected void onDetachedFromWindow() {
         Playlist.getInstance().unregisterObserver(mPlaylistObserver);
         Playlist.getInstance().unregisterPlayingObserver(mPlaylistObserver);
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mReceiver);
         super.onDetachedFromWindow();
     }
 }
