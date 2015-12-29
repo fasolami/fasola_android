@@ -69,6 +69,8 @@ public class PlaybackService extends Service
     public static final String BROADCAST_PREPARED = "org.fasola.fasolaminutes.mediaBroadcast.PREPARED";
     /** Broadcast sent when the {@link MediaPlayer} has started playing */
     public static final String BROADCAST_PLAYING = "org.fasola.fasolaminutes.mediaBroadcast.PLAYING";
+    /** Broadcast sent when the {@link MediaPlayer} is paused */
+    public static final String BROADCAST_PAUSED = "org.fasola.fasolaminutes.mediaBroadcast.PAUSED";
     /** Broadcast sent when playback (of a single song) is completed */
     public static final String BROADCAST_COMPLETED = "org.fasola.fasolaminutes.mediaBroadcast.COMPLETED";
     /** Broadcast sent on {@link MediaPlayer} error */
@@ -226,6 +228,7 @@ public class PlaybackService extends Service
         if (isPrepared()) {
             ensurePlayer().pause();
             updateNotification();
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PAUSED));
         }
     }
 
@@ -474,9 +477,9 @@ public class PlaybackService extends Service
         mErrorCount = 0;
         if (mSong != null)
             mSong.status = Playlist.Song.STATUS_OK;
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PREPARED));
         if (mShouldPlay)
             start();
-        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PREPARED));
     }
 
     @Override
@@ -498,9 +501,10 @@ public class PlaybackService extends Service
         Log.e(TAG, "Error: " + String.valueOf(what));
         if (mSong != null)
             mSong.status = Playlist.Song.STATUS_ERROR;
-        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_ERROR));
         mIsPrepared = false;
         ++mErrorCount;
+        if (mErrorCount >= ERROR_LIMIT / 2)
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_ERROR));
         if (mErrorCount >= ERROR_LIMIT) {
             mErrorCount = 0;
             return false; // Give up on this song; move to the next
