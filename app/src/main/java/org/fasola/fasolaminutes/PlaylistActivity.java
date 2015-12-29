@@ -1,12 +1,11 @@
 package org.fasola.fasolaminutes;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class PlaylistActivity extends FragmentActivity {
+public class PlaylistActivity extends BackActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

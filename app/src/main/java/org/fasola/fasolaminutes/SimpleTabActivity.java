@@ -2,7 +2,6 @@ package org.fasola.fasolaminutes;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -21,7 +20,7 @@ import java.util.List;
  *  Extend this class, and override onCreateTabs()
  *  In this function, call addTab() to add a tab to your activity
  */
-public abstract class SimpleTabActivity extends FragmentActivity {
+public abstract class SimpleTabActivity extends BackActivity {
     /* Override to change the content view resource */
     protected int getLayoutId() {
         return R.layout.activity_tab;
@@ -96,7 +95,6 @@ public abstract class SimpleTabActivity extends FragmentActivity {
             mTabStrip.setOnPageChangeListener(mOwnPageChangeListener);
         else
             mViewPager.setOnPageChangeListener(mOwnPageChangeListener);
-
     }
 
     /**
