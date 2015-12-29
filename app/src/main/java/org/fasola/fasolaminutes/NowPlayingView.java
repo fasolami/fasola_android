@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.database.DataSetObserver;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageButton;
@@ -46,20 +45,18 @@ public class NowPlayingView extends LinearLayout {
     }
 
     protected void updateButton() {
-        updateButton(mPlayer.isPlaying());
+        mPlayPause.setImageResource(mPlayer.isPlaying() ?
+                R.drawable.ic_pause :
+                R.drawable.ic_play_arrow);
     }
 
     DataSetObserver mPlaylistObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
-            Playlist playlist = Playlist.getInstance();
-            if (! playlist.isEmpty()) {
+            Playlist.Song song = Playlist.getInstance().getCurrent();
+            if (PlaybackService.isRunning() && song != null) {
                 setVisibility(View.VISIBLE);
-                Playlist.Song song = playlist.getCurrent();
-                if (song == null)
-                    mText.setText("");
-                else
-                    mText.setText(String.format("%s  -  %s %s", song.name, song.year, song.singing));
+                mText.setText(String.format("%s  -  %s %s", song.name, song.year, song.singing));
             }
             else {
                 setVisibility(View.GONE);
@@ -79,8 +76,6 @@ public class NowPlayingView extends LinearLayout {
     BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.v("NOW PLAYING broadcast", intent.getAction());
-            Log.v("NOW PLAYING isPlaying?", String.valueOf(mPlayer.isPlaying()));
             updateButton();
             // Add error indicator
             int iconResource = 0;
