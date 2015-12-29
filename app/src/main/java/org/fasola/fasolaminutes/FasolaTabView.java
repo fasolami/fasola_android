@@ -2,7 +2,6 @@ package org.fasola.fasolaminutes;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.support.v4.widget.DrawerLayout;
@@ -14,18 +13,18 @@ import android.widget.TextView;
 
 public class FasolaTabView extends LinearLayout {
     View mSelectedView;
-    static final int NORMAL_COLOR = Color.parseColor("#aaaaaa");
-    static final int SELECTED_COLOR = Color.parseColor("#411c24");
-    static final int BACKGROUND_COLOR = Color.parseColor("#f4eedd");
+    int NORMAL_COLOR;
+    int SELECTED_COLOR;
 
     public FasolaTabView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        // This should really be handled with a style
-        setBackgroundColor(BACKGROUND_COLOR);
+        NORMAL_COLOR = getResources().getColor(R.color.fasolatab_deselected);
+        SELECTED_COLOR = getResources().getColor(R.color.fasolatab_selected);
         // Inflate the layout
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.fasola_tabs, this, true);
+        setBackgroundColor(getResources().getColor(R.color.fasolatab_background));
         // Apply color and click handler to items
         for (int i = 0; i < getChildCount(); i++) {
             setIconColor(getChildAt(i), NORMAL_COLOR);
