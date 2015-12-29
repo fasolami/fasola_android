@@ -50,7 +50,7 @@
         </service>
 
         <activity
-            android:name=".PlaylistActivity"
+            android:name=".NowPlayingActivity"
             android:label="@string/title_activity_playlist"
             android:launchMode="singleTop">
             <meta-data

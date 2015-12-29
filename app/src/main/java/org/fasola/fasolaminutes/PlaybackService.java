@@ -419,7 +419,7 @@ public class PlaybackService extends Service
                 this, 0, closeIntent, PendingIntent.FLAG_UPDATE_CURRENT
         ));
         // Main Notification Intent
-        Intent intent = new Intent(this, PlaylistActivity.class);
+        Intent intent = new Intent(this, NowPlayingActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(
                 this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
         );

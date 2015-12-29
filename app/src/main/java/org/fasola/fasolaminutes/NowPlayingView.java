@@ -43,7 +43,7 @@ public class NowPlayingView extends LinearLayout {
         setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                getContext().startActivity(new Intent(getContext(), PlaylistActivity.class));
+                getContext().startActivity(new Intent(getContext(), NowPlayingActivity.class));
             }
         });
     }
