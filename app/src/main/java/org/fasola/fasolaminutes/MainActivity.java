@@ -20,8 +20,9 @@ public class MainActivity extends SimpleTabActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
         // Save all the pages since the queries may take some time to run
-        mViewPager.setOffscreenPageLimit(mSectionsPagerAdapter.getCount());
+        mViewPager.setOffscreenPageLimit(mSimplePagerAdapter.getCount());
         // Set page change listener and initial settings
         setOnPageChangeListener(mPageChangeListener);
         mPageChangeListener.onPageSelected(0);
@@ -61,7 +62,7 @@ public class MainActivity extends SimpleTabActivity {
         new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                setTitle(mSectionsPagerAdapter.getPageTitle(position));
+                setTitle(mSimplePagerAdapter.getPageTitle(position));
                 ((FasolaTabView) findViewById(R.id.fasola_tabs)).setSelection(position);
             }
         };
@@ -86,15 +87,6 @@ public class MainActivity extends SimpleTabActivity {
             else
                 mPageChangeListener.onPageSelected(position);
         }
-    }
-
-
-    @Override
-    protected void onCreateTabs() {
-        addTab(getString(R.string.tab_leaders), LeaderListFragment.class);
-        addTab(getString(R.string.tab_songs), SongListFragment.class);
-        addTab(getString(R.string.tab_singings), SingingListFragment.class);
-        addTab(getString(R.string.tab_playlist), PlaylistFragment.class);
     }
 
 

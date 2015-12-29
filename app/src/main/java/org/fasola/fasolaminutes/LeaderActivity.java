@@ -18,21 +18,9 @@ import java.util.ArrayList;
 
 public class LeaderActivity extends SimpleTabActivity {
     @Override
-    public int getLayoutId() {
-        return R.layout.activity_leader;
-    }
-
-    @Override
-    public void onCreateTabs() {
-        addTab("Stats", LeaderStatsFragment.class);
-        addTab("Songs", LeaderSongFragment.class);
-        addTab("Singings", LeaderSingingFragment.class);
-        addTab("All Leads", LeaderLeadsFragment.class);
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_leader);
         // Query for main data
         long id = getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
         SQL.Query query = SQL.select(C.Leader.fullName, C.Leader.aka).whereEq(C.Leader.id);
@@ -47,7 +35,7 @@ public class LeaderActivity extends SimpleTabActivity {
         });
         // Check for a lead id and switch to All Leads tab
         if (getIntent().getLongExtra(SingingActivity.EXTRA_LEAD_ID, -1) > -1) {
-            int position = mSectionsPagerAdapter.getFragmentIndex(LeaderLeadsFragment.class);
+            int position = mSimplePagerAdapter.getFragmentIndex(LeaderLeadsFragment.class);
             mViewPager.setCurrentItem(position);
         }
     }

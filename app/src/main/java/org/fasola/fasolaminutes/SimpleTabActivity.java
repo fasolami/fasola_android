@@ -1,13 +1,20 @@
 package org.fasola.fasolaminutes;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.AttributeSet;
 import android.util.Pair;
+import android.view.InflateException;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewStub;
 import android.widget.SearchView;
 
 import com.astuetz.PagerSlidingTabStrip;
@@ -16,23 +23,48 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *  A base class for an activity with tabs
- *  Extend this class, and override onCreateTabs()
- *  In this function, call addTab() to add a tab to your activity
+ *  A base class for an activity with tabs.
+ *  Use {@link android.support.v4.view.ViewPager} in the layout file, and define tabs using
+ *  {@code <fragment android:title="label" android:name="FragmentClass">}
  */
 public abstract class SimpleTabActivity extends BackActivity {
-    /* Override to change the content view resource */
-    protected int getLayoutId() {
-        return R.layout.activity_tab;
+    /** PagerAdapter for ViewPager */
+    SimplePagerAdapter mSimplePagerAdapter;
+
+    /** ViewPager (defined in layout) */
+    ViewPager mViewPager;
+
+    /** Optional Tab Strip header */
+    PagerSlidingTabStrip mTabStrip;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        getLayoutInflater().setFactory2(this); // Use our onCreateView function
+        super.onCreate(savedInstanceState);
+        mSimplePagerAdapter = new SimplePagerAdapter(getSupportFragmentManager());
     }
 
-    /* Override to add tabs to the interface */
-    protected void onCreateTabs() {
-    }
-
-    /* Call from onCreateTabs() to add tabs given a label and a fragment class */
-    protected void addTab(String label, Class<? extends Fragment> fragmentClass) {
-        mSectionsPagerAdapter.addTab(label, fragmentClass);
+    /**
+     * Setup ViewPager and PagerSlidingTabStrip.
+     * Remove temporary ViewStubs (=tabs) from ViewPager.
+     */
+    @Override
+    public void setContentView(int layoutResID) {
+        super.setContentView(layoutResID);
+        // Setup tabs
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.removeAllViews(); // Remove ViewStubs (added in custom onCreateView)
+        mViewPager.setAdapter(mSimplePagerAdapter);
+        mSimplePagerAdapter.notifyDataSetChanged();
+        // Setup PagerSlidingTabStrip (if we have one)
+        mTabStrip = (PagerSlidingTabStrip) findViewById(R.id.tab_strip);
+        if (mTabStrip != null)
+            mTabStrip.setViewPager(mViewPager);
+        // Setup page change listener
+        if (mTabStrip != null)
+            mTabStrip.setOnPageChangeListener(mOwnPageChangeListener);
+        else
+            mViewPager.setOnPageChangeListener(mOwnPageChangeListener);
     }
 
     public Fragment getFragmentByPosition(int index) {
@@ -44,61 +76,8 @@ public abstract class SimpleTabActivity extends BackActivity {
         return getFragmentByPosition(mViewPager.getCurrentItem());
     }
 
-    protected void removeTab(int index) {
-        mSectionsPagerAdapter.removeTab(index);
-    }
-
-    // UI Stuff
-
     /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
-    SectionsPagerAdapter mSectionsPagerAdapter;
-
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    ViewPager mViewPager;
-
-    PagerSlidingTabStrip mTabStrip;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(getLayoutId());
-
-        // Create the adapter that will return a fragment for each of the
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        // Initialize tabs
-        onCreateTabs();
-        mSectionsPagerAdapter.notifyDataSetChanged();
-
-        // If using tab strip, bind here
-        mTabStrip = (PagerSlidingTabStrip) findViewById(R.id.tab_strip);
-        if (mTabStrip != null) {
-            mTabStrip.setViewPager(mViewPager);
-        }
-
-        // Setup page change listener
-        if (mTabStrip != null)
-            mTabStrip.setOnPageChangeListener(mOwnPageChangeListener);
-        else
-            mViewPager.setOnPageChangeListener(mOwnPageChangeListener);
-    }
-
-    /**
-     * Interface for fragments to detect when paging occurs
+     * Interface for fragments to respond to paging events.
      */
     public interface FragmentPagerListener {
         void onPageFocused();
@@ -173,45 +152,19 @@ public abstract class SimpleTabActivity extends BackActivity {
         }
     };
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.menu_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
+     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the tabs.
      */
-
-    protected class SectionsPagerAdapter extends FragmentPagerAdapter {
+    protected class SimplePagerAdapter extends FragmentPagerAdapter {
         public List<Pair<String, Class<? extends Fragment>>> mTabs;
+
+        public SimplePagerAdapter(FragmentManager fm) {
+            super(fm);
+            mTabs = new ArrayList<>();
+        }
 
         public void addTab(String label, Class<? extends Fragment> fragmentClass) {
             mTabs.add(new Pair<String, Class<? extends Fragment>>(label, fragmentClass));
-        }
-
-        public void removeTab(int index) {
-            mTabs.remove(index);
-        }
-
-        public SectionsPagerAdapter(FragmentManager fm) {
-            super(fm);
-            mTabs = new ArrayList<>();
         }
 
         @Override
@@ -237,14 +190,6 @@ public abstract class SimpleTabActivity extends BackActivity {
             }
         }
 
-        public Class<? extends Fragment> getFragmentClass(int position) {
-            try {
-                return mTabs.get(position).second;
-            } catch (IndexOutOfBoundsException ex) {
-                return null;
-            }
-        }
-
         public int getFragmentIndex(Class<? extends Fragment> fragmentClass) {
             for (int i = 0; i < mTabs.size(); i++)
                 if (mTabs.get(i).second == fragmentClass)
@@ -252,4 +197,30 @@ public abstract class SimpleTabActivity extends BackActivity {
             return -1;
         }
     }
+
+    /**
+     * Use fragment tag to add Tabs to the ViewPager.
+     */
+    @Override
+    @Nullable
+    public View onCreateView(View parent, String name, @NonNull Context context, @NonNull AttributeSet attrs) {
+        if (name.equals("fragment") && parent instanceof ViewPager) {
+            String androidNamespace = "http://schemas.android.com/apk/res/android";
+            String fname = attrs.getAttributeValue(androidNamespace, "name");
+            int labelId = attrs.getAttributeResourceValue(androidNamespace, "title", 0);
+            String label = labelId != 0
+                    ? getResources().getString(labelId)
+                    : attrs.getAttributeValue(androidNamespace, "title");
+            try {
+                mSimplePagerAdapter.addTab(label, (Class<? extends Fragment>) Class.forName(fname));
+            }
+            catch (ClassNotFoundException e) {
+                throw new InflateException(attrs.getPositionDescription()
+                        + ": Invalid class: " + fname);
+            }
+            return new ViewStub(context);
+        }
+        return super.onCreateView(name, context, attrs);
+    }
+
 }

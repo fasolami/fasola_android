@@ -2,9 +2,9 @@ package org.fasola.fasolaminutes;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +21,7 @@ public class SingingActivity extends SimpleTabActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_singing);
         // Query
         long id = getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
         SQL.Query query = C.Singing.select(C.Singing.name).whereEq(C.Singing.id);
@@ -32,17 +33,6 @@ public class SingingActivity extends SimpleTabActivity {
                     setTitle(singing.name.getString());
             }
         });
-    }
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.activity_singing;
-    }
-
-    @Override
-    protected void onCreateTabs() {
-        addTab("Songs", SingingSongListFragment.class);
-        addTab("Full Text", FullTextFragment.class);
     }
 
     public static class SingingSongListFragment extends CursorListFragment

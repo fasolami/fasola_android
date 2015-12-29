@@ -23,21 +23,9 @@ import java.util.ArrayList;
 
 public class SongActivity extends SimpleTabActivity {
     @Override
-    protected int getLayoutId() {
-        return R.layout.activity_song;
-    }
-
-    @Override
-    protected void onCreateTabs() {
-        addTab("Stats", SongStatsFragment.class);
-        addTab("Words", SongWordsFragment.class);
-        addTab("Top Leaders", SongLeaderListFragment.class);
-        addTab("Recordings", SongRecordingsFragment.class);
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_song);
         // Query for main data
         long id = getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
         SQL.Query query = C.Song.select(C.Song.fullName).whereEq(C.Song.id);

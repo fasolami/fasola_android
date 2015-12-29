@@ -21,7 +21,33 @@
             android:id="@+id/pager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1">
+
+            <fragment
+                android:title="Stats"
+                android:name="org.fasola.fasolaminutes.LeaderActivity$LeaderStatsFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <fragment
+                android:title="Songs"
+                android:name="org.fasola.fasolaminutes.LeaderActivity$LeaderSongFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <fragment
+                android:title="Singings"
+                android:name="org.fasola.fasolaminutes.LeaderActivity$LeaderSingingFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+            <fragment
+                android:title="All Leads"
+                android:name="org.fasola.fasolaminutes.LeaderActivity$LeaderLeadsFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+
+        </android.support.v4.view.ViewPager>
 
     </LinearLayout>
 </org.fasola.fasolaminutes.WrapperLayout>
