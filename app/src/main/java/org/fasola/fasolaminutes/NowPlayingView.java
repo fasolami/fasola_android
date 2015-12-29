@@ -38,10 +38,12 @@ public class NowPlayingView extends LinearLayout {
                     mPlayer.start();
             }
         });
-    }
-
-    protected void updateButton(boolean isPlaying) {
-        mPlayPause.setImageResource(isPlaying ? R.drawable.ic_pause : R.drawable.ic_play_arrow);
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getContext().startActivity(new Intent(getContext(), PlaylistActivity.class));
+            }
+        });
     }
 
     protected void updateButton() {
