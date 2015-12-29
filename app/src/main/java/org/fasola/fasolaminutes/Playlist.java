@@ -39,6 +39,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
         public String leaders;
         public String singing;
         public String date;
+        public String year;
         public String url;
         public int status;
 
@@ -57,7 +58,8 @@ public class Playlist extends ArrayList<Playlist.Song> {
             this.leaders = cursor.getString(2);
             this.singing = cursor.getString(3);
             this.date = cursor.getString(4);
-            this.url = cursor.getString(5);
+            this.year = cursor.getString(5);
+            this.url = cursor.getString(6);
             this.status = STATUS_OK;
         }
     }
@@ -76,7 +78,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
         return SQL.select(
                 C.SongLeader.leadId, C.Song.fullName,
                 C.Leader.fullName.func("group_concat", "', '"),
-                C.Singing.name, C.Singing.startDate,
+                C.Singing.name, C.Singing.startDate, C.Singing.year,
                 C.SongLeader.audioUrl)
             .where(column, "IN", args) // This makes for a verbose but efficient query
             .group(C.SongLeader.leadId);
