@@ -40,6 +40,7 @@ public class PlaylistFragment extends ListFragment
         filter.addAction(PlaybackService.BROADCAST_PLAYING);
         filter.addAction(PlaybackService.BROADCAST_COMPLETED);
         filter.addAction(PlaybackService.BROADCAST_ERROR);
+        filter.addAction(PlaybackService.BROADCAST_PAUSED);
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
     }
 
@@ -127,6 +128,8 @@ public class PlaylistFragment extends ListFragment
             else if (intent.getAction().equals(PlaybackService.BROADCAST_PLAYING))
                 updateControls();
             else if (intent.getAction().equals(PlaybackService.BROADCAST_COMPLETED))
+                updateControls();
+            else if (intent.getAction().equals(PlaybackService.BROADCAST_PAUSED))
                 updateControls();
         }
     };
