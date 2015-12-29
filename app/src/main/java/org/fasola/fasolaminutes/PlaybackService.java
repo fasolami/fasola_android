@@ -459,13 +459,13 @@ public class PlaybackService extends Service
     }
 
     /**
-     * Observer that stops playback if the song is removed from the playlist
+     * Observer that pauses playback if the song is removed from the playlist
      */
     DataSetObserver mPlaylistObserver = new DataSetObserver() {
         @Override
         public void onChanged() {
             if (mSong != null && ! Playlist.getInstance().contains(mSong))
-                stop();
+                pause();
         }
     };
 
