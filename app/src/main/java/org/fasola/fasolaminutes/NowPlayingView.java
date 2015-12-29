@@ -24,6 +24,8 @@ public class NowPlayingView extends LinearLayout {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.now_playing, this, true);
+        setBackgroundColor(getResources().getColor(R.color.fasola_foreground));
+        setClickable(true);
         // Set members
         mText = (TextView) findViewById(R.id.song_title);
         mPlayPause = (ImageButton) findViewById(R.id.play_pause);
