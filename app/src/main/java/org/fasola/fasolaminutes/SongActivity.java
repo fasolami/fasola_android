@@ -43,16 +43,21 @@ public class SongActivity extends SimpleTabActivity {
     public static class SongLeaderListFragment extends CursorListFragment {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
             setItemLayout(R.layout.leader_list_item);
             setIntentActivity(LeaderActivity.class);
             long songId = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
+            if (songId != -1)
+                setSongId(songId);
+        }
+
+        public void setSongId(long id) {
             SQL.Query query = C.Leader.selectList(C.Leader.fullName,
                                 C.LeaderStats.leadCount.format("'(' || {column} || ')'"))
                             .whereEq(C.LeaderStats.songId)
                             .order(C.LeaderStats.leadCount, "DESC", C.Leader.lastName, "ASC")
-                            .limit(20);
-            setQuery(query, String.valueOf(songId));
-            super.onViewCreated(view, savedInstanceState);
+                    .limit(20);
+            setQuery(query, String.valueOf(id));
         }
     }
 
@@ -67,12 +72,18 @@ public class SongActivity extends SimpleTabActivity {
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
             long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
+            if (id != -1)
+                setSongId(id);
+        }
+
+        public void setSongId(long id) {
             SQL.Query query = C.Song.select(C.Song.lyrics, C.Song.poet, C.Song.composer,
                                             C.Song.key, C.Song.time)
                                     .whereEq(C.Song.id);
-            getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
+            getLoaderManager().restartLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
                 @Override
                 public void onLoadFinished(Cursor cursor) {
+                    View view = getView();
                     C.SongDAO song = C.Song.fromCursor(cursor);
                     if (song != null) {
                         ((TextView) view.findViewById(R.id.words)).setText(song.poet.getString());

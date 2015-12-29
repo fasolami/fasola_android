@@ -22,7 +22,7 @@ public class MainActivity extends SimpleTabActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         // Save all the pages since the queries may take some time to run
-        mViewPager.setOffscreenPageLimit(mSimplePagerAdapter.getCount());
+        mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount());
         // Set page change listener and initial settings
         setOnPageChangeListener(mPageChangeListener);
         mPageChangeListener.onPageSelected(0);
@@ -62,7 +62,7 @@ public class MainActivity extends SimpleTabActivity {
         new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                setTitle(mSimplePagerAdapter.getPageTitle(position));
+                setTitle(mPagerAdapter.getPageTitle(position));
                 ((FasolaTabView) findViewById(R.id.fasola_tabs)).setSelection(position);
             }
         };

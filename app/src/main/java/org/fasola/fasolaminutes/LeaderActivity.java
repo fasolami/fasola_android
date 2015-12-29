@@ -35,7 +35,7 @@ public class LeaderActivity extends SimpleTabActivity {
         });
         // Check for a lead id and switch to All Leads tab
         if (getIntent().getLongExtra(SingingActivity.EXTRA_LEAD_ID, -1) > -1) {
-            int position = mSimplePagerAdapter.getFragmentIndex(LeaderLeadsFragment.class);
+            int position = mPagerAdapter.getFragmentIndex(LeaderLeadsFragment.class);
             mViewPager.setCurrentItem(position);
         }
     }

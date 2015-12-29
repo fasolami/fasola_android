@@ -29,7 +29,7 @@ import java.util.List;
  */
 public abstract class SimpleTabActivity extends BackActivity {
     /** PagerAdapter for ViewPager */
-    SimplePagerAdapter mSimplePagerAdapter;
+    SimplePagerAdapter mPagerAdapter;
 
     /** ViewPager (defined in layout) */
     ViewPager mViewPager;
@@ -41,7 +41,7 @@ public abstract class SimpleTabActivity extends BackActivity {
     protected void onCreate(Bundle savedInstanceState) {
         getLayoutInflater().setFactory2(this); // Use our onCreateView function
         super.onCreate(savedInstanceState);
-        mSimplePagerAdapter = new SimplePagerAdapter(getSupportFragmentManager());
+        mPagerAdapter = new SimplePagerAdapter(getSupportFragmentManager());
     }
 
     /**
@@ -54,8 +54,8 @@ public abstract class SimpleTabActivity extends BackActivity {
         // Setup tabs
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.removeAllViews(); // Remove ViewStubs (added in custom onCreateView)
-        mViewPager.setAdapter(mSimplePagerAdapter);
-        mSimplePagerAdapter.notifyDataSetChanged();
+        mViewPager.setAdapter(mPagerAdapter);
+        mPagerAdapter.notifyDataSetChanged();
         // Setup PagerSlidingTabStrip (if we have one)
         mTabStrip = (PagerSlidingTabStrip) findViewById(R.id.tab_strip);
         if (mTabStrip != null)
@@ -212,7 +212,7 @@ public abstract class SimpleTabActivity extends BackActivity {
                     ? getResources().getString(labelId)
                     : attrs.getAttributeValue(androidNamespace, "title");
             try {
-                mSimplePagerAdapter.addTab(label, (Class<? extends Fragment>) Class.forName(fname));
+                mPagerAdapter.addTab(label, (Class<? extends Fragment>) Class.forName(fname));
             }
             catch (ClassNotFoundException e) {
                 throw new InflateException(attrs.getPositionDescription()
