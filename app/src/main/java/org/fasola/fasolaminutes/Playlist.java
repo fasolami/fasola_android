@@ -236,6 +236,16 @@ public class Playlist extends ArrayList<Playlist.Song> {
         return notifyWrapper(super.addAll(collection));
     }
 
+    // Replace all songs in the playlist with these songs (avoids extra notifications)
+    public boolean replaceWith(Collection<? extends Song> collection) {
+        super.clear();
+        boolean result = super.addAll(collection);
+        mPos = collection.size() > 0 ? 0 : -1;
+        mPlayingObservable.notifyChanged();
+        notifyChanged();
+        return result;
+    }
+
     @Override
     public boolean addAll(int index, Collection<? extends Song> collection) {
         if (super.addAll(index, collection)) {

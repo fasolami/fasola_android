@@ -117,10 +117,8 @@ public class PlaybackService extends Service
         // Enqueue/play
         else if (action.equals(ACTION_PLAY_MEDIA) || action.equals(ACTION_ENQUEUE_MEDIA)) {
             int play = -1;
-            if (action.equals(ACTION_PLAY_MEDIA)) {
-                Playlist.getInstance().clear();
+            if (action.equals(ACTION_PLAY_MEDIA))
                 play = intent.getIntExtra(EXTRA_PLAY_INDEX, 0);
-            }
             if (intent.hasExtra(EXTRA_LEAD_ID))
                 enqueueLead(play, C.SongLeader.leadId, intent.getLongExtra(EXTRA_LEAD_ID, -1));
             else if (intent.hasExtra(EXTRA_URL))
@@ -367,10 +365,14 @@ public class PlaybackService extends Service
 
                 // Add to the playlist and start playback
                 Playlist pl = Playlist.getInstance();
-                int pos = pl.size();
-                if (pl.addAll(songs) && playIndex > -1) {
-                    pl.moveToPosition(pos + playIndex);
+                if (playIndex > -1) {
+                    // If we're just playing songs, remove all previous songs from the playlist
+                    pl.replaceWith(songs);
+                    pl.moveToPosition(playIndex);
                     prepare();
+                }
+                else {
+                    pl.addAll(songs);
                 }
             }
         });
