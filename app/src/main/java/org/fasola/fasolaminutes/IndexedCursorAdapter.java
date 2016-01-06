@@ -15,7 +15,14 @@ import android.widget.TextView;
 import se.emilsjolander.stickylistheaders.StickyListHeadersAdapter;
 
 /**
- * A CursorAdapter and StickyListHeadersAdapter that implements SectionIndexer
+ * A CursorAdapter and StickyListHeadersAdapter that implements SectionIndexer.
+ *
+ * <p>A recording icon (and optional count) are show when a record contains
+ * {@link CursorListFragment#AUDIO_COLUMN}.
+ *
+ * <p>List items can be highlighted using {@link #setHighlight}.
+ *
+ * <p>Headers can be hidden or shown using {@link #showHeaders}.
  */
 public class IndexedCursorAdapter extends SimpleCursorAdapter implements SectionIndexer, StickyListHeadersAdapter {
     protected LetterIndexer mIndexer;
@@ -35,34 +42,27 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         this(context, layout, null, null, null, 0);
     }
 
-    // Call immediately after constructing
+    /** Sets recording icon click listeners */
     public void setPlayClickListeners(View.OnClickListener click, View.OnLongClickListener longClick) {
         mClickListener = click;
         mLongClickListener = longClick;
     }
 
-    // Set a SectionIndexer
+    /** Sets the SectionIndexer */
     public void setIndexer(LetterIndexer indexer) {
         mIndexer = indexer;
         updateIndexerCursor();
     }
 
+    /** Does this Adapter have a SectionIndexer? */
     public boolean hasIndexer() { return mIndexer != null; }
 
-    // Does this cursor have an index column?
+    /** Does this cursor have an index column? */
     public boolean hasIndex() {
-        return hasIndex(getCursor());
+        return getCursor() != null && getCursor().getColumnIndex(SQL.INDEX_COLUMN) != -1;
     }
 
-    public static boolean hasIndex(Cursor cursor) {
-        return cursor != null && cursor.getColumnIndex(SQL.INDEX_COLUMN) != -1;
-    }
-
-    // Find the index column
-    protected int getIndexColumn() {
-        return getIndexColumn(getCursor());
-    }
-
+    /** Returns the index of the {@code SQL.INDEX_COLUMN} or -1 */
     public static int getIndexColumn(Cursor cursor) {
         if (cursor == null)
             return -1;
@@ -76,7 +76,27 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         return -1;
     }
 
-    // Automatically update indexer when the cursor is changed
+    /** Sets the highlighted record index. */
+    public void setHighlight(int position) {
+        mHighlight = position;
+    }
+
+    /** Gets the highlighted record index. */
+    public int getHighlight() {
+        return mHighlight;
+    }
+
+    /** Shows/hides StickyList headers. */
+    public void showHeaders(boolean show) {
+        mAreHeadersVisible = show;
+    }
+
+    /** Are StickyList headers shown? */
+    public boolean areHeadersShown() {
+        return hasIndexer() && mAreHeadersVisible;
+    }
+
+    // Updates indexer and audio column when the cursor is changed.
     @Override
     public Cursor swapCursor(Cursor newCursor) {
         Cursor oldCursor = super.swapCursor(newCursor);
@@ -93,7 +113,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
             mAudioColumn = cursor.getColumnIndex(CursorListFragment.AUDIO_COLUMN);
     }
 
-    // Update the indexer when the cursor changes
+    // Updates the indexer when the cursor changes.
     private void updateIndexerCursor() {
         // Update indexer
         if (! hasIndexer())
@@ -107,6 +127,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         else
             mIndexer.setCursor(null);
     }
+
     // SectionIndexer overrides
     @Override
     public int getPositionForSection(int sectionIndex) {
@@ -123,54 +144,27 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         return mIndexer != null ? mIndexer.getSectionLabels() : null;
     }
 
-    public void showHeaders(boolean show) {
-        mAreHeadersVisible = show;
-    }
-
-    public boolean areHeadersShown() {
-        return hasIndexer() && mAreHeadersVisible;
-    }
-
-    // StickyListHeadersAdapter overrides
+    // Shows/hides recording icon and sets highlight.
     @Override
-    public View getHeaderView(int position, View convertView, ViewGroup parent) {
-        if (! areHeadersShown())
-            return new View(parent.getContext());
-        // Create the view
-        // If convertView is not a ViewGroup, it was created as an empty View above
-        if (convertView == null || ! (convertView instanceof ViewGroup))
-            convertView = mInflater.inflate(R.layout.sticky_list_header, parent, false);
-        // Set the text
-        int section = getSectionForPosition(position);
-        String text = getSections()[section].toString();
-        TextView headerView = (TextView) convertView.findViewById(R.id.list_header_text);
-        headerView.setText(text);
-        // Set count
-        int sectionCount = mIndexer.getCountForSection(section);
-        TextView countView = (TextView) convertView.findViewById(R.id.list_header_count);
-        countView.setText(String.valueOf(sectionCount));
-        return convertView;
+    public View getView(int position, View convertView, ViewGroup parent) {
+        View view = addOrRemoveImage(super.getView(position, convertView, parent), parent);
+        if (position == mHighlight)
+            view.setBackgroundResource(R.color.tab_background);
+        else
+            view.setBackgroundColor(Color.TRANSPARENT);
+        return view;
     }
 
-    public long getHeaderId(int position) {
-        // Only create a single header (which will be empty) if headers are invisible
-        if (areHeadersShown())
-            return getSectionForPosition(position);
-        return 0;
-    }
-
-    // Highlight
-    public int getHighlight() {
-        return mHighlight;
-    }
-
-    public void setHighlight(int position) {
-        mHighlight = position;
-    }
-
-    // Play button
-
-    // Change layout if Cursor has an audioUrl
+    /**
+     * Shows or hides the recording icon.
+     *
+     * <p>Icon is show for records with a non-null/zero {@link CursorListFragment#AUDIO_COLUMN}.
+     * If {@code AUDIO_COLUMN} is a number, the value is displayed below the icon.
+     *
+     * @param view original view
+     * @param parent parent view
+     * @return the modified view
+     */
     protected View addOrRemoveImage(View view, ViewGroup parent) {
         if (mAudioColumn > -1) {
             if (view.getId() != R.id.play_image_layout) {
@@ -180,10 +174,12 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
                         0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
                 view = layout;
                 View image = view.findViewById(R.id.play_image);
-                image.setOnClickListener(mClickListener);
-                image.setOnLongClickListener(mLongClickListener);
+                if (mClickListener != null)
+                    image.setOnClickListener(mClickListener);
+                if (mLongClickListener != null)
+                    image.setOnLongClickListener(mLongClickListener);
             }
-            // Change image visibility by audioUrl column
+            // Change image visibility by audio column
             String label = getCursor().getString(mAudioColumn);
             ImageView playImage = (ImageView)view.findViewById(R.id.play_image);
             TextView recordingCount = (TextView)view.findViewById(R.id.recording_count);
@@ -212,14 +208,32 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         return view;
     }
 
-    // The custom view: check for a play button and highlight
+    // StickyListHeadersAdapter overrides
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = addOrRemoveImage(super.getView(position, convertView, parent), parent);
-        if (position == mHighlight)
-            view.setBackgroundResource(R.color.tab_background);
-        else
-            view.setBackgroundColor(Color.TRANSPARENT);
-        return view;
+    public View getHeaderView(int position, View convertView, ViewGroup parent) {
+        if (! areHeadersShown())
+            return new View(parent.getContext());
+        // Create the view
+        // If convertView is not a ViewGroup, it was created as an empty View above
+        if (convertView == null || ! (convertView instanceof ViewGroup))
+            convertView = mInflater.inflate(R.layout.sticky_list_header, parent, false);
+        // Set the text
+        int section = getSectionForPosition(position);
+        String text = getSections()[section].toString();
+        TextView headerView = (TextView) convertView.findViewById(R.id.list_header_text);
+        headerView.setText(text);
+        // Set count
+        int sectionCount = mIndexer.getCountForSection(section);
+        TextView countView = (TextView) convertView.findViewById(R.id.list_header_count);
+        countView.setText(String.valueOf(sectionCount));
+        return convertView;
+    }
+
+    @Override
+    public long getHeaderId(int position) {
+        if (areHeadersShown())
+            return getSectionForPosition(position);
+        // Create a single empty header (with id=0) if headers are invisible.
+        return 0;
     }
 }

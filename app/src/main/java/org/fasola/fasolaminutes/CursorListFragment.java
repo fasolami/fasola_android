@@ -22,15 +22,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Simple framework for using queries as the base for a ListFragment
- * Call setQuery() with a SQL.Query to update the list
- *      Query should have id as the first column, and display columns afterwards
- *      To use sections and fastScroll, name a column IndexedCursorAdapter.INDEX_COLUMN
- * Call setIndexer/setAlphabet/setBins/setIntSections to initialize an Indexer
- * Call setItemLayout() to use a custom layout for list items
- *      Layout should use R.id.text[1-n] to provide text views
- *      The number of TextViews must be >= the number of display columns
- * Call setIntentActivity() to provide an Activity that will be started when an item is clicked
+ * ListFragment that displays SQL queries.
+ *
+ * <p>Call {@link #setItemLayout} to set the layout for list items.
+ *
+ * <p>Call {@link #setQuery} to update the list.
+ *
+ * <p>Call any of the following to initialize a section indexer:
+ * <ul><li>{@link #setIndexer}
+ * <li>{@link #setAlphabet}
+ * <li>{@link #setBins}
+ * <li>{@link #setRangeIndexer}
+ * <li>{@link #setStringIndexer}
+ * </ul>
+ *
+ * <p>Call {@link #setIntentActivity} to set the Activity to start when an item is clicked.
  */
 public class CursorListFragment extends ListFragment
                                 implements MinutesLoader.Callbacks,
@@ -44,7 +50,7 @@ public class CursorListFragment extends ListFragment
     public final static int RANGE_INDEXER = 1;
     public final static int STRING_INDEXER = 2;
 
-    protected int mItemLayoutId = android.R.layout.simple_list_item_1;
+    protected final static int DEFAULT_LAYOUT = android.R.layout.simple_list_item_1;
     protected Class<?> mIntentClass;
     protected MinutesLoader mMinutesLoader;
     protected String mSearchTerm = "";
@@ -65,6 +71,22 @@ public class CursorListFragment extends ListFragment
         }
         // Setup the cursor loader
         mMinutesLoader = new MinutesLoader(this);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Create and attach an empty adapter
+        IndexedCursorAdapter adapter = getListAdapter();
+        if (adapter == null) {
+            adapter = new IndexedCursorAdapter(getActivity(), DEFAULT_LAYOUT);
+            setListAdapter(adapter);
+        }
+        // Setup listeners for the play button
+        adapter.setPlayClickListeners(this, this);
+        // Start loading the cursor in the background
+        if (mMinutesLoader.hasQuery())
+            getLoaderManager().initLoader(-1, null, mMinutesLoader);
     }
 
     // Subclasses that want to override the default layout should provide a ViewStub with
@@ -100,20 +122,46 @@ public class CursorListFragment extends ListFragment
             saveInstanceState.putParcelable(LIST_STATE, getListView().onSaveInstanceState());
     }
 
-    // Set the custom list item layout
+    /**
+     * Sets the layout to use for list items.
+     *
+     * <p>Layout should include up to three {@code TextViews} with the following ids:
+     * <ul><li>{@code android.R.id.text1}
+     * <li>{@code android.R.id.text2}
+     * <li>{@code R.id.text3} (NB: text3 is *not* in the android namespace)
+     * </ul>
+     *
+     * @param layoutId resource id for list items
+     * @see #setQuery
+     */
     public void setItemLayout(int layoutId) {
-        mItemLayoutId = layoutId;
+        getListAdapter().setViewResource(layoutId);
     }
 
-    // Set an Activity to start when an list item is clicked
+    /**
+     * Sets an Activity to start when a list item is clicked.
+     *
+     * <p>Activity is started with an Intent with {@link #EXTRA_ID} set to the list item id.
+     *
+     * @param cls Activity class
+     */
     public void setIntentActivity(Class<?> cls) {
         mIntentClass = cls;
     }
 
     /**
-     * Set a new query and start loading it
-     * @param query
-     * @param queryArgs
+     * Starts loading a new query.
+     *
+     * <p>{@code query} should {@code SELECT} ID column first.
+     * Subsequent columns are displayed using {@code TextViews} in the list item layout.
+     *
+     * <p>A section index can be specified using {@code SELECT column AS {{SQL.INDEX_COLUMN}}}.
+     *
+     * <p>A recording icon will be displayed for any records that have a non-null {@link #AUDIO_COLUMN}.
+     *
+     * @param query query to execute.
+     * @param queryArgs args to substitute using ? placeholders in {@code query}.
+     * @see #setItemLayout(int)
      */
     public void setQuery(SQL.Query query, String... queryArgs) {
         mMinutesLoader.setQuery(query, queryArgs);
@@ -121,9 +169,10 @@ public class CursorListFragment extends ListFragment
     }
 
     /**
-     * Set a new search term using the given query
-     * @param searchTerm
-     * @see #onUpdateSearch(SQL.Query, String)
+     * Sets a new search term using the given query.
+     *
+     * @param searchTerm the search string
+     * @see #onUpdateSearch
      */
     public void setSearch(String searchTerm) {
         mSearchTerm = searchTerm;
@@ -133,15 +182,17 @@ public class CursorListFragment extends ListFragment
             setQuery(onUpdateSearch(mOriginalQuery.copy(), searchTerm));
     }
 
+    /** Gets the search term. */
     public String getSearch() {
         return mSearchTerm;
     }
 
     /**
-     * Override to respond to search events
-     * @param query A copy of the existing query
-     * @param searchTerm Search term (will not be empty)
-     * @return {@link SQL.Query} that incorporates the search term
+     * Override to respond to search events.
+     *
+     * @param query a copy of the existing query
+     * @param searchTerm search term (will not be empty)
+     * @return query that incorporates the search term
      */
     public SQL.Query onUpdateSearch(SQL.Query query, String searchTerm) {
         return query;
@@ -149,8 +200,9 @@ public class CursorListFragment extends ListFragment
 
 
     /**
-     * Update the query and start loading
-     * Calls {@link #setSearch(String)} if there is an existing search term
+     * Updates the query and starts loading.
+     *
+     * <p>Calls {@link #setSearch(String)} if there is an existing search term.
      */
     public void updateQuery() {
         mOriginalQuery = onUpdateQuery();
@@ -162,15 +214,16 @@ public class CursorListFragment extends ListFragment
     }
 
     /**
-     * Override to reset query after cancelling a search
-     * @return new {@link SQL.Query}
+     * Override to reset query after cancelling a search.
+     *
+     * @return the new query
      */
     public SQL.Query onUpdateQuery() {
         return mOriginalQuery;
     }
 
     /**
-     * Set SearchView callbacks if a SearchView is found in the menu.
+     * Sets SearchView callbacks if a SearchView is found in the menu.
      */
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
@@ -206,23 +259,41 @@ public class CursorListFragment extends ListFragment
         searchView.setQuery(mSearchTerm, false);
     }
 
+    /**
+     * Sets the list SectionIndexer
+     * @param indexer {@link LetterIndexer} subclass
+     */
     public void setIndexer(LetterIndexer indexer) {
         // Defer til onLoadFinished so we don't apply this indexer to the previous query
         setDeferredIndexer(NO_INDEXER);
         mDeferredIndexer = indexer;
     }
 
-    public void setDeferredIndexer(int type) {
+    /**
+     * Sets an indexer that is deferred til the Cursor is loaded.
+     *
+     * @param type one of {@code NO_INDEXER}, {@code RANGE_INDEXER}, or {@code STRING_INDEXER}
+     */
+    protected void setDeferredIndexer(int type) {
         mDeferredIndexerType = type;
         // Clear custom labels any time a new indexer is set
         setSectionLabels();
     }
 
-    // Indexer shortcuts
+    /**
+     * Sets a {@link LetterIndexer}.
+     *
+     * @param alphabet each character is used as a section
+     */
     public void setAlphabet(CharSequence alphabet) {
         setIndexer(new LetterIndexer(null, -1, alphabet));
     }
 
+    /**
+     * Sets a {@link BinIndexer}.
+     *
+     * @param bins array of the lower range for each bin
+     */
     public void setBins(int... bins) {
         setIndexer(new BinIndexer(null, -1, bins));
     }
@@ -231,29 +302,60 @@ public class CursorListFragment extends ListFragment
         setIndexer(new StringIndexer(null, -1, sections));
     }
 
-    // Set using a known range
+    /**
+     * Sets a {@link RangeIndexer} using a known range.
+     *
+     * @param min minimum extent of range
+     * @param max maximium extent of range
+     * @see #setRangeIndexer()
+     */
     public void setRangeIndexer(int min, int max) {
         setIndexer(new RangeIndexer(null, -1, min, max));
     }
 
-    // Delay until the query is performed and we can find a range
+    /**
+     * Sets a {@link RangeIndexer} using values from the cursor.
+     *
+     * @see #setRangeIndexer(int, int)
+     */
     public void setRangeIndexer() {
         setDeferredIndexer(RANGE_INDEXER);
     }
 
-    // Delay until the query is performed and we can find a range
+    /**
+     * Sets a {@link StringIndexer} using values found in the Cursor.
+     */
     public void setStringIndexer() {
         setDeferredIndexer(STRING_INDEXER);
     }
 
+    /**
+     * Sets alternate labels for section headers.
+     *
+     * @param sections list of labels (must be the same length as indexer sections)
+     */
     public void setSectionLabels(String... sections) {
         mSectionLabels = sections;
     }
 
+    /**
+     * Gets the highlighted row.
+     *
+     * @return index of highlighted item
+     */
     public int getHighlight() {
         return getListAdapter().getHighlight();
     }
 
+    /**
+     * Highlights the first matching item in the list.
+     *
+     * @param cursor cursor to search
+     * @param column column to search
+     * @param value value to search for
+     * @return index of highlighted item or -1 if no item matches
+     * @see #setHighlight(int)
+     */
     public int setHighlight(Cursor cursor, String column, Object value) {
         if (cursor == null || ! cursor.moveToFirst())
             return -1;
@@ -268,6 +370,12 @@ public class CursorListFragment extends ListFragment
         return -1;
     }
 
+    /**
+     * Highlights an item in the list.
+     *
+     * @param position index of the item to highlight
+     * @see #setHighlight(Cursor, String, Object)
+     */
     public void setHighlight(int position) {
         ListView list = getListView();
         // I can't find another way to jump to a position without smooth-scrolling
@@ -279,36 +387,60 @@ public class CursorListFragment extends ListFragment
             getListAdapter().getView(position, view, getListView()); // NB: should reuse the view
     }
 
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        // Create and attach an empty adapter
-        if (getListAdapter() == null) {
-            IndexedCursorAdapter adapter = new IndexedCursorAdapter(
-                getActivity(), mItemLayoutId);
-            setListAdapter(adapter);
-        }
-        // Setup listeners for the play button
-        getListAdapter().setPlayClickListeners(this, this);
-        // Start loading the cursor in the background
-        if (mMinutesLoader.hasQuery())
-            getLoaderManager().initLoader(-1, null, mMinutesLoader);
-    }
-
     protected void setFastScrollEnabled(boolean enabled) {
         getListView().setFastScrollEnabled(enabled);
     }
 
-    // Cast to IndexedCursorAdapter
+    /** Returns list adapter casted to {@code IndexedCursorAdapter}. */
     @Override
     public IndexedCursorAdapter getListAdapter() {
         return (IndexedCursorAdapter) getListView().getAdapter();
     }
 
-    /**
-     * Play button click listeners.
-     * Override onPlayClick() and onPlayLongClick() in a derived class to handle these events
-     */
+    // region Loader Callbacks
+    //---------------------------------------------------------------------------------------------
+    @Override
+    public void onLoadFinished(Cursor cursor) {
+        IndexedCursorAdapter adapter = getListAdapter();
+        // Setup any deferred section indexers
+        if (mDeferredIndexerType == RANGE_INDEXER)
+            mDeferredIndexer = new RangeIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
+        else if (mDeferredIndexerType == STRING_INDEXER)
+            mDeferredIndexer = new StringIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
+        // Set the new indexer
+        if (mDeferredIndexer != null) {
+            mDeferredIndexer.setSectionLabels(mSectionLabels);
+            adapter.setIndexer(mDeferredIndexer);
+            mDeferredIndexer = null;
+            mSectionLabels = null;
+        }
+        // Setup the CursorAdapter
+        if (cursor.getColumnCount() == 0) {
+            adapter.changeCursor(null);
+            return;
+        }
+        String[] from = getFrom(cursor);
+        int[] to = getTo(from.length);
+        adapter.changeCursorAndColumns(cursor, from, to);
+        // Set fastScroll if we have an index column
+        setFastScrollEnabled(adapter.hasIndex() && adapter.hasIndexer());
+        // Update list state
+        if (mListState != null) {
+            getListView().onRestoreInstanceState(mListState);
+            mListState = null;
+        }
+    }
+
+    @Override
+    public void onLoaderReset() {
+        if (getView() != null) {
+            getListAdapter().changeCursor(null);
+            setListAdapter(null);
+        }
+    }
+    //---------------------------------------------------------------------------------------------
+    // endregion Loader Callbacks
+
     @Override
     public void onClick(View v) {
         onPlayClick(v, getListView().getPositionForView(v));
@@ -319,7 +451,14 @@ public class CursorListFragment extends ListFragment
         return onPlayLongClick(v, getListView().getPositionForView(v));
     }
 
-    // Default onPlayClick: play the song
+    /**
+     * Handle click on the play/recording icon.
+     *
+     * <p>Defaults to playing the song or songs.
+     *
+     * @param v the clicked view
+     * @param position the index of the record in the cursor
+     */
     public void onPlayClick(View v, int position) {
         Cursor cursor = getListAdapter().getCursor();
         int urlColumn = cursor.getColumnIndex(AUDIO_COLUMN);
@@ -329,7 +468,14 @@ public class CursorListFragment extends ListFragment
         playSongs(PlaybackService.ACTION_PLAY_MEDIA, cursor.getString(urlColumn));
     }
 
-    // Default onPlayLongClick: enqueue song
+    /**
+     * Handle long click on the play/recording icon.
+     *
+     * <p>Defaults to enqueuing the song or songs.
+     *
+     * @param v the clicked view
+     * @param position the index of the record in the cursor
+     */
     public boolean onPlayLongClick(View v, int position) {
         Cursor cursor = getListAdapter().getCursor();
         int urlColumn = cursor.getColumnIndex(AUDIO_COLUMN);
@@ -341,8 +487,9 @@ public class CursorListFragment extends ListFragment
     }
 
     /**
-     * Play a list of songs
-     * @param cursor Cursor with {@link #AUDIO_COLUMN} column
+     * Plays all songs in the cursor with recording urls.
+     *
+     * @param cursor cursor with {@link #AUDIO_COLUMN} column
      * @param position position in {@code cursor} to start playback
      */
     public void playSongs(Cursor cursor, int position) {
@@ -372,7 +519,8 @@ public class CursorListFragment extends ListFragment
     }
 
     /**
-     * Play or enqueue a list of urls from the beginning
+     * Plays or enqueues a list of urls from the beginning.
+     *
      * @param action PlaybackService.ACTION enums (Usually PLAY_MEDIA or ENQUEUE_MEDIA)
      * @param urls array of urls
      */
@@ -381,7 +529,8 @@ public class CursorListFragment extends ListFragment
     }
 
     /**
-     * Play or enqueue a list of songs and notify the user with a toast
+     * Plays or enqueues a list of songs and notifies the user with a toast.
+     *
      * @param action PlaybackService.ACTION enums (Usually PLAY_MEDIA or ENQUEUE_MEDIA)
      * @param playIndex index in the url list of the first song to play
      * @param urls array of urls
@@ -423,52 +572,14 @@ public class CursorListFragment extends ListFragment
         intent.putExtra(EXTRA_ID, id);
     }
 
-    //region Callbacks
-    //-------------------------------------------------------------------------
-    @Override
-    public void onLoadFinished(Cursor cursor) {
-        IndexedCursorAdapter adapter = getListAdapter();
-        // Setup any deferred section indexers
-        if (mDeferredIndexerType == RANGE_INDEXER)
-            mDeferredIndexer = new RangeIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
-        else if (mDeferredIndexerType == STRING_INDEXER)
-            mDeferredIndexer = new StringIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
-        // Set the new indexer
-        if (mDeferredIndexer != null) {
-            mDeferredIndexer.setSectionLabels(mSectionLabels);
-            adapter.setIndexer(mDeferredIndexer);
-            mDeferredIndexer = null;
-            mSectionLabels = null;
-        }
-        // Setup the CursorAdapter
-        if (cursor.getColumnCount() == 0) {
-            adapter.changeCursor(null);
-            return;
-        }
-        String[] from = getFrom(cursor);
-        int[] to = getTo(from.length);
-        adapter.changeCursorAndColumns(cursor, from, to);
-        // Set fastScroll if we have an index column
-        setFastScrollEnabled(adapter.hasIndex() && adapter.hasIndexer());
-        // Update list state
-        if (mListState != null) {
-            getListView().onRestoreInstanceState(mListState);
-            mListState = null;
-        }
-    }
-
-    @Override
-    public void onLoaderReset() {
-        if (getView() != null) {
-            getListAdapter().changeCursor(null);
-            setListAdapter(null);
-        }
-    }
-    //endregion
-
-    // Static helper functions
-
-    // Return an array of columns from the cursor (excluding the ID column)
+    /**
+     * Gets an array of column names from the cursor.
+     *
+     * <p>Excludes ID, SQL.INDEX_COLUMN, and any column that starts with "__".
+     *
+     * @param cursor the data cursor
+     * @return array of String column names
+     */
     public static String[] getFrom(Cursor cursor) {
         // Assemble the column names based on query columns
         // Check for an index column, which is not included as a display column
@@ -483,7 +594,15 @@ public class CursorListFragment extends ListFragment
         return from.toArray(new String[from.size()]);
     }
 
-    // Return an array of View ids (using the pattern R.id.text[n])
+    /**
+     * Gets an array of view IDs.
+     *
+     * <p>The following ids are used: {@code android.R.id.text1}, {@code android.R.id.text2},
+     * {@code R.id.text3}
+     *
+     * @param numberOfItems the number of text items in this view.
+     * @return an array of text item ids.
+     */
     public static int[] getTo(int numberOfItems) {
         int[] to = new int[numberOfItems];
         for (int i = 0; i < numberOfItems; ++i) {
