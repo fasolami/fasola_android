@@ -3,25 +3,27 @@ package org.fasola.fasolaminutes;
 import android.database.Cursor;
 
 /**
- * A Hacked up version of AlphabetIndexer that uses int bins instead of a String alphabet
+ * An indexer that uses integer bins.
+ *
+ * <p>Sections are specified using the bottom range of the bin.
+ * For example, using {@code bins={1, 2, 3, 4}}, the following sections will be created:
+ * <ul><li>{@code "1" -> from 1 to 2}
+ * <li>{@code "2" -> from 2 to 3}
+ * <li>{@code "3" -> from 3 to 4}
+ * <li>{@code "4" -> 4 and above}
+ * </ul>
+ *
+ * <p>To create a < 1 bin in this example, use {@code Integer.MIN_VALUE} as the first bin.
  */
 public class BinIndexer extends StringIndexer {
     protected int[] mBins;
 
-    // Make section labels from bins
-    protected static String[] makeSections(int[] bins) {
-        String[] sections = new String[bins.length];
-        for (int i = 0; i < bins.length; i++)
-            sections[i] = Integer.toString(bins[i]);
-        // Check for MIN_VALUE for bins "< n"
-        if (bins.length > 1 && bins[0] == Integer.MIN_VALUE)
-            sections[0] = "< " + sections[1];
-        return sections;
-    }
-
     /**
-     * Create an Indexer with sections at each bin where bins is an array of bin values.
-     * To create bins for all < a number or all > a number, use Integer.MIN_VALUE and Integer.MAX_VALUE
+     * Creates an Indexer with sections for each bin.
+     *
+     * @param cursor the data cursor
+     * @param sortedColumnIndex the column to index
+     * @param bins lower range for each bin
      */
     public BinIndexer(Cursor cursor, int sortedColumnIndex, int[] bins) {
         // Init the StringIndexer with the custom sections array
@@ -41,5 +43,21 @@ public class BinIndexer extends StringIndexer {
         int low = mBins[index];
         int high = mBins[index + 1];
         return n < low ? -1 : (n > high ? 1 : 0);
+    }
+
+    /**
+     * Makes section labels from a list of bin breaks.
+     *
+     * @param bins array of bin breaks
+     * @return section labels
+     */
+    protected static String[] makeSections(int[] bins) {
+        String[] sections = new String[bins.length];
+        for (int i = 0; i < bins.length; i++)
+            sections[i] = Integer.toString(bins[i]);
+        // Check for MIN_VALUE for bins "< n"
+        if (bins.length > 1 && bins[0] == Integer.MIN_VALUE)
+            sections[0] = "< " + sections[1];
+        return sections;
     }
 }

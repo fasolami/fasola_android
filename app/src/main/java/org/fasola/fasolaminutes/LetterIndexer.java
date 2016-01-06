@@ -8,8 +8,9 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A subclass of up AlphabetIndexer that allows changing the column index
- * This is used as a base class for StringIndexer, and is used in IndexedCursorAdapter
+ * A subclass of up AlphabetIndexer that allows setting custom section labels.
+ *
+ * <p>This is used as a base class for StringIndexer, and is used in IndexedCursorAdapter.
  */
 public class LetterIndexer extends AlphabetIndexer {
     boolean mIsDesc;
@@ -34,15 +35,17 @@ public class LetterIndexer extends AlphabetIndexer {
 
     // mAlphabetArray is private in AlphabetIndexer, but we get get at it through getSections()
     protected void setSections(String[] sections) {
-        System.arraycopy(sections, 0, (String[])getSections(), 0, sections.length);
+        System.arraycopy(sections, 0, (String[]) getSections(), 0, sections.length);
     }
 
     /**
-     * Override SectionIndexer labels
-     * Example:
-     *   Using AlphabetIndexer with "0123"
-     *   setSectionLabels("First", "Second", "Third", "Fourth")
-     * @param sections Section labels
+     * Overrides default sections with custom labels.
+     *
+     * <p>For example, an alphabet of {@code "0123"} uses "0", "1", etc. as section labels.
+     * {@code setSectionLabels("First", "Second", "Third", "Fourth")} changes the section labels
+     * to "First", "Second", etc. while keeping the same indexer values.
+     *
+     * @param sections must have the same number of labels as sections (null to clear)
      */
     public void setSectionLabels(String... sections) {
         if (sections == null || sections.length == 0)
@@ -51,6 +54,13 @@ public class LetterIndexer extends AlphabetIndexer {
             mSections = sections;
     }
 
+    /** Gets section labels.
+     *
+     * <p>Falls back to default indexer section labels if no custom labels have been set.
+     *
+     * @return list of section labels
+     * @see #setSectionLabels
+     */
     public Object[] getSectionLabels() {
         return mSections != null ? mSections : getSections();
     }
@@ -97,8 +107,9 @@ public class LetterIndexer extends AlphabetIndexer {
     }
 
     /**
-     * Returns the number of items in a section
-     * @param section Section index
+     * Gets the number of items in a section.
+     *
+     * @param section section index
      * @return number of items in the section
      */
     int getCountForSection(int section) {

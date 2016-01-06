@@ -6,11 +6,18 @@ import android.support.annotation.NonNull;
 import java.util.ArrayList;
 
 /**
- * A Hacked up version of AlphabetIndexer that uses a full String instead of just the first letter
+ * An indexer that uses a full string instead of just the first letter.
  */
 public class StringIndexer extends LetterIndexer {
     protected java.text.Collator mCollator;
 
+    /**
+     * Creates a StringIndexer using specified strings.
+     *
+     * @param cursor the data cursor
+     * @param sortedColumnIndex the column to index
+     * @param sections strings to use for indexing and for section headers
+     */
     public StringIndexer(Cursor cursor, int sortedColumnIndex, String[] sections) {
         // Init the AlphabetIndexer with the custom alphabet
         super(cursor, sortedColumnIndex, makeAlphabet(sections.length));
@@ -21,18 +28,21 @@ public class StringIndexer extends LetterIndexer {
     }
 
     /**
-     * Creates a StringIndexer using all strings found in the cursor
-     * @see #makeSections(Cursor, int)
+     * Creates a StringIndexer using all strings found in the cursor.
+     *
+     * @param cursor the data cursor
+     * @param sortedColumnIndex the column to index
      */
     public StringIndexer(Cursor cursor, int sortedColumnIndex) {
         this(cursor, sortedColumnIndex, makeSections(cursor, sortedColumnIndex));
     }
 
+    /** Gets sections casted to a string array */
     protected String[] getStringSections() {
         return (String[])getSections();
     }
 
-    // Subclasses should override this instead of the AlphabetIndexer compare function
+    /** Override this function instead of {@link #compare(String, String)} */
     protected int compare(String word, int index) {
         String word2 = getStringSections()[index];
         return mCollator.compare(word, word2);
@@ -45,9 +55,10 @@ public class StringIndexer extends LetterIndexer {
     }
 
     /**
-     * Make section labels from a cursor
-     * @param cursor Cursor
-     * @param sortedIndexColumn Cursor column to use for the index
+     * Makes section labels using all strings in the cursor.
+     *
+     * @param cursor data cursor
+     * @param sortedIndexColumn column to use (must be sorted)
      * @return section labels
      */
     protected static String[] makeSections(@NonNull Cursor cursor, int sortedIndexColumn) {
@@ -67,9 +78,9 @@ public class StringIndexer extends LetterIndexer {
     }
 
     /**
-     * Makes an alphabet String of unicode code points 0 - nSections
+     * Makes an alphabet String of unicode code points from 0 to {@code nSections}.
      *
-     * <p>Code points are used as indices for the actual sections</p>
+     * <p>Code points are used as indices for the actual sections.
      *
      * @param nSections number of sections needed
      * @return String of unicode points (starting from 0)
