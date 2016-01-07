@@ -153,6 +153,14 @@ public abstract class SimpleTabActivity extends BackActivity {
     };
 
     /**
+     * Override to initialize a new fragment.  Defaults to setting Activity bundle args as extras.
+     * @param fragment The new fragment.
+     */
+    public void onNewFragment(Fragment fragment) {
+        fragment.setArguments(getIntent().getExtras());
+    }
+
+    /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to one of the tabs.
      */
     protected class SimplePagerAdapter extends FragmentPagerAdapter {
@@ -170,7 +178,9 @@ public abstract class SimpleTabActivity extends BackActivity {
         @Override
         public Fragment getItem(int position) {
             try {
-                return mTabs.get(position).second.newInstance();
+                Fragment fragment = mTabs.get(position).second.newInstance();
+                onNewFragment(fragment);
+                return fragment;
             } catch (IndexOutOfBoundsException|InstantiationException|IllegalAccessException ex) {
                 return null;
             }
