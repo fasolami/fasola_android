@@ -10,7 +10,7 @@ public class MinutesContract {
     protected MinutesContract() {
     }
 
-    public static final int DB_VERSION = 5;
+    public static final int DB_VERSION = 6;
     public static final String DB_NAME = "minutes.db";
 
     // Contract classes (see below for definitions
@@ -21,6 +21,7 @@ public class MinutesContract {
     public static LeaderStatsDAO LeaderStats = new LeaderStatsDAO();
     public static SingingDAO Singing = new SingingDAO();
     public static SongLeaderDAO SongLeader = new SongLeaderDAO();
+    public static SongNeighborDAO SongNeighbor = new SongNeighborDAO();
 
     // Initialize joins and calculated columns
     static {
@@ -204,7 +205,7 @@ public class MinutesContract {
         public SQL.Column name, startDate, location, fullText, year, recordingCount, songCount, leaderCount;
     }
 
-    /* Song-Singing-Leader join table table */
+    /* Song-Singing-Leader join table */
     public static final class SongLeaderDAO extends MinutesBaseTable {
         protected SongLeaderDAO() {
             super("song_leader_joins");
@@ -218,6 +219,18 @@ public class MinutesContract {
 
         public SQL.Column songId, singingId, leaderId, leadId, audioUrl;
         public String singingOrder;
+    }
+
+    /* Song Neighbor join table */
+    public static final class SongNeighborDAO extends MinutesBaseTable {
+        protected SongNeighborDAO() {
+            super("song_neighbors");
+            fromId = column("from_song_id");
+            toId = column("to_song_id");
+            rank = column("rank");
+        }
+
+        public SQL.Column fromId, toId, rank;
     }
 }
 
