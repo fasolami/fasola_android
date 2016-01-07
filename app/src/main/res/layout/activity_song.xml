@@ -15,7 +15,8 @@
         <com.astuetz.PagerSlidingTabStrip
             android:id="@+id/tab_strip"
             android:layout_width="match_parent"
-            android:layout_height="40dip"/>
+            android:layout_height="40dip"
+            app:pstsTabPaddingLeftRight="18dp"/>
 
         <android.support.v4.view.ViewPager
             android:id="@+id/pager"
@@ -44,6 +45,12 @@
             <fragment
                 android:title="Recordings"
                 android:name="org.fasola.fasolaminutes.SongActivity$SongRecordingsFragment"
+                android:layout_height="match_parent"
+                android:layout_width="match_parent"/>
+
+            <fragment
+                android:title="Similar Songs"
+                android:name="org.fasola.fasolaminutes.SongActivity$SongNeighborsFragment"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"/>
 

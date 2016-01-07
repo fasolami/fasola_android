@@ -180,6 +180,19 @@ public class SongActivity extends SimpleTabActivity {
         }
     }
 
+    public static class SongNeighborsFragment extends CursorListFragment {
+        @Override
+        public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            setItemLayout(R.layout.song_list_item);
+            setIntentActivity(SongActivity.class);
+            long id = getArguments().getLong(EXTRA_ID, -1);
+            setQuery(SQL.select(C.Song.id, C.Song.number, C.Song.title)
+                        .join(C.SongNeighbor, C.Song.id, C.SongNeighbor.toId)
+                        .where(C.SongNeighbor.fromId, "=", id));
+        }
+    }
+
     public static class SongRecordingsFragment extends CursorListFragment {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
