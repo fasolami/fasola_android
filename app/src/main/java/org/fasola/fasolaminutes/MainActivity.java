@@ -112,8 +112,6 @@ public class MainActivity extends SimpleTabActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            setIntentActivity(LeaderActivity.class);
-            setItemLayout(R.layout.leader_list_item);
             if (savedInstanceState != null)
                 mSortId = savedInstanceState.getInt(BUNDLE_SORT, mSortId);
             setHasOptionsMenu(true);
@@ -122,6 +120,8 @@ public class MainActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            setIntentActivity(LeaderActivity.class);
+            setItemLayout(R.layout.leader_list_item);
             updateQuery();
         }
 
@@ -201,8 +201,6 @@ public class MainActivity extends SimpleTabActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            setIntentActivity(SongActivity.class);
-            setItemLayout(R.layout.song_list_item);
             if (savedInstanceState != null) {
                 mSortId = savedInstanceState.getInt(BUNDLE_SORT, mSortId);
             }
@@ -212,6 +210,8 @@ public class MainActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            setIntentActivity(SongActivity.class);
+            setItemLayout(R.layout.song_list_item);
             updateQuery();
         }
 
@@ -331,8 +331,6 @@ public class MainActivity extends SimpleTabActivity {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            setIntentActivity(SingingActivity.class);
-            setItemLayout(R.layout.singing_list_item);
             if (savedInstanceState != null)
                 mSortId = savedInstanceState.getInt(BUNDLE_SORT, mSortId);
             setHasOptionsMenu(true);
@@ -341,6 +339,8 @@ public class MainActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            setIntentActivity(SingingActivity.class);
+            setItemLayout(R.layout.singing_list_item);
             updateQuery();
         }
 

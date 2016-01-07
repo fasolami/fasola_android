@@ -183,6 +183,7 @@ public class SongActivity extends SimpleTabActivity {
     public static class SongRecordingsFragment extends CursorListFragment {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
             setItemLayout(R.layout.singing_list_item);
             setRangeIndexer();
             long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
@@ -192,7 +193,6 @@ public class SongActivity extends SimpleTabActivity {
                         .group(C.SongLeader.leadId)
                         .where(C.SongLeader.songId, "=", id)
                             .and(C.SongLeader.audioUrl, "IS NOT", "NULL"));
-            super.onViewCreated(view, savedInstanceState);
         }
     }
 }

@@ -129,6 +129,7 @@ public class LeaderActivity extends SimpleTabActivity {
     static public class LeaderSongFragment extends CursorListFragment {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
             setItemLayout(R.layout.leader_list_item);
             setIntentActivity(SongActivity.class);
             long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
@@ -136,13 +137,13 @@ public class LeaderActivity extends SimpleTabActivity {
                                        C.LeaderStats.leadCount.format("'(' || {column} || ')'"))
                             .where(C.LeaderStats.leaderId, "=", id)
                             .order(C.LeaderStats.leadCount, "DESC", C.Song.pageSort, "ASC"));
-            super.onViewCreated(view, savedInstanceState);
         }
     }
 
     static public class LeaderSingingFragment extends CursorStickyListFragment {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
             setItemLayout(R.layout.singing_list_item);
             setIntentActivity(SingingActivity.class);
             setRangeIndexer();
@@ -150,13 +151,13 @@ public class LeaderActivity extends SimpleTabActivity {
             setQuery(C.Singing.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location).distinct()
                         .sectionIndex(C.Singing.year)
                         .where(C.SongLeader.leaderId, "=", id));
-            super.onViewCreated(view, savedInstanceState);
         }
     }
 
     static public class LeaderLeadsFragment extends CursorStickyListFragment {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
             setItemLayout(R.layout.singing_list_item);
             setIntentActivity(SingingActivity.class);
             setRangeIndexer();
@@ -166,7 +167,6 @@ public class LeaderActivity extends SimpleTabActivity {
                     .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
                     .sectionIndex(C.Singing.year)
                     .where(C.SongLeader.leaderId, "=", id));
-            super.onViewCreated(view, savedInstanceState);
         }
 
         @Override

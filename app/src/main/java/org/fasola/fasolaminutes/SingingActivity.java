@@ -46,6 +46,7 @@ public class SingingActivity extends SimpleTabActivity {
 
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
             setItemLayout(R.layout.singing_song_list_item);
             setIntentActivity(LeaderActivity.class);
             long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
@@ -80,7 +81,6 @@ public class SingingActivity extends SimpleTabActivity {
                                 .group(C.SongLeader.leadId)
                                 .order(C.SongLeader.singingOrder, "ASC");
             setQuery(query, String.valueOf(id));
-            super.onViewCreated(view, savedInstanceState);
         }
 
         @Override
@@ -148,6 +148,7 @@ public class SingingActivity extends SimpleTabActivity {
 
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
             long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
             SQL.Query query = C.Singing.select(C.Singing.fullText).whereEq(C.Singing.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
@@ -165,7 +166,6 @@ public class SingingActivity extends SimpleTabActivity {
                     }
                 }
             });
-            super.onViewCreated(view, savedInstanceState);
         }
     }
 }
