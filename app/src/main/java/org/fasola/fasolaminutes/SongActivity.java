@@ -46,7 +46,7 @@ public class SongActivity extends SimpleTabActivity {
             super.onViewCreated(view, savedInstanceState);
             setItemLayout(R.layout.leader_list_item);
             setIntentActivity(LeaderActivity.class);
-            long songId = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
+            long songId = getArguments().getLong(EXTRA_ID, -1);
             if (songId != -1)
                 setSongId(songId);
         }
@@ -71,7 +71,7 @@ public class SongActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
+            long id = getArguments().getLong(CursorListFragment.EXTRA_ID, -1);
             if (id != -1)
                 setSongId(id);
         }
@@ -125,7 +125,7 @@ public class SongActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
+            long id = getArguments().getLong(CursorListFragment.EXTRA_ID, -1);
             // Stats summary
             SQL.Query query = C.Song.select(C.Song.leaderCount, C.Song.leadCount, C.Song.coleadCount)
                                     .whereEq(C.Song.id);
@@ -186,7 +186,7 @@ public class SongActivity extends SimpleTabActivity {
             super.onViewCreated(view, savedInstanceState);
             setItemLayout(R.layout.singing_list_item);
             setRangeIndexer();
-            long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
+            long id = getArguments().getLong(EXTRA_ID, -1);
             setQuery(SQL.select(C.SongLeader.id, C.Singing.name, C.Singing.startDate, C.Singing.location)
                         .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
                         .sectionIndex(C.Singing.year)
