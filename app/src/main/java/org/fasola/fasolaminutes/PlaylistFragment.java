@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.widget.MediaController;
 import android.widget.TextView;
 
 import com.mobeta.android.dslv.DragSortListView;
@@ -21,24 +20,18 @@ public class PlaylistFragment extends ListFragment
         implements DragSortListView.DropListener {
 
     DragSortListView mList;
-    MediaController mController;
     PlaybackService.Control mPlayer;
     Playlist mPlaylist;
 
     public PlaylistFragment() {
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_playlist, container, false);
         mList = (DragSortListView)view.findViewById(android.R.id.list);
-        mController = (MediaController)view.findViewById(R.id.media_controller);
         mPlaylist = Playlist.getInstance();
         mList.setEmptyView(view.findViewById(android.R.id.empty));
         return view;
@@ -52,21 +45,12 @@ public class PlaylistFragment extends ListFragment
         mList.setDropListener(this);
         // Setup MediaController
         mPlayer = new PlaybackService.Control(getActivity());
-        mController.setMediaPlayer(mPlayer);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mPlaylistObserver.register(getActivity());
-        updateControls(); // Initial Setup
         ((BaseAdapter)getListAdapter()).notifyDataSetChanged();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mPlaylistObserver.unregister();
     }
 
     @Override
@@ -87,32 +71,6 @@ public class PlaylistFragment extends ListFragment
         mPlaylist.move(from, to);
         ((BaseAdapter)getListAdapter()).notifyDataSetChanged();
     }
-
-    protected void updateControls() {
-        Playlist playlist = Playlist.getInstance();
-        if (playlist.isEmpty()) {
-            mController.setVisibility(View.GONE);
-        }
-        else {
-            mController.setVisibility(View.VISIBLE);
-            int pos = playlist.getPosition();
-            mController.setPrevNextListeners(
-                    pos < playlist.size() - 1 ? mPlayer.nextListener : null,
-                    pos > 0 ? mPlayer.prevListener : null
-            );
-            mController.show(0); // Update status
-        }
-    }
-
-    /**
-     * Observer that sets or removes PrevNext listeners based on playlist state
-     */
-    PlaylistObserver mPlaylistObserver = new PlaylistObserver() {
-        @Override
-        public void onChanged(String action) {
-            updateControls();
-        }
-    };
 
     /**
      * Custom ListAdapter backed by the PlaybackService's playlist
