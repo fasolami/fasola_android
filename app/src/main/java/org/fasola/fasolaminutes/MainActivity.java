@@ -25,7 +25,6 @@ public class MainActivity extends SimpleTabActivity {
         mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount());
         // Set page change listener and initial settings
         setOnPageChangeListener(mPageChangeListener);
-        mPageChangeListener.onPageSelected(0);
         // Setup drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         // Drawer toggle callbacks
@@ -66,6 +65,12 @@ public class MainActivity extends SimpleTabActivity {
                 ((FasolaTabView) findViewById(R.id.fasola_tabs)).setSelection(position);
             }
         };
+
+    @Override
+    protected void onResume() {
+        mPageChangeListener.onPageSelected(mViewPager.getCurrentItem());
+        super.onResume();
+    }
 
     @Override
     protected void onDestroy() {
