@@ -40,7 +40,11 @@ public class SongActivity extends SimpleTabActivity {
         });
     }
 
-    public static class SongLeaderListFragment extends CursorListFragment {
+    public interface SongFragment {
+        void setSongId(long id);
+    }
+
+    public static class SongLeaderListFragment extends CursorListFragment implements SongFragment {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
@@ -61,7 +65,7 @@ public class SongActivity extends SimpleTabActivity {
         }
     }
 
-    public static class SongWordsFragment extends Fragment {
+    public static class SongWordsFragment extends Fragment implements SongFragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
