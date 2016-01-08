@@ -1,13 +1,9 @@
 package org.fasola.fasolaminutes;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,13 +31,6 @@ public class PlaylistFragment extends ListFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(PlaybackService.BROADCAST_PREPARED);
-        filter.addAction(PlaybackService.BROADCAST_PLAYING);
-        filter.addAction(PlaybackService.BROADCAST_COMPLETED);
-        filter.addAction(PlaybackService.BROADCAST_ERROR);
-        filter.addAction(PlaybackService.BROADCAST_PAUSED);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mReceiver, filter);
     }
 
     @Override
@@ -64,24 +53,20 @@ public class PlaylistFragment extends ListFragment
         // Setup MediaController
         mPlayer = new PlaybackService.Control(getActivity());
         mController.setMediaPlayer(mPlayer);
-        mPlaylist.registerObserver(mPlaylistObserver);
-        mPlaylist.registerPlayingObserver(mPlaylistObserver);
-        updateControls(); // Initial Setup
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        updateControls();
+        mPlaylistObserver.register(getActivity());
+        updateControls(); // Initial Setup
         ((BaseAdapter)getListAdapter()).notifyDataSetChanged();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mPlaylist.unregisterObserver(mPlaylistObserver);
-        mPlaylist.unregisterPlayingObserver(mPlaylistObserver);
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mReceiver);
+        mPlaylistObserver.unregister();
     }
 
     @Override
@@ -119,27 +104,12 @@ public class PlaylistFragment extends ListFragment
         }
     }
 
-    // Receive PlaybackService broadcasts
-    BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(PlaybackService.BROADCAST_PREPARED))
-                updateControls();
-            else if (intent.getAction().equals(PlaybackService.BROADCAST_PLAYING))
-                updateControls();
-            else if (intent.getAction().equals(PlaybackService.BROADCAST_COMPLETED))
-                updateControls();
-            else if (intent.getAction().equals(PlaybackService.BROADCAST_PAUSED))
-                updateControls();
-        }
-    };
-
     /**
      * Observer that sets or removes PrevNext listeners based on playlist state
      */
-    DataSetObserver mPlaylistObserver = new DataSetObserver() {
+    PlaylistObserver mPlaylistObserver = new PlaylistObserver() {
         @Override
-        public void onChanged() {
+        public void onChanged(String action) {
             updateControls();
         }
     };
@@ -202,15 +172,13 @@ public class PlaylistFragment extends ListFragment
         // Playlist change observers
         @Override
         public void registerDataSetObserver(DataSetObserver observer) {
-            mPlaylist.registerObserver(observer);
-            mPlaylist.registerPlayingObserver(observer);
+            mPlaylist.registerObserver(new PlaylistObserver.Wrapper(observer));
             super.registerDataSetObserver(observer);
         }
 
         @Override
         public void unregisterDataSetObserver(DataSetObserver observer) {
-            mPlaylist.unregisterObserver(observer);
-            mPlaylist.unregisterPlayingObserver(observer);
+            mPlaylist.unregisterObserver(new PlaylistObserver.Wrapper(observer));
             super.unregisterDataSetObserver(observer);
         }
     }

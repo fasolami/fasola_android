@@ -7,7 +7,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
@@ -76,6 +75,12 @@ public class PlaybackService extends Service
     /** Broadcast sent on {@link MediaPlayer} error */
     public static final String BROADCAST_ERROR = "org.fasola.fasolaminutes.mediaBroadcast.ERROR";
 
+    /** All broadcast actions. */
+    public static final String[] BROADCAST_ALL = {
+            BROADCAST_PREPARED, BROADCAST_PLAYING, BROADCAST_PAUSED,
+            BROADCAST_COMPLETED, BROADCAST_ERROR
+    };
+
     MediaPlayer mMediaPlayer;
     boolean mIsPrepared;
     boolean mShouldPlay; // Should we play the song once it is prepared?
@@ -106,7 +111,7 @@ public class PlaybackService extends Service
         mInstance = this;
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        Playlist.getInstance().registerObserver(mPlaylistObserver);
+        mObserver.register();
     }
 
     @Override
@@ -168,9 +173,9 @@ public class PlaybackService extends Service
 
     @Override
     public void onDestroy() {
-       stop();
-       Playlist.getInstance().unregisterObserver(mPlaylistObserver);
-       mInstance = null;
+        stop();
+        mObserver.unregister();
+        mInstance = null;
     }
 
     private final IBinder mBinder = new MediaBinder();
@@ -461,9 +466,9 @@ public class PlaybackService extends Service
     /**
      * Observer that pauses playback if the song is removed from the playlist
      */
-    DataSetObserver mPlaylistObserver = new DataSetObserver() {
+    PlaylistObserver mObserver = new PlaylistObserver() {
         @Override
-        public void onChanged() {
+        public void onPlaylistChanged() {
             if (mSong != null && ! Playlist.getInstance().contains(mSong))
                 pause();
         }

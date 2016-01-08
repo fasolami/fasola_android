@@ -1,11 +1,7 @@
 package org.fasola.fasolaminutes;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.database.DataSetObserver;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,13 +50,21 @@ public class NowPlayingView extends LinearLayout {
                 R.drawable.ic_play_arrow);
     }
 
-    DataSetObserver mPlaylistObserver = new DataSetObserver() {
+    PlaylistObserver mObserver = new PlaylistObserver() {
         @Override
-        public void onChanged() {
+        public void onChanged(String action) {
             Playlist.Song song = Playlist.getInstance().getCurrent();
             if (PlaybackService.isRunning() && song != null) {
                 setVisibility(View.VISIBLE);
                 mText.setText(String.format("%s  -  %s %s", song.name, song.year, song.singing));
+                updateButton();
+                // Add error indicator
+                if (action != null) {
+                    int iconResource = 0;
+                    if (action.equals(PlaybackService.BROADCAST_ERROR))
+                        iconResource = R.drawable.ic_warning_amber_18dp;
+                    mText.setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0);
+                }
             }
             else {
                 setVisibility(View.GONE);
@@ -68,42 +72,16 @@ public class NowPlayingView extends LinearLayout {
         }
     };
 
-    IntentFilter filter = new IntentFilter();
-    {
-        filter.addAction(PlaybackService.BROADCAST_PREPARED);
-        filter.addAction(PlaybackService.BROADCAST_PLAYING);
-        filter.addAction(PlaybackService.BROADCAST_COMPLETED);
-        filter.addAction(PlaybackService.BROADCAST_ERROR);
-        filter.addAction(PlaybackService.BROADCAST_PAUSED);
-    }
-
-    BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateButton();
-            // Add error indicator
-            int iconResource = 0;
-            if (intent.getAction().equals(PlaybackService.BROADCAST_ERROR))
-                iconResource = R.drawable.ic_warning_amber_18dp;
-            mText.setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0);
-        }
-    };
-
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Playlist.getInstance().registerObserver(mPlaylistObserver);
-        Playlist.getInstance().registerPlayingObserver(mPlaylistObserver);
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(mReceiver, filter);
-        mPlaylistObserver.onChanged();
-        updateButton();
+        mObserver.register(getContext());
+        mObserver.onChanged();
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        Playlist.getInstance().unregisterObserver(mPlaylistObserver);
-        Playlist.getInstance().unregisterPlayingObserver(mPlaylistObserver);
-        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(mReceiver);
+        mObserver.unregister();
         super.onDetachedFromWindow();
     }
 }

@@ -1,8 +1,6 @@
 package org.fasola.fasolaminutes;
 
 import android.database.Cursor;
-import android.database.DataSetObservable;
-import android.database.DataSetObserver;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
@@ -25,13 +23,27 @@ import java.util.Collection;
  *
  * <p>Observers can be used to receive notifications on playlist changes and cursor changes.
  * <ul>
- *     <li> {@link #registerObserver(DataSetObserver)}
- *     <li> {@link #unregisterObserver(DataSetObserver)}
- *     <li> {@link #registerPlayingObserver(DataSetObserver)}
- *     <li> {@link #unregisterPlayingObserver(DataSetObserver)}
+ *     <li> {@link #registerObserver(Observer)}
+ *     <li> {@link #unregisterObserver(Observer)}
  * </ul>
  */
 public class Playlist extends ArrayList<Playlist.Song> {
+    /** Cursor position */
+    int mPos = -1;
+
+    // Observers
+    private final PlaylistObservable mObservable = new PlaylistObservable();
+
+    // Singleton
+    static Playlist mInstance;
+
+    /** Returns the {@link Playlist} singleton */
+    public static Playlist getInstance() {
+        if (mInstance == null)
+            mInstance = new Playlist();
+        return mInstance;
+    }
+
     /** Song data structure */
     public static class Song {
         public long leadId;
@@ -84,51 +96,28 @@ public class Playlist extends ArrayList<Playlist.Song> {
             .group(C.SongLeader.leadId);
     }
 
-    // Singleton
-    static Playlist mInstance;
-
-    /** Returns the {@link Playlist} singleton */
-    public static Playlist getInstance() {
-        if (mInstance == null)
-            mInstance = new Playlist();
-        return mInstance;
-    }
-
-    /** Cursor position */
-    int mPos;
-
-    /** Constructs an empty playlist */
-    private Playlist() {
-        mPos = -1;
-    }
-
-    /** DataSet Observers */
-    private final DataSetObservable mObservable = new DataSetObservable();
-    private final DataSetObservable mPlayingObservable = new DataSetObservable();
-
-    /** Registers an observer that is notified when Songs are added or removed */
-    public void registerObserver(DataSetObserver observer) {
-        mObservable.registerObserver(observer);
-    }
-
-    /** Removes an observer added by {@link #registerObserver(DataSetObserver)} */
-    public void unregisterObserver(DataSetObserver observer) {
-        mObservable.unregisterObserver(observer);
+    /** Observer base class */
+    public static class Observer {
+        /** Override to respond when items are added or removed from the playlist. */
+        public void onPlaylistChanged() {}
+        /** Override to respond when the playlist cursor moves. */
+        public void onCursorChanged() {}
+        /** Override to respond to either event. */
+        public void onChanged() {}
     }
 
     /**
-     * Registers an observer that is notified when the cursor position changes
+     * Registers an observer.
      *
-     * @see #getPosition
-     * @see #moveToPosition
+     * @see PlaylistObserver
      */
-    public void registerPlayingObserver(DataSetObserver observer) {
-        mPlayingObservable.registerObserver(observer);
+    public void registerObserver(Observer observer) {
+        mObservable.registerObserver(observer);
     }
 
-    /** Removes an observer added by {@link #registerPlayingObserver(DataSetObserver)} */
-    public void unregisterPlayingObserver(DataSetObserver observer) {
-        mPlayingObservable.unregisterObserver(observer);
+    /** Unregister a previously registered observer. */
+    public void unregisterObserver(Observer observer) {
+        mObservable.unregisterObserver(observer);
     }
 
     /** Returns the cursor position */
@@ -155,7 +144,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
         boolean hasChanged = pos != mPos;
         mPos = pos;
         if (hasChanged)
-            mPlayingObservable.notifyChanged();
+            mObservable.notifyCursorChanged();
         return getCurrent();
     }
 
@@ -196,7 +185,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
         return add(new Song(cursor));
     }
 
-    /** Adds all {@link Song}s in a cursor
+    /** Adds all {@link Song}s in a cursor.
      *
      * <p>Observers are notified only once if the Playlist is changed, not for each song.
      *
@@ -211,29 +200,40 @@ public class Playlist extends ArrayList<Playlist.Song> {
             // Don't notify for every song
             super.add(new Song(cursor));
         } while(cursor.moveToNext());
-        return notifyWrapper(true);
+        mObservable.notifyPlaylistChanged();
+        return true;
     }
 
     // ArrayList overrides to manage notifications
 
     @Override
     public boolean add(Song object) {
-        return notifyWrapper(super.add(object));
+        if (super.add(object)) {
+            mObservable.notifyPlaylistChanged();
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void add(int index, Song object) {
         super.add(index, object);
-        notifyChanged();
         if (index <= mPos) {
             ++mPos;
-            mPlayingObservable.notifyChanged();
+            mObservable.notifyChanged();
+        }
+        else {
+            mObservable.notifyPlaylistChanged();
         }
     }
 
     @Override
     public boolean addAll(Collection<? extends Song> collection) {
-        return notifyWrapper(super.addAll(collection));
+        if (super.addAll(collection)) {
+            mObservable.notifyPlaylistChanged();
+            return true;
+        }
+        return false;
     }
 
     // Replace all songs in the playlist with these songs (avoids extra notifications)
@@ -241,19 +241,19 @@ public class Playlist extends ArrayList<Playlist.Song> {
         super.clear();
         boolean result = super.addAll(collection);
         mPos = collection.size() > 0 ? 0 : -1;
-        mPlayingObservable.notifyChanged();
-        notifyChanged();
+        mObservable.notifyChanged();
         return result;
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends Song> collection) {
         if (super.addAll(index, collection)) {
-            notifyChanged();
             if (index <= mPos && ! collection.isEmpty()) {
                 mPos += collection.size();
-                mPlayingObservable.notifyChanged();
+                mObservable.notifyChanged();
             }
+            else
+                mObservable.notifyPlaylistChanged();
             return true;
         }
         return false;
@@ -263,7 +263,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
     public Song set(int index, Song object) {
         Song song = super.set(index, object);
         if (song != null)
-            notifyChanged();
+            mObservable.notifyPlaylistChanged();
         return song;
     }
 
@@ -271,11 +271,12 @@ public class Playlist extends ArrayList<Playlist.Song> {
     public Song remove(int index) {
         Song song = super.remove(index);
         if (song != null) {
-            notifyChanged();
             if (index <= mPos) {
                 --mPos;
-                mPlayingObservable.notifyChanged();
+                mObservable.notifyChanged();
             }
+            else
+                mObservable.notifyPlaylistChanged();
         }
         return song;
     }
@@ -283,7 +284,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
     public void move(int from, int to) {
         int lastPos = getPosition();
         super.add(to, super.remove(from));
-        notifyChanged();
+        mObservable.notifyChanged();
         // Update now playing if we just moved the currently playing song
         // (otherwise Playlist handles it)
         if (lastPos == from)
@@ -295,8 +296,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
     public void clear() {
         mPos = -1;
         super.clear();
-        mPlayingObservable.notifyChanged();
-        notifyChanged();
+        mObservable.notifyChanged();
     }
 
     // These methods make managing the currentSong pointer tricky, so they are unsupported
@@ -308,17 +308,5 @@ public class Playlist extends ArrayList<Playlist.Song> {
     @Override
     public boolean removeAll(@NonNull Collection<?> collection) {
         throw new UnsupportedOperationException();
-    }
-
-    /** Notifies observers that the playlist has changed */
-    private void notifyChanged() {
-        mObservable.notifyChanged();
-    }
-
-    /** Wrapper for functions that should {@link #notifyChanged()} and return a value */
-    private boolean notifyWrapper(boolean value) {
-        if (value)
-            notifyChanged();
-        return value;
     }
 }
