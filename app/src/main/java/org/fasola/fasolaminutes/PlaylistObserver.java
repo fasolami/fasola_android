@@ -19,11 +19,6 @@ public class PlaylistObserver extends Playlist.Observer {
     IntentFilter mFilter;
     String mAction;
 
-    /** Sets the context for the BroadcastReceiver. */
-    public void setContext(Context context) {
-        mContext = context.getApplicationContext();
-    }
-
     /**
      * Sets the IntentFilter for the BroadcastReceiver.
      *
@@ -47,18 +42,11 @@ public class PlaylistObserver extends Playlist.Observer {
         mFilter = filter;
     }
 
-    /** Registers broadcasts and dataset observers. */
-    public void register() {
-        if (mContext != null)
-            registerBroadcastReceiver(mContext);
-        registerPlaylistObserver();
-    }
-
-    /** Sets context and filter before registering. */
-    public void register(Context context, String... actions) {
-        setContext(context);
+    /** Registers broadcast and dataset observers. */
+    public void registerAll(@NonNull Context context, String... actions) {
         setFilter(actions);
-        register();
+        registerPlaylistObserver();
+        registerBroadcastReceiver(context);
     }
 
     /** Registers only playlist dataset observer. */
@@ -82,12 +70,8 @@ public class PlaylistObserver extends Playlist.Observer {
             };
         if (mFilter == null)
             setFilter(PlaybackService.BROADCAST_ALL);
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mReceiver, mFilter);
+        LocalBroadcastManager.getInstance(context).registerReceiver(mReceiver, mFilter);
         isReceiverRegistered = true;
-    }
-
-    public void registerBroadcastReceiver() {
-        registerBroadcastReceiver(mContext);
     }
 
     /** Unregisters broadcasts and dataset observers. */

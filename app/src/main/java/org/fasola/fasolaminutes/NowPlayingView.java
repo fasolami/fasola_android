@@ -75,7 +75,7 @@ public class NowPlayingView extends LinearLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        mObserver.register(getContext());
+        mObserver.registerAll(getContext(), PlaybackService.BROADCAST_ALL);
         mObserver.onChanged();
     }
 

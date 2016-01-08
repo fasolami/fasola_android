@@ -111,7 +111,7 @@ public class PlaybackService extends Service
         mInstance = this;
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        mObserver.register();
+        mObserver.registerPlaylistObserver();
     }
 
     @Override
