@@ -46,6 +46,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
 
     /** Song data structure */
     public static class Song {
+        public long songId;
         public long leadId;
         public String name;
         public String leaders;
@@ -65,13 +66,14 @@ public class Playlist extends ArrayList<Playlist.Song> {
          * @param cursor {@code Cursor}
          */
         public Song(Cursor cursor) {
-            this.leadId = cursor.getLong(0);
-            this.name = cursor.getString(1);
-            this.leaders = cursor.getString(2);
-            this.singing = cursor.getString(3);
-            this.date = cursor.getString(4);
-            this.year = cursor.getString(5);
-            this.url = cursor.getString(6);
+            this.songId = cursor.getLong(0);
+            this.leadId = cursor.getLong(1);
+            this.name = cursor.getString(2);
+            this.leaders = cursor.getString(3);
+            this.singing = cursor.getString(4);
+            this.date = cursor.getString(5);
+            this.year = cursor.getString(6);
+            this.url = cursor.getString(7);
             this.status = STATUS_OK;
         }
     }
@@ -88,6 +90,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
      */
     public static SQL.Query getSongQuery(Object column, Object... args) {
         return SQL.select(
+                C.Song.id,
                 C.SongLeader.leadId, C.Song.fullName,
                 C.Leader.fullName.func("group_concat", "', '"),
                 C.Singing.name, C.Singing.startDate, C.Singing.year,
