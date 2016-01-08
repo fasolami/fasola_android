@@ -33,7 +33,7 @@ public class PlaybackService extends Service
             AudioManager.OnAudioFocusChangeListener {
 
     private static final String TAG = "PlaybackService";
-    private static final int ERROR_LIMIT = 10;
+    private static final int ERROR_LIMIT = 100;
     private static final int ERROR_DELAY_MS = 500;
 
     /** Enqueue songs */
