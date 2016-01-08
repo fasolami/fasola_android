@@ -20,6 +20,8 @@ public class MainActivity extends SimpleTabActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (PlaybackService.isRunning())
+            PlaybackService.getInstance().setMainTaskRunning(true);
         setContentView(R.layout.activity_main);
         // Save all the pages since the queries may take some time to run
         mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount());
@@ -74,9 +76,9 @@ public class MainActivity extends SimpleTabActivity {
 
     @Override
     protected void onDestroy() {
+        if (PlaybackService.isRunning())
+            PlaybackService.getInstance().setMainTaskRunning(false);
         super.onDestroy();
-        // Kill the service
-        stopService(new Intent(this, PlaybackService.class));
     }
 
     @Override
@@ -93,7 +95,6 @@ public class MainActivity extends SimpleTabActivity {
                 mPageChangeListener.onPageSelected(position);
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

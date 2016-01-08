@@ -12,6 +12,7 @@ import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
@@ -403,9 +404,7 @@ public class PlaybackService extends Service
      *
      * @return {@link Notification} that controls playback
      */
-    private Notification getNotification() {
-        if (mNotification != null)
-            return mNotification;
+    private Notification createNotification() {
         // RemoteViews
         RemoteViews remote = new RemoteViews(getPackageName(), R.layout.notification_playback);
         Intent playIntent = new Intent(this, PlaybackService.class);
@@ -437,16 +436,24 @@ public class PlaybackService extends Service
             .getNotification(); // build() was added in API 16
     }
 
+    boolean mHasMainTask = true;
+    public void setMainTaskRunning(boolean isRunning) {
+        if (isRunning != mHasMainTask) {
+            mHasMainTask = isRunning;
+            updateNotification();
+        }
+    }
+
     /** Updates the {@link Notification} with the current playing status
      *
      * <p>If no notification exists this service is in the background.  In this case,
      * {@link #startForeground(int, Notification)} is called, and a new notification is created.
      *
-     * @see #getNotification()
+     * @see #createNotification()
      */
     private void updateNotification() {
         Playlist.Song song = Playlist.getInstance().getCurrent();
-        Notification notification = getNotification();
+        Notification notification = mNotification != null ? mNotification : createNotification();
         // Update content
         RemoteViews remote = notification.contentView;
         remote.setTextViewText(R.id.title, song != null ? song.name : "");
@@ -454,12 +461,27 @@ public class PlaybackService extends Service
         remote.setImageViewResource(R.id.play_pause, isPlaying()
                 ? android.R.drawable.ic_media_pause
                 : android.R.drawable.ic_media_play);
+        // Update pending intent
+        if (mHasMainTask) {
+            // Launch NowPlayingActivity normally
+            Intent intent = new Intent(this, NowPlayingActivity.class);
+            notification.contentIntent = PendingIntent.getActivity(
+                    this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+        else {
+            // Synthesize stack MainActivity -> NowPlayingActivity
+            TaskStackBuilder stack = TaskStackBuilder.create(getApplicationContext());
+            stack.addNextIntent(new Intent(this, MainActivity.class));
+            stack.addNextIntent(new Intent(this, NowPlayingActivity.class));
+            notification.contentIntent = stack.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
         // Show or update notification
         if (mNotification == null) {
             Log.v(TAG, "Starting foreground service");
             startForeground(NOTIFICATION_ID, notification);
             mNotification = notification;
-        } else
+        }
+        else
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
     }
 
@@ -510,8 +532,7 @@ public class PlaybackService extends Service
             mSong.status = Playlist.Song.STATUS_ERROR;
         mIsPrepared = false;
         ++mErrorCount;
-        if (mErrorCount >= ERROR_LIMIT / 2)
-            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_ERROR));
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_ERROR));
         if (mErrorCount >= ERROR_LIMIT) {
             mErrorCount = 0;
             return false; // Give up on this song; move to the next
