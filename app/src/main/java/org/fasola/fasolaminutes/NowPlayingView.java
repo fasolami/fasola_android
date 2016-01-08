@@ -52,16 +52,16 @@ public class NowPlayingView extends LinearLayout {
 
     PlaylistObserver mObserver = new PlaylistObserver() {
         @Override
-        public void onChanged(String action) {
+        public void onChanged() {
             Playlist.Song song = Playlist.getInstance().getCurrent();
             if (PlaybackService.isRunning() && song != null) {
                 setVisibility(View.VISIBLE);
                 mText.setText(String.format("%s  -  %s %s", song.name, song.year, song.singing));
                 updateButton();
                 // Add error indicator
-                if (action != null) {
+                if (getAction() != null) {
                     int iconResource = 0;
-                    if (action.equals(PlaybackService.BROADCAST_ERROR))
+                    if (getAction().equals(PlaybackService.BROADCAST_ERROR))
                         iconResource = R.drawable.ic_warning_amber_18dp;
                     mText.setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0);
                 }

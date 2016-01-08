@@ -17,6 +17,7 @@ public class PlaylistObserver extends Playlist.Observer {
     BroadcastReceiver mReceiver;
     Context mContext;
     IntentFilter mFilter;
+    String mAction;
 
     /** Sets the context for the BroadcastReceiver. */
     public void setContext(Context context) {
@@ -73,8 +74,10 @@ public class PlaylistObserver extends Playlist.Observer {
             mReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
+                    mAction = intent.getAction();
                     PlaylistObserver.this.onReceive(context, intent);
-                    PlaylistObserver.this.onChanged(intent.getAction());
+                    PlaylistObserver.this.onChanged();
+                    mAction = null;
                 }
             };
         if (mFilter == null)
@@ -99,18 +102,17 @@ public class PlaylistObserver extends Playlist.Observer {
         }
     }
 
-    /** Override to respond to all events.
+    /** Gets the broadcast intent action.
      *
-     * @param action Intent action if this is a broadcast;
-     *               null if this is a Playlist observer action
+     * @return action or null if this is not a broadcast
      */
-    public void onChanged(String action) {
+    public String getAction() {
+        return mAction;
     }
 
-    // Used for Playlist observers (which do not have an intent action)
+    /** Override to respond to all events. */
     @Override
     public void onChanged() {
-        onChanged(null);
     }
 
     /** Override to handle broadcasts. */
