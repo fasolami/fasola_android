@@ -1,33 +1,38 @@
-<android.support.v4.widget.DrawerLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/drawer_layout"
+    android:id="@+id/content_frame"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/content_frame"
+    <com.astuetz.PagerSlidingTabStrip
+        android:id="@+id/tab_strip"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="40dip"/>
 
-    </LinearLayout>
-
-    <!-- The Playlist -->
-    <FrameLayout android:id="@+id/playlist_drawer"
+    <android.support.v4.view.ViewPager
+        android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="end"
-        android:clickable="true"
-        android:background="@color/fasola_background"
-        android:layout_marginRight="15dp">
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-        <fragment android:id="@+id/playlist"
-            android:layout_width="match_parent"
+        <fragment
+            android:title="Words"
+            android:name="org.fasola.fasolaminutes.SongActivity$SongWordsFragment"
             android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
+
+        <fragment
+            android:title="Playlist"
             android:name="org.fasola.fasolaminutes.PlaylistFragment"
-            tools:layout="@layout/fragment_playlist"/>
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
 
-    </FrameLayout>
+    </android.support.v4.view.ViewPager>
 
-</android.support.v4.widget.DrawerLayout>
+    <org.fasola.fasolaminutes.MediaControllerXml
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/media_controller" />
+
+</LinearLayout>
