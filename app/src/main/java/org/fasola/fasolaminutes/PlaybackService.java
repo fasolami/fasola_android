@@ -112,6 +112,7 @@ public class PlaybackService extends Service
         mInstance = this;
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        mObserver.registerBroadcastReceiver(getApplicationContext());
         mObserver.registerPlaylistObserver();
     }
 
@@ -489,10 +490,24 @@ public class PlaybackService extends Service
      * Observer that pauses playback if the song is removed from the playlist
      */
     PlaylistObserver mObserver = new PlaylistObserver() {
+        {
+            setFilter(Intent.ACTION_HEADSET_PLUG);
+        }
+
+        // Pause playback when song is removed from playlist
         @Override
         public void onPlaylistChanged() {
             if (mSong != null && ! Playlist.getInstance().contains(mSong))
                 pause();
+        }
+
+        // Pause playback when headset is unplugged
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG) &&
+                    intent.getIntExtra("state", -1) == 0) {
+                pause();
+            }
         }
     };
 
