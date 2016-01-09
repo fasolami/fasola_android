@@ -44,9 +44,8 @@ public class PlaylistObserver extends Playlist.Observer {
 
     /** Registers broadcast and dataset observers. */
     public void registerAll(@NonNull Context context, String... actions) {
-        setFilter(actions);
         registerPlaylistObserver();
-        registerBroadcastReceiver(context);
+        registerBroadcastReceiver(context, actions);
     }
 
     /** Registers only playlist dataset observer. */
@@ -56,7 +55,9 @@ public class PlaylistObserver extends Playlist.Observer {
     }
 
     /** Registers only broadcast receiver. */
-    public void registerBroadcastReceiver(@NonNull Context context) {
+    public void registerBroadcastReceiver(@NonNull Context context, String... actions) {
+        if (actions.length > 0)
+            setFilter(actions);
         mContext = context.getApplicationContext();
         if (mReceiver == null)
             mReceiver = new BroadcastReceiver() {
