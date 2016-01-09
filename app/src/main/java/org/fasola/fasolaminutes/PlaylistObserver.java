@@ -13,6 +13,7 @@ import android.support.v4.content.LocalBroadcastManager;
  */
 public class PlaylistObserver extends Playlist.Observer {
     boolean isPlaylistRegistered = false;
+    boolean isLocalReceiverRegistered = false;
     boolean isReceiverRegistered = false;
     BroadcastReceiver mReceiver;
     Context mContext;
@@ -71,8 +72,25 @@ public class PlaylistObserver extends Playlist.Observer {
             };
         if (mFilter == null)
             setFilter(PlaybackService.BROADCAST_ALL);
-        LocalBroadcastManager.getInstance(context).registerReceiver(mReceiver, mFilter);
-        isReceiverRegistered = true;
+        // Register global receiver if using android broadcast actions
+        // Register local receiver if using org.fasola broadcast actions
+        for (int i=0; i<mFilter.countActions(); ++i) {
+            String action = mFilter.getAction(i);
+            if (action.startsWith("android.")) {
+                if (! isReceiverRegistered) {
+                    mContext.registerReceiver(mReceiver, mFilter);
+                    isReceiverRegistered = true;
+                }
+            }
+            else if (action.startsWith("org.fasola")) {
+                if (! isLocalReceiverRegistered) {
+                    LocalBroadcastManager.getInstance(context).registerReceiver(mReceiver, mFilter);
+                    isLocalReceiverRegistered = true;
+                }
+            }
+            if (isReceiverRegistered && isLocalReceiverRegistered)
+                break;
+        }
     }
 
     /** Unregisters broadcasts and dataset observers. */
@@ -82,8 +100,12 @@ public class PlaylistObserver extends Playlist.Observer {
             isPlaylistRegistered = false;
         }
         if (isReceiverRegistered) {
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mReceiver);
+            mContext.unregisterReceiver(mReceiver);
             isReceiverRegistered = false;
+        }
+        if (isLocalReceiverRegistered) {
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mReceiver);
+            isLocalReceiverRegistered = false;
         }
     }
 
