@@ -278,6 +278,10 @@ public class PlaybackService extends Service
         return isPrepared() && mMediaPlayer.isPlaying();
     }
 
+    public boolean isPaused() {
+        return ! mShouldPlay;
+    }
+
     @Override
     public int getBufferPercentage() {
         return 0;
@@ -439,7 +443,11 @@ public class PlaybackService extends Service
 
     boolean mHasMainTask = true;
     public void setMainTaskRunning(boolean isRunning) {
-        if (isRunning != mHasMainTask) {
+        // Stop if the app is closing and playback is paused
+        if (! isRunning && isPaused())
+            stop();
+        // Update notification to use synthesized back stack if the app is exiting
+        else if (isRunning != mHasMainTask) {
             mHasMainTask = isRunning;
             updateNotification();
         }
