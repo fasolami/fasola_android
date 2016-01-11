@@ -35,6 +35,18 @@ public class BinIndexer extends StringIndexer {
         mBins[mBins.length - 1] = Integer.MAX_VALUE;
     }
 
+    /**
+     * Creates a BinIndexer using equal interval sections.
+     *
+     * @param cursor the data cursor
+     * @param sortedColumnIndex the column to index
+     * @param sectionCount number of sections
+     */
+    public static BinIndexer equalIntervals(Cursor cursor, int sortedColumnIndex, int sectionCount) {
+        // Init the StringIndexer with the custom sections array
+        return new BinIndexer(cursor, sortedColumnIndex, makeBins(cursor, sortedColumnIndex, sectionCount));
+    }
+
     @Override
     protected int compare(String word, int index) {
         // Word is an integer stored as a string
@@ -59,5 +71,29 @@ public class BinIndexer extends StringIndexer {
         if (bins.length > 1 && bins[0] == Integer.MIN_VALUE)
             sections[0] = "< " + sections[1];
         return sections;
+    }
+
+    /** Makes bins using equal intervals */
+    protected static int[] makeBins(Cursor cursor, int sortedColumnIndex, int sectionCount) {
+        int[] bins = new int[sectionCount];
+        // Get min/max
+        int pos = cursor.getPosition();
+        cursor.moveToFirst();
+        double first = cursor.getDouble(sortedColumnIndex);
+        cursor.moveToLast();
+        double last = cursor.getDouble(sortedColumnIndex);
+        cursor.moveToPosition(pos);
+        // Calculate bin size and first bin
+        // All numbers will be rounded to the binSize order of magnitude
+        // For example: if min = 40, max = 2000, and sectionCount = 4
+        // bin size is (2000 - 40)/4 = 490  [rounded to the nearest 100] = 500
+        double binSize = Math.abs(first - last) / sectionCount;
+        double factor = Math.pow(10, Math.floor(Math.log10(binSize)));
+        binSize = Math.floor((binSize / factor) + 0.5) * factor;
+        double start = Math.floor((Math.min(first, last) / factor) + 0.5) * factor;
+        // Make bins
+        for (int i = 0; i < bins.length; i++)
+            bins[i] = (int)(start + binSize * i);
+        return bins;
     }
 }

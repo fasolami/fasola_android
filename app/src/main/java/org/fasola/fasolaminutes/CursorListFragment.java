@@ -49,6 +49,8 @@ public class CursorListFragment extends ListFragment
     public final static int NO_INDEXER = 0;
     public final static int RANGE_INDEXER = 1;
     public final static int STRING_INDEXER = 2;
+    public final static int BIN_INDEXER = 3;
+    private int mBinCount;
 
     protected final static int DEFAULT_LAYOUT = android.R.layout.simple_list_item_1;
     protected Class<?> mIntentClass;
@@ -298,8 +300,14 @@ public class CursorListFragment extends ListFragment
         setIndexer(new BinIndexer(null, -1, bins));
     }
 
-    public void setBins(String... sections) {
-        setIndexer(new StringIndexer(null, -1, sections));
+    /**
+     * Sets a {@link BinIndexer} using equal intervals
+     *
+     * @param binCount number of bins
+     */
+    public void setBinCount(int binCount) {
+        mBinCount = binCount;
+        setDeferredIndexer(BIN_INDEXER);
     }
 
     /**
@@ -407,6 +415,8 @@ public class CursorListFragment extends ListFragment
             mDeferredIndexer = new RangeIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
         else if (mDeferredIndexerType == STRING_INDEXER)
             mDeferredIndexer = new StringIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
+        else if (mDeferredIndexerType == BIN_INDEXER)
+            mDeferredIndexer = BinIndexer.equalIntervals(cursor, IndexedCursorAdapter.getIndexColumn(cursor), mBinCount);
         // Set the new indexer
         if (mDeferredIndexer != null) {
             mDeferredIndexer.setSectionLabels(mSectionLabels);
