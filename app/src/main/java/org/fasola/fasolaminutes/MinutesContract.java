@@ -67,6 +67,7 @@ public class MinutesContract {
             composer = column("composer");
             poet = column("poet");
             time = column("Times");
+            meter = column("MeterName");
             // Format keys (which are in the db as "D" or "A min")
             // 1. Some keys have extraneous spaces at the end, hence trim()
             // 2. Minor keys are written "min"; major keys are blank; key changes list "min" first
@@ -105,7 +106,7 @@ public class MinutesContract {
             ));
         }
 
-        public SQL.Column title, titleOrdinal, number, composer, poet, lyrics, rawKey, key, time;
+        public SQL.Column title, titleOrdinal, number, composer, poet, lyrics, rawKey, key, time, meter;
         public SQL.Column fullName, leaderCount, leadCount, coleadCount, pageSort;
     }
 

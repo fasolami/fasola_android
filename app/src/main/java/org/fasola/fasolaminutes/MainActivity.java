@@ -292,6 +292,17 @@ public class MainActivity extends SimpleTabActivity {
                     }
                     else
                         return query.order(C.Song.time, "ASC");
+                case R.id.menu_song_sort_meter:
+                    if (setSectionIndex) {
+                        setStringIndexer();
+                        showHeaders(true);
+                        return query.sectionIndex(C.Song.meter)
+                                    .orderAsc(C.Song.meter.cast("INT"))
+                                    .orderAsc(C.Song.meter);
+                    }
+                    else
+                        return query.orderAsc(C.Song.meter.cast("INT"))
+                                    .orderAsc(C.Song.meter);
                 case R.id.menu_song_sort_page:
                 default:
                     if (setSectionIndex) {
