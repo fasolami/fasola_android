@@ -338,6 +338,10 @@ public class SQL {
             return func("COUNT", distinct);
         }
 
+        public Column cast(String type) {
+            return format("CAST({column} AS %s)", type);
+        }
+
         public Column sum() {
             return func("SUM");
         }
