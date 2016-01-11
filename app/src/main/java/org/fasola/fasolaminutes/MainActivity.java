@@ -164,7 +164,7 @@ public class MainActivity extends SimpleTabActivity {
         public SQL.Query onUpdateQuery() {
             switch(mSortId) {
                 case R.id.menu_leader_sort_count:
-                    setBins(0, 10, 50, 100, 500, 1000);
+                    setBinCount(7);
                     showHeaders(false);
                     return C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
                                    .sectionIndex(C.Leader.leadCount, "DESC")
@@ -270,7 +270,7 @@ public class MainActivity extends SimpleTabActivity {
                         return query.order(C.Song.title, "ASC");
                 case R.id.menu_song_sort_leads:
                     if (setSectionIndex) {
-                        setBins(100, 500, 1000, 1500, 2000, 2500, 3000);
+                        setBinCount(7);
                         showHeaders(false);
                         return query.sectionIndex(C.SongStats.leadCount.sum(), "DESC");
                     }
