@@ -21,10 +21,11 @@ public class StringIndexer extends LetterIndexer {
     public StringIndexer(Cursor cursor, int sortedColumnIndex, String[] sections) {
         // Init the AlphabetIndexer with the custom alphabet
         super(cursor, sortedColumnIndex, makeAlphabet(sections.length));
-        setSections(sections);
         // Get a Collator for the current locale for string comparisons.
         mCollator = java.text.Collator.getInstance();
         mCollator.setStrength(java.text.Collator.PRIMARY);
+        setSections(sections);
+        mIsSorted = true;
     }
 
     /**
@@ -35,6 +36,18 @@ public class StringIndexer extends LetterIndexer {
      */
     public StringIndexer(Cursor cursor, int sortedColumnIndex) {
         this(cursor, sortedColumnIndex, makeSections(cursor, sortedColumnIndex));
+        // Check to see if sections are sorted
+        mIsSorted = true;
+        String[] sections = getStringSections();
+        if (sections.length > 1) {
+            int sortCheck = mCollator.compare(sections[0], sections[1]);
+            for (int i=2; i<sections.length; ++i) {
+                if (mCollator.compare(sections[i-1], sections[i]) != sortCheck) {
+                    mIsSorted = false;
+                    break;
+                }
+            }
+        }
     }
 
     /** Gets sections casted to a string array */
@@ -44,8 +57,18 @@ public class StringIndexer extends LetterIndexer {
 
     /** Override this function instead of {@link #compare(String, String)} */
     protected int compare(String word, int index) {
-        String word2 = getStringSections()[index];
-        return mCollator.compare(word, word2);
+        if (mIsSorted) {
+            String word2 = getStringSections()[index];
+            return mCollator.compare(word, word2);
+        }
+        else {
+            String[] sections = getStringSections();
+            for (int i=0; i<sections.length; ++i) {
+                if (sections[i].equals(word))
+                    return i - index;
+            }
+        }
+        return 1;
     }
 
     @Override

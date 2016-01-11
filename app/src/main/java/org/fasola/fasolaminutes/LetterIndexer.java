@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class LetterIndexer extends AlphabetIndexer {
     boolean mIsDesc;
+    boolean mIsSorted = true;
     int mTotalCount = 0;
     String[] mSections;
 
@@ -69,6 +70,8 @@ public class LetterIndexer extends AlphabetIndexer {
     @Override
     public void setCursor(Cursor cursor) {
         super.setCursor(cursor);
+        if (! mIsSorted)
+            return;
         if (cursor != null) {
             // Find first and last values
             boolean isDesc = false;
