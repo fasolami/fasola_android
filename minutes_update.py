@@ -209,6 +209,17 @@ db.executemany("INSERT INTO song_stats (song_id, year, lead_count, rank) VALUES 
 
 
 # ----------------------------------------------------------------------------
+# Clean empty string recordings
+# ----------------------------------------------------------------------------
+print "Replacing 'audio_url' empty strings with NULLs in 'song_leader_joins' table"
+db.execute("""
+    UPDATE song_leader_joins
+    SET audio_url = NULL
+    WHERE audio_url = ''
+""")
+
+
+# ----------------------------------------------------------------------------
 # Add RecordingCt
 # ----------------------------------------------------------------------------
 has_recording_ct = col_exists(db, 'minutes', 'RecordingCt')
@@ -296,10 +307,10 @@ if not has_poet or FORCE_UPDATE:
 # Vacuum and commit
 # ----------------------------------------------------------------------------
 if COMMIT_CHANGES:
-    print "Vacuuming db"
-    db.execute("VACUUM")
     print "Committing"
     db.commit()
+    print "Vacuuming db"
+    db.execute("VACUUM")
     db.close()
     print "Done"
 
