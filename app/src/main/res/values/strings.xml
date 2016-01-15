@@ -70,5 +70,6 @@
     <string name="menu_song_sort_key">By key signature</string>
     <string name="menu_song_sort_time">By time signature</string>
     <string name="menu_song_sort_meter">By meter</string>
+    <string name="meter_label">Meter:</string>
 
 </resources>

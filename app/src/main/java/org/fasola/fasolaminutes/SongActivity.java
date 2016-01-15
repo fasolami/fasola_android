@@ -82,7 +82,7 @@ public class SongActivity extends SimpleTabActivity {
 
         public void setSongId(long id) {
             SQL.Query query = C.Song.select(C.Song.lyrics, C.Song.poet, C.Song.composer,
-                                            C.Song.key, C.Song.time)
+                                            C.Song.key, C.Song.time, C.Song.meter)
                                     .whereEq(C.Song.id);
             getLoaderManager().restartLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
                 @Override
@@ -94,6 +94,7 @@ public class SongActivity extends SimpleTabActivity {
                         ((TextView) view.findViewById(R.id.tune)).setText(song.composer.getString());
                         ((TextView) view.findViewById(R.id.key)).setText(song.key.getString());
                         ((TextView) view.findViewById(R.id.time)).setText(song.time.getString());
+                        ((TextView) view.findViewById(R.id.meter)).setText(song.meter.getString());
                         CharSequence lyrics = createIndentedText(song.lyrics.getString(), 0, 20);
                         ((TextView) view.findViewById(R.id.lyrics)).setText(lyrics);
                     }
