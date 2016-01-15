@@ -7,8 +7,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
 
-import java.lang.reflect.Field;
-
 import static java.lang.System.nanoTime;
 
 /**
@@ -26,7 +24,7 @@ interface _MinutesLoaderCallbacksInterface {
 public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>,
                                       Loader.OnLoadCompleteListener<Cursor>,
                                       _MinutesLoaderCallbacksInterface {
-    private static final boolean DEBUG_QUERIES = true;
+    private static final boolean DEBUG_QUERIES = true && BuildConfig.DEBUG;
 
     public interface Callbacks extends _MinutesLoaderCallbacksInterface {
     }
@@ -67,9 +65,14 @@ public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>,
     //----------------
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (SQLiteDebugActivity.isDebug())
+            SQLiteDebugActivity.addQuery(mQuery, mQueryArgs);
         return new CursorLoader(MinutesApplication.getContext()) {
             @Override
             public Cursor loadInBackground() {
+                if (SQLiteDebugActivity.isDebug())
+                    return null;
+                Thread.currentThread().setName("MinutesLoader: " + mQuery.toString());
                 Cursor cursor = MinutesLoader.this.onLoadInBackground(MinutesDb.getInstance());
                 // The query isn't executed until data is accessed in some way.
                 // Since the whole point of using a cursor loader is to do the heavy lifting in
@@ -78,15 +81,10 @@ public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>,
                     cursor.getCount();
                 else {
                     long start = nanoTime();
+                    Log.v("SQL", mQuery.toString());
+                    Log.v("SQL", "Query length: " + mQuery.toString().length());
                     cursor.getCount();
-                    try {
-                        Field f = cursor.getClass().getDeclaredField("mQuery");
-                        f.setAccessible(true);
-                        Log.v("SQL", f.get(cursor).toString().substring(13));
-                        Log.v("SQL", "query time (secs): " + (nanoTime() - start)/1000000000.);
-                    } catch (Exception e) {
-                        Log.v("SQL", "[error fetching query]");
-                    }
+                    Log.v("SQL", "query time (secs): " + (nanoTime() - start)/1000000000.);
                 }
                 return cursor;
             }
@@ -115,6 +113,8 @@ public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>,
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         // Reset cursor position to before the first row in case this is an automatic call
         // from initLoader (i.e. we are using an existing cursor)
+        if (SQLiteDebugActivity.isDebug())
+            return;
         cursor.moveToPosition(-1);
         mCallbacks.onLoadFinished(cursor);
     }

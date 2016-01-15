@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_sqlite_debug"
+        android:title="SQLiteDebug" />
+
+    <item
+        android:id="@+id/menu_catch_sql"
+        android:title="Redirect queries"
+        android:checkable="true"/>
+</menu>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_run_query"
+        android:title="Run Query"
+        android:icon="@android:drawable/ic_media_play"
+        android:showAsAction="always"/>
+
+    <item android:id="@+id/menu_show_drawer"
+        android:title="Show Drawer"
+        android:icon="@android:drawable/ic_menu_sort_by_size"
+        android:showAsAction="always"/>
+</menu>
