@@ -8,6 +8,6 @@
     android:paddingBottom="@dimen/multiline_item_vertical_margin"
     android:orientation="vertical">
 
-    <include layout="@layout/three_line_text" />
+    <include layout="@layout/list_item_three_line" />
 
 </LinearLayout>

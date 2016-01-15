@@ -48,7 +48,7 @@ public class SingingActivity extends SimpleTabActivity {
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
             setFastScrollEnabled(true);
-            setItemLayout(R.layout.singing_song_list_item);
+            setItemLayout(R.layout.list_item_singing_song);
             setIntentActivity(LeaderActivity.class);
             long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             // Singing info query
@@ -163,7 +163,7 @@ public class SingingActivity extends SimpleTabActivity {
                         // Fake it with a ListView of smaller TextViews for better performance
                         ListView list = (ListView) view.findViewById(R.id.full_text);
                         list.setAdapter(new ArrayAdapter<>(getActivity(),
-                                R.layout.long_text_item,
+                                R.layout.list_item_long_text,
                                 text.split("\n")));
                     }
                 }

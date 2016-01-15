@@ -137,7 +137,7 @@ public class PlaylistFragment extends ListFragment
         @Override
         public View getView(int i, View view, ViewGroup viewGroup) {
             if (view == null)
-                view = mInflater.inflate(R.layout.playlist_list_item, viewGroup, false);
+                view = mInflater.inflate(R.layout.list_item_playlist, viewGroup, false);
             // Text
             Playlist.Song song = getSong(i);
             ((TextView) view.findViewById(android.R.id.text1)).setText(song.name);

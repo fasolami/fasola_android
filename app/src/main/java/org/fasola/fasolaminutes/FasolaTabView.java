@@ -23,7 +23,7 @@ public class FasolaTabView extends LinearLayout {
         // Inflate the layout
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.fasola_tabs, this, true);
+        inflater.inflate(R.layout.view_fasola_tabs, this, true);
         setBackgroundColor(getResources().getColor(R.color.fasolatab_background));
         // Apply color and click handler to items
         for (int i = 0; i < getChildCount(); i++) {

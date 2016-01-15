@@ -23,7 +23,7 @@
         android:orientation="vertical"
         android:layout_weight="1">
 
-        <include layout="@layout/three_line_text" />
+        <include layout="@layout/list_item_three_line" />
 
     </LinearLayout>
 

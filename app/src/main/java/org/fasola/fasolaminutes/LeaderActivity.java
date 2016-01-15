@@ -130,7 +130,7 @@ public class LeaderActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            setItemLayout(R.layout.leader_list_item);
+            setItemLayout(R.layout.list_item_leader);
             setIntentActivity(SongActivity.class);
             long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             setQuery(C.Song.selectList(C.Song.fullName,
@@ -144,7 +144,7 @@ public class LeaderActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            setItemLayout(R.layout.singing_list_item);
+            setItemLayout(R.layout.list_item_singing);
             setIntentActivity(SingingActivity.class);
             setRangeIndexer();
             long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
@@ -158,7 +158,7 @@ public class LeaderActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            setItemLayout(R.layout.singing_list_item);
+            setItemLayout(R.layout.list_item_singing);
             setIntentActivity(SingingActivity.class);
             setRangeIndexer();
             long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);

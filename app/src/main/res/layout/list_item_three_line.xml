@@ -3,7 +3,7 @@
     A reusable layout with three stacked text items
     Should be used within a vertical LinearLayout
 
-    See, e.g. singing_list_item and playlist_list_item for usage
+    See, e.g. list_item_singing and list_item_playlist for usage
 -->
 
 <merge xmlns:android="http://schemas.android.com/apk/res/android" >

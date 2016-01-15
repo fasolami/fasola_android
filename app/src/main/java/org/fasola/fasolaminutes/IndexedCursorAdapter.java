@@ -169,7 +169,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         if (mAudioColumn > -1) {
             if (view.getId() != R.id.play_image_layout) {
                 // Use the layout with an image button
-                LinearLayout layout = (LinearLayout)mInflater.inflate(R.layout.play_image_list_item, parent, false);
+                LinearLayout layout = (LinearLayout)mInflater.inflate(R.layout.list_item_play_image, parent, false);
                 layout.addView(view, 0, new LinearLayout.LayoutParams(
                         0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
                 view = layout;
@@ -216,7 +216,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         // Create the view
         // If convertView is not a ViewGroup, it was created as an empty View above
         if (convertView == null || ! (convertView instanceof ViewGroup))
-            convertView = mInflater.inflate(R.layout.sticky_list_header, parent, false);
+            convertView = mInflater.inflate(R.layout.list_header_stickylist, parent, false);
         // Set the text
         int section = getSectionForPosition(position);
         String text = getSections()[section].toString();

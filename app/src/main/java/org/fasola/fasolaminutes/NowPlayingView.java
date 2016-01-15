@@ -19,7 +19,7 @@ public class NowPlayingView extends LinearLayout {
         // Inflate the layout
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.now_playing, this, true);
+        inflater.inflate(R.layout.view_now_playing, this, true);
         setBackgroundColor(getResources().getColor(R.color.fasola_foreground));
         setClickable(true);
         // Set members

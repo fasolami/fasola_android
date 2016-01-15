@@ -48,7 +48,7 @@ public class SongActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            setItemLayout(R.layout.leader_list_item);
+            setItemLayout(R.layout.list_item_leader);
             setIntentActivity(LeaderActivity.class);
             long songId = getArguments().getLong(EXTRA_ID, -1);
             if (songId != -1)
@@ -189,7 +189,7 @@ public class SongActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            setItemLayout(R.layout.song_list_item);
+            setItemLayout(R.layout.list_item_song);
             setIntentActivity(SongActivity.class);
             long id = getArguments().getLong(EXTRA_ID, -1);
             setQuery(SQL.select(C.Song.id, C.Song.number, C.Song.title)
@@ -202,7 +202,7 @@ public class SongActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            setItemLayout(R.layout.singing_list_item);
+            setItemLayout(R.layout.list_item_singing);
             setRangeIndexer();
             long id = getArguments().getLong(EXTRA_ID, -1);
             setQuery(SQL.select(C.SongLeader.id, C.Singing.name, C.Singing.startDate, C.Singing.location)

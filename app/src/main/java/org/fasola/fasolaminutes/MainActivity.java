@@ -127,7 +127,7 @@ public class MainActivity extends SimpleTabActivity {
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
             setIntentActivity(LeaderActivity.class);
-            setItemLayout(R.layout.leader_list_item);
+            setItemLayout(R.layout.list_item_leader);
             updateQuery();
         }
 
@@ -139,7 +139,7 @@ public class MainActivity extends SimpleTabActivity {
 
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.menu_leader_fragment, menu);
+            inflater.inflate(R.menu.menu_leader_list_fragment, menu);
             // Check the initial sort
             MenuItem item = menu.findItem(mSortId);
             if (item != null)
@@ -217,7 +217,7 @@ public class MainActivity extends SimpleTabActivity {
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
             setIntentActivity(SongActivity.class);
-            setItemLayout(R.layout.song_list_item);
+            setItemLayout(R.layout.list_item_song);
             updateQuery();
         }
 
@@ -229,7 +229,7 @@ public class MainActivity extends SimpleTabActivity {
 
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.menu_song_fragment, menu);
+            inflater.inflate(R.menu.menu_song_list_fragment, menu);
             // Check the initial sort
             MenuItem item = menu.findItem(mSortId);
             if (item != null)
@@ -357,7 +357,7 @@ public class MainActivity extends SimpleTabActivity {
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
             setIntentActivity(SingingActivity.class);
-            setItemLayout(R.layout.singing_list_item);
+            setItemLayout(R.layout.list_item_singing);
             updateQuery();
         }
 
@@ -369,7 +369,7 @@ public class MainActivity extends SimpleTabActivity {
 
         @Override
         public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.menu_singing_fragment, menu);
+            inflater.inflate(R.menu.menu_singing_list_fragment, menu);
             // Check the initial sort
             MenuItem item = menu.findItem(mSortId);
             if (item != null)
