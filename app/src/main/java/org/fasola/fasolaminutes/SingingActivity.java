@@ -73,13 +73,14 @@ public class SingingActivity extends SimpleTabActivity {
                 }
             });
             // Song list query
-            query = C.Song.selectList(C.Song.fullName, C.Leader.fullName.func("group_concat", "', '"))
-                                .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
-                                .select(C.Leader.id.func("group_concat")).as("__leaderIds")
-                                .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
-                                .whereEq(C.SongLeader.singingId)
-                                .group(C.SongLeader.leadId)
-                                .order(C.SongLeader.singingOrder, "ASC");
+            query = SQL.select(C.Song.id, C.Song.fullName, C.Leader.fullName.func("group_concat", "', '"))
+                            .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
+                            .select(C.Leader.id.func("group_concat")).as("__leaderIds")
+                            .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
+                        .from(C.SongLeader)
+                        .whereEq(C.SongLeader.singingId)
+                        .group(C.SongLeader.leadId)
+                        .order(C.SongLeader.singingOrder, "ASC");
             setQuery(query, String.valueOf(id));
         }
 

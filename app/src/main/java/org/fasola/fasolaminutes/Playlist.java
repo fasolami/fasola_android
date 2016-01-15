@@ -90,11 +90,15 @@ public class Playlist extends ArrayList<Playlist.Song> {
      */
     public static SQL.Query getSongQuery(Object column, Object... args) {
         return SQL.select(
-                C.Song.id,
-                C.SongLeader.leadId, C.Song.fullName,
+                C.SongLeader.songId,
+                C.SongLeader.leadId,
+                C.Song.fullName,
                 C.Leader.fullName.func("group_concat", "', '"),
-                C.Singing.name, C.Singing.startDate, C.Singing.year,
+                C.Singing.name,
+                C.Singing.startDate,
+                C.Singing.year,
                 C.SongLeader.audioUrl)
+            .from(C.SongLeader)
             .where(column, "IN", args) // This makes for a verbose but efficient query
             .group(C.SongLeader.leadId);
     }
