@@ -60,6 +60,7 @@ public class CursorListFragment extends ListFragment
     protected int mDeferredIndexerType = NO_INDEXER;
     protected LetterIndexer mDeferredIndexer;
     protected String[] mSectionLabels;
+    protected boolean mUseFastScroll = false;
     private String BUNDLE_SEARCH = "SEARCH_TERM";
     private String LIST_STATE = "LIST_STATE";
     private Parcelable mListState;
@@ -395,7 +396,9 @@ public class CursorListFragment extends ListFragment
             getListAdapter().getView(position, view, getListView()); // NB: should reuse the view
     }
 
+    /** Force use of fast scroll */
     protected void setFastScrollEnabled(boolean enabled) {
+        mUseFastScroll = enabled;
         getListView().setFastScrollEnabled(enabled);
     }
 
@@ -433,7 +436,8 @@ public class CursorListFragment extends ListFragment
         int[] to = getTo(from.length);
         adapter.changeCursorAndColumns(cursor, from, to);
         // Set fastScroll if we have an index column
-        setFastScrollEnabled(adapter.hasIndex() && adapter.hasIndexer());
+        getListView().setFastScrollEnabled(
+                mUseFastScroll || (adapter.hasIndex() && adapter.hasIndexer()));
         // Update list state
         if (mListState != null) {
             getListView().onRestoreInstanceState(mListState);
