@@ -34,6 +34,7 @@ public class NowPlayingActivity extends SimpleTabActivity {
     protected void onResumeFragments() {
         super.onResumeFragments();
         mObserver.onChanged();
+        mObserver.onCursorChanged();
     }
 
     @Override
