@@ -21,10 +21,7 @@ public class BackActivity extends FragmentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean ret = super.onCreateOptionsMenu(menu);
-        if (BuildConfig.DEBUG) {
-            getMenuInflater().inflate(R.menu.debug_sqlite_base_menu, menu);
-            return true;
-        }
+        SQLiteDebugActivity.createOptionsMenu(getMenuInflater(), menu);
         return ret;
     }
 

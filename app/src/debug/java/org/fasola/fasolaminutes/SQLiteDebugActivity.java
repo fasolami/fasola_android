@@ -13,6 +13,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,9 +33,8 @@ import static java.lang.System.nanoTime;
 public class SQLiteDebugActivity extends BackActivity {
     public static boolean DEBUG_SQLITE = false;
     public static boolean isDebug() {
-        return BuildConfig.DEBUG && DEBUG_SQLITE;
+        return DEBUG_SQLITE;
     }
-
 
     public static ArrayList<String> sQueries = new ArrayList<>();
     public static ArrayList<String[]> sQueryArgs = new ArrayList<>();
@@ -65,7 +65,7 @@ public class SQLiteDebugActivity extends BackActivity {
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
                 if (position == mSelection)
-                    view.setBackgroundResource(R.color.fasola_foreground);
+                    view.setBackgroundResource(R.color.tab_background);
                 else
                     view.setBackgroundColor(Color.TRANSPARENT);
                 return view;
@@ -111,8 +111,6 @@ public class SQLiteDebugActivity extends BackActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.clear();
-        super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.debug_sqlite_menu, menu);
         return true;
     }
@@ -268,8 +266,6 @@ public class SQLiteDebugActivity extends BackActivity {
     }
 
     public static boolean handleOptionsItemSelected(Context context, MenuItem item) {
-        if (! BuildConfig.DEBUG)
-            return false;
         if (item.getItemId() == R.id.menu_sqlite_debug) {
             context.startActivity(new Intent(context, SQLiteDebugActivity.class));
             return true;
@@ -280,6 +276,13 @@ public class SQLiteDebugActivity extends BackActivity {
             return true;
         }
         return false;
+    }
+
+    public static void createOptionsMenu(MenuInflater menuInflater, Menu menu) {
+        menuInflater.inflate(R.menu.debug_sqlite_base_menu, menu);
+        MenuItem item = menu.findItem(R.id.menu_catch_sql);
+        if (item != null)
+            item.setChecked(DEBUG_SQLITE);
     }
 
     static {

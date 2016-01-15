@@ -26,7 +26,6 @@ public class PlaylistFragment extends ListFragment
     public PlaylistFragment() {
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
