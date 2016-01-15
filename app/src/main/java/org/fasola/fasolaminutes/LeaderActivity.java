@@ -31,7 +31,6 @@ public class LeaderActivity extends SimpleTabActivity {
                 if (leader != null) {
                     setTitle(leader.fullName.getString());
                 }
-                cursor.close();
             }
         });
         // Check for a lead id and switch to All Leads tab
@@ -87,7 +86,6 @@ public class LeaderActivity extends SimpleTabActivity {
                         ((TextView) view.findViewById(R.id.major_pct)).setText(majorText);
                         ((TextView) view.findViewById(R.id.entropy)).setText(entropy);
                     }
-                    cursor.close();
                 }
             });
             // Query for BarChart
@@ -123,7 +121,6 @@ public class LeaderActivity extends SimpleTabActivity {
                     // Update -- if the query took a little while, sometimes the chart doesn't
                     // want to redraw, so we force it here.
                     chart.invalidate();
-                    cursor.close();
                 }
             });
         }

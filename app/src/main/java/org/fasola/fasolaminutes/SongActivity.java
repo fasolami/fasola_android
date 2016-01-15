@@ -36,7 +36,6 @@ public class SongActivity extends SimpleTabActivity {
                 if (song != null) {
                     setTitle(song.fullName.getString());
                 }
-                cursor.close();
             }
         });
     }
@@ -149,7 +148,6 @@ public class SongActivity extends SimpleTabActivity {
                         ((TextView) view.findViewById(R.id.stats)).setText(
                                 "Led " + timesLed + ", by " + leaders + " (" + coleads + ")");
                     }
-                    cursor.close();
                 }
             });
             // Chart data
@@ -182,7 +180,6 @@ public class SongActivity extends SimpleTabActivity {
                     // Update -- if the query took a little while, sometimes the chart doesn't
                     // want to redraw, so we force it here.
                     chart.invalidate();
-                    cursor.close();
                 }
             });
         }

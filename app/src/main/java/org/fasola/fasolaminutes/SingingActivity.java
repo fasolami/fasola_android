@@ -31,7 +31,6 @@ public class SingingActivity extends SimpleTabActivity {
                 C.SingingDAO singing = C.Singing.fromCursor(cursor);
                 if (singing != null)
                     setTitle(singing.name.getString());
-                cursor.close();
             }
         });
     }
@@ -71,7 +70,6 @@ public class SingingActivity extends SimpleTabActivity {
                         ((TextView) view.findViewById(R.id.songs)).setText(songs);
                         ((TextView) view.findViewById(R.id.leaders)).setText(leaders);
                     }
-                    cursor.close();
                 }
             });
             // Song list query
@@ -167,7 +165,6 @@ public class SingingActivity extends SimpleTabActivity {
                                                            R.layout.long_text_item,
                                                            text.split("\n")));
                     }
-                    cursor.close();
                 }
             });
         }
