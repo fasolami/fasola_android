@@ -31,6 +31,7 @@ public class SingingActivity extends SimpleTabActivity {
                 C.SingingDAO singing = C.Singing.fromCursor(cursor);
                 if (singing != null)
                     setTitle(singing.name.getString());
+                cursor.close();
             }
         });
     }
@@ -70,16 +71,17 @@ public class SingingActivity extends SimpleTabActivity {
                         ((TextView) view.findViewById(R.id.songs)).setText(songs);
                         ((TextView) view.findViewById(R.id.leaders)).setText(leaders);
                     }
+                    cursor.close();
                 }
             });
             // Song list query
             query = SQL.select(C.Song.id, C.Song.fullName, C.Leader.fullName.func("group_concat", "', '"))
                             .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
-                            .select(C.Leader.id.func("group_concat")).as("__leaderIds")
+                    .select(C.Leader.id.func("group_concat")).as("__leaderIds")
                             .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
-                        .from(C.SongLeader)
-                        .whereEq(C.SongLeader.singingId)
-                        .group(C.SongLeader.leadId)
+                    .from(C.SongLeader)
+                    .whereEq(C.SongLeader.singingId)
+                    .group(C.SongLeader.leadId)
                         .order(C.SongLeader.singingOrder, "ASC");
             setQuery(query, String.valueOf(id));
         }
@@ -165,6 +167,7 @@ public class SingingActivity extends SimpleTabActivity {
                                                            R.layout.long_text_item,
                                                            text.split("\n")));
                     }
+                    cursor.close();
                 }
             });
         }
