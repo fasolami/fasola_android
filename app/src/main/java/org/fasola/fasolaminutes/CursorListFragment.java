@@ -448,6 +448,16 @@ public class CursorListFragment extends ListFragment
             setListAdapter(null);
         }
     }
+
+    @Override
+    public void onDestroy() {
+        if (getView() != null) {
+            getListAdapter().changeCursor(null);
+            setListAdapter(null);
+        }
+        super.onDestroy();
+    }
+
     //---------------------------------------------------------------------------------------------
     // endregion Loader Callbacks
 
@@ -506,26 +516,25 @@ public class CursorListFragment extends ListFragment
         int urlColumn = cursor.getColumnIndex(AUDIO_COLUMN);
         if (! cursor.moveToFirst())
             return;
-        if (cursor.isNull(urlColumn)) {
-            Log.w("CursorListFragment", "Clicked ImageView should have been hidden");
-            return;
-        }
         // Make a list of urls to add
         List<String> urls = new ArrayList<>();
-        urls.add(cursor.getString(urlColumn));
         // Index of song to play in urls list
         // NB: If any songs are missing urls, they will not be added to the urls list, and thus
         // playIndex is not always the same as (list) position
         int playIndex = 0;
-        while (cursor.moveToNext()) {
-            if (!cursor.isNull(urlColumn)) {
+        do {
+            if (! cursor.isNull(urlColumn)) {
                 urls.add(cursor.getString(urlColumn)); // Enqueue next songs
                 if (cursor.getPosition() == position)
                     playIndex = urls.size() - 1;
             }
         }
+        while (cursor.moveToNext());
         // Send the intent
-        playSongs(PlaybackService.ACTION_PLAY_MEDIA, playIndex, urls.toArray(new String[urls.size()]));
+        if (urls.isEmpty())
+            Log.e("CursorListFragment", "No recordings; ImageView should have been hidden");
+        else
+            playSongs(PlaybackService.ACTION_PLAY_MEDIA, playIndex, urls.toArray(new String[urls.size()]));
     }
 
     /**
