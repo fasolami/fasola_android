@@ -4,7 +4,9 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -33,6 +35,17 @@ public class PlaylistFragment extends ListFragment
         mList = (DragSortListView)view.findViewById(android.R.id.list);
         mPlaylist = Playlist.getInstance();
         mList.setEmptyView(view.findViewById(android.R.id.empty));
+        // If this is in a drawer, check for drawer opened events and update the scroll position
+        View drawerLayout = view.getRootView().findViewById(R.id.drawer_layout);
+        if (drawerLayout instanceof DrawerLayout) {
+            ((DrawerLayout)drawerLayout).setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+                @Override
+                public void onDrawerOpened(View drawerView) {
+                    if (drawerView.findViewById(mList.getId()) != null)
+                        setUserVisibleHint(true);
+                }
+            });
+        }
         return view;
     }
 
@@ -44,6 +57,23 @@ public class PlaylistFragment extends ListFragment
         mList.setDropListener(this);
         // Setup MediaController
         mPlayer = new PlaybackService.Control(getActivity());
+        setHasOptionsMenu(true);
+    }
+
+    // Scroll to playlist position when we become visible
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        // This works in DrawerLayout
+        mList.setSelection(mPlaylist.getPosition());
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        // This works everywhere else (including ViewPager)
+        if (isVisibleToUser && mList != null)
+            mList.setSelection(mPlaylist.getPosition());
     }
 
     @Override
