@@ -13,6 +13,10 @@
         <item name="android:colorBackground">@color/fasola_background</item>
         <item name="android:windowBackground">@color/fasola_background</item>
 
+        <!-- For Lollipop+ ActionBar dropdown -->
+        <item name="android:textAppearanceLargePopupMenu">@android:style/TextAppearance.Holo.Inverse</item>
+        <item name="android:textAppearanceSmallPopupMenu">@android:style/TextAppearance.Holo.Inverse</item>
+
         <!-- PagerSlidingTabStrip styles -->
         <item name="pstsShouldExpand">true</item>
         <item name="pstsIndicatorColor">@color/fasola_foreground</item>
