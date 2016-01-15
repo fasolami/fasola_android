@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -597,6 +598,7 @@ public class SQL {
                     JoinEntry firstJoin = BaseTable.getJoin(t1, other);
                     if (firstJoin == null)
                         throw new JoinException(t1, t2);
+                    Log.w("SQL", "many to many join for tables: " + t1 + ", " + t2);
                     _join(other, firstJoin.text, firstJoin.isLeft || isLeft);
                     // Join to the second table
                     _join(t2, entry.text, entry.isLeft || isLeft);
