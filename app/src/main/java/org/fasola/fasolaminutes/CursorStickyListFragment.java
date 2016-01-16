@@ -47,10 +47,4 @@ public abstract class CursorStickyListFragment extends CursorListFragment {
     public void setListAdapter(ListAdapter adapter) {
         mStickyList.setAdapter((IndexedCursorAdapter)adapter);
     }
-
-    // Specially overridden function in CursorListFragment
-    @Override
-    protected void setFastScrollEnabled(boolean enabled) {
-        mStickyList.setFastScrollEnabled(enabled);
-    }
 }
