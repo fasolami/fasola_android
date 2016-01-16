@@ -35,7 +35,7 @@ public class SingingActivity extends SimpleTabActivity {
         });
     }
 
-    public static class SingingSongListFragment extends CursorListFragment
+    public static class SingingSongListFragment extends CursorStickyListFragment
                                                 implements ListDialogFragment.Listener {
 
         long mId;
@@ -97,11 +97,15 @@ public class SingingActivity extends SimpleTabActivity {
             // Order
             switch (getSortId()) {
                 case R.id.menu_singing_song_sort_leader:
-                    return query.order(C.Leader.lastName, "ASC");
+                    showHeaders(true);
+                    setAlphabetIndexer();
+                    return query.sectionIndex(C.Leader.lastName, "ASC");
                 case R.id.menu_singing_song_sort_page:
+                    showHeaders(false);
                     return query.order(C.Song.pageSort, "ASC");
                 case R.id.menu_singing_song_sort_order:
                 default:
+                    showHeaders(false);
                     return query.order(C.SongLeader.singingOrder, "ASC");
             }
         }
