@@ -8,13 +8,13 @@
           android:showAsAction="ifRoom|collapseActionView"
           android:actionViewClass="android.widget.SearchView" />
 
-    <item android:id="@+id/menu_song_sort"
-        android:title="@string/menu_leader_sort"
+    <item android:id="@+id/menu_sort"
+        android:title="@string/menu_sort"
         android:icon="@drawable/ic_action_sort_by_size"
         android:showAsAction="always">
 
         <menu>
-        <group android:id="@+id/menu_group_song_sort"
+        <group android:id="@+id/menu_group_sort"
             android:checkableBehavior="single">
 
             <item android:id="@+id/menu_song_sort_page"

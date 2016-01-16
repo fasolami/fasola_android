@@ -3,7 +3,7 @@
 
     <string name="app_name">FaSoLa Minutes</string>
     <string name="menu_settings">Settings</string>
-    <string name="menu_leader_sort">Sort</string>
+    <string name="menu_sort">Sort</string>
     <string name="menu_leader_sort_name">By last name</string>
     <string name="menu_leader_sort_count">By lead count</string>
     <string name="menu_leader_sort_entropy">By entropy score</string>

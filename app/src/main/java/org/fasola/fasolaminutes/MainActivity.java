@@ -149,7 +149,7 @@ public class MainActivity extends SimpleTabActivity {
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             // Sort
-            if (item.getGroupId() == R.id.menu_group_leader_sort) {
+            if (item.getGroupId() == R.id.menu_group_sort) {
                 item.setChecked(true);
                 mSortId = item.getItemId();
                 updateQuery();
@@ -201,51 +201,14 @@ public class MainActivity extends SimpleTabActivity {
     }
 
     public static class SongListFragment extends CursorStickyListFragment {
-        protected int mSortId = R.id.menu_song_sort_page;
-        protected final static String BUNDLE_SORT = "SORT_ID";
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            if (savedInstanceState != null) {
-                mSortId = savedInstanceState.getInt(BUNDLE_SORT, mSortId);
-            }
-            setHasOptionsMenu(true);
-        }
-
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            setMenuResource(R.menu.menu_song_list_fragment);
+            setDefaultSortId(R.id.menu_song_sort_page);
             setIntentActivity(SongActivity.class);
             setItemLayout(R.layout.list_item_song);
             updateQuery();
-        }
-
-        @Override
-        public void onSaveInstanceState(final Bundle saveInstanceState) {
-            super.onSaveInstanceState(saveInstanceState);
-            saveInstanceState.putSerializable(BUNDLE_SORT, mSortId);
-        }
-
-        @Override
-        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.menu_song_list_fragment, menu);
-            // Check the initial sort
-            MenuItem item = menu.findItem(mSortId);
-            if (item != null)
-                item.setChecked(true);
-        }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            // Sort
-            if (item.getGroupId() == R.id.menu_group_song_sort) {
-                item.setChecked(true);
-                mSortId = item.getItemId();
-                updateQuery();
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
         }
 
         /**
@@ -259,7 +222,7 @@ public class MainActivity extends SimpleTabActivity {
 
         // Code common to onUpdateQuery and onUpdateSearch
         private SQL.Query setQueryOrder(SQL.Query query, boolean setSectionIndex) {
-            switch(mSortId) {
+            switch(getSortId()) {
                 case R.id.menu_song_sort_title:
                     if (setSectionIndex) {
                         setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
@@ -342,50 +305,14 @@ public class MainActivity extends SimpleTabActivity {
     }
 
     public static class SingingListFragment extends CursorStickyListFragment {
-        protected int mSortId = R.id.menu_singing_sort_year;
-        protected final static String BUNDLE_SORT = "SORT_ID";
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            if (savedInstanceState != null)
-                mSortId = savedInstanceState.getInt(BUNDLE_SORT, mSortId);
-            setHasOptionsMenu(true);
-        }
-
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            setMenuResource(R.menu.menu_singing_list_fragment);
+            setDefaultSortId(R.id.menu_singing_sort_year);
             setIntentActivity(SingingActivity.class);
             setItemLayout(R.layout.list_item_singing);
             updateQuery();
-        }
-
-        @Override
-        public void onSaveInstanceState(final Bundle saveInstanceState) {
-            super.onSaveInstanceState(saveInstanceState);
-            saveInstanceState.putSerializable(BUNDLE_SORT, mSortId);
-        }
-
-        @Override
-        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.menu_singing_list_fragment, menu);
-            // Check the initial sort
-            MenuItem item = menu.findItem(mSortId);
-            if (item != null)
-                item.setChecked(true);
-        }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            // Sort
-            if (item.getGroupId() == R.id.menu_group_singing_sort) {
-                item.setChecked(true);
-                mSortId = item.getItemId();
-                updateQuery();
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
         }
 
         /**

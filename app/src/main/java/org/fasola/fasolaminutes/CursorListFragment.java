@@ -8,6 +8,7 @@ import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,12 +58,16 @@ public class CursorListFragment extends ListFragment
     protected MinutesLoader mMinutesLoader;
     protected String mSearchTerm = "";
     protected SQL.Query mOriginalQuery;
+    protected int mSortId = -1;
+    protected int mMenuResourceId = -1;
     protected int mDeferredIndexerType = NO_INDEXER;
     protected LetterIndexer mDeferredIndexer;
     protected String[] mSectionLabels;
     protected boolean mUseFastScroll = false;
-    private String BUNDLE_SEARCH = "SEARCH_TERM";
-    private String LIST_STATE = "LIST_STATE";
+
+    private static final String BUNDLE_SEARCH = "SEARCH_TERM";
+    private static final String BUNDLE_SORT = "SORT_ID";
+    private static final String LIST_STATE = "LIST_STATE";
     private Parcelable mListState;
 
     @Override
@@ -70,6 +75,7 @@ public class CursorListFragment extends ListFragment
         super.onCreate(savedInstanceState);
         if (savedInstanceState != null) {
             mSearchTerm = savedInstanceState.getString(BUNDLE_SEARCH, mSearchTerm);
+            mSortId = savedInstanceState.getInt(BUNDLE_SORT, mSortId);
             mListState = savedInstanceState.getParcelable(LIST_STATE);
         }
         // Setup the cursor loader
@@ -121,6 +127,7 @@ public class CursorListFragment extends ListFragment
     public void onSaveInstanceState(final Bundle saveInstanceState) {
         super.onSaveInstanceState(saveInstanceState);
         saveInstanceState.putSerializable(BUNDLE_SEARCH, mSearchTerm);
+        saveInstanceState.putSerializable(BUNDLE_SORT, mSortId);
         if (getView() != null) // Prevent IllegalStateException "Content view not yet created"
             saveInstanceState.putParcelable(LIST_STATE, getListView().onSaveInstanceState());
     }
@@ -201,7 +208,6 @@ public class CursorListFragment extends ListFragment
         return query;
     }
 
-
     /**
      * Updates the query and starts loading.
      *
@@ -223,6 +229,61 @@ public class CursorListFragment extends ListFragment
      */
     public SQL.Query onUpdateQuery() {
         return mOriginalQuery;
+    }
+
+    /**
+     * Sets a menu resource to be inflated by onCreateOptionsMenu.
+     *
+     * <p>If this menu has a group named {@code R.id.menu_group_sort}, this group will
+     * be used for sort menu items, which will be managed by this class.
+     *
+     * @param id resource id
+     * @see #getSortId()
+     */
+    public void setMenuResource(int id) {
+        mMenuResourceId = id;
+        if (id != -1)
+            setHasOptionsMenu(true);
+    }
+
+    /** Sets the default sort item id. */
+    public void setDefaultSortId(int id) {
+        if (mSortId == -1)
+            mSortId = id;
+    }
+
+    /** Returns the id for the selected sort item. */
+    public int getSortId() {
+        return mSortId;
+    }
+
+    // Create the menu specified in setMenuResource
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(mMenuResourceId, menu);
+        // Check the initial sort
+        MenuItem item = menu.findItem(mSortId);
+        if (item == null) {
+            if (mSortId != -1)
+                Log.w("CursorListFragment", "Invalid sortId specified; guessing initial sortId");
+            mSortId = menu.getItem(0).getItemId();
+            menu.getItem(0).setChecked(true);
+        }
+        else
+            item.setChecked(true);
+    }
+
+
+    // Set sort id
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getGroupId() == R.id.menu_group_sort) {
+            item.setChecked(true);
+            mSortId = item.getItemId();
+            updateQuery();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
