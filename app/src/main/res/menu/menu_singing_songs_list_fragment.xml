@@ -1,0 +1,36 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/menu_search"
+          android:title="@string/search_songs"
+          android:icon="@drawable/ic_action_search"
+          android:showAsAction="ifRoom|collapseActionView"
+          android:actionViewClass="android.widget.SearchView" />
+
+
+    <item android:id="@+id/menu_sort"
+        android:title="@string/menu_sort"
+        android:icon="@drawable/ic_action_sort_by_size"
+        android:showAsAction="always">
+
+        <menu>
+        <group android:id="@+id/menu_group_sort"
+            android:checkableBehavior="single">
+
+            <item android:id="@+id/menu_singing_song_sort_order"
+                android:title="@string/menu_singing_song_sort_order"
+                app:showAsAction="never" />
+
+            <item android:id="@+id/menu_singing_song_sort_page"
+                android:title="@string/menu_singing_song_sort_page"
+                app:showAsAction="never" />
+
+            <item android:id="@+id/menu_singing_song_sort_leader"
+                android:title="@string/menu_singing_song_sort_leader"
+                app:showAsAction="never" />
+
+        </group>
+        </menu>
+
+    </item>
+</menu>

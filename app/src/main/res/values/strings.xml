@@ -71,5 +71,8 @@
     <string name="menu_song_sort_time">By time signature</string>
     <string name="menu_song_sort_meter">By meter</string>
     <string name="meter_label">Meter:</string>
+    <string name="menu_singing_song_sort_order">By lead order</string>
+    <string name="menu_singing_song_sort_page">By page number</string>
+    <string name="menu_singing_song_sort_leader">By leader name</string>
 
 </resources>

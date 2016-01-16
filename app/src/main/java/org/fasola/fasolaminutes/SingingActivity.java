@@ -37,6 +37,9 @@ public class SingingActivity extends SimpleTabActivity {
 
     public static class SingingSongListFragment extends CursorListFragment
                                                 implements ListDialogFragment.Listener {
+
+        long mId;
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View root = inflater.inflate(R.layout.fragment_singing_songlist, container, false);
@@ -47,15 +50,17 @@ public class SingingActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            setMenuResource(R.menu.menu_singing_songs_list_fragment);
+            setDefaultSortId(R.id.menu_singing_song_sort_order);
             setFastScrollEnabled(true);
             setItemLayout(R.layout.list_item_singing_song);
             setIntentActivity(LeaderActivity.class);
-            long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
+            mId = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             // Singing info query
             SQL.Query query = C.Singing.select(C.Singing.name, C.Singing.location,
                                                C.Singing.songCount, C.Singing.leaderCount)
                                         .whereEq(C.Singing.id);
-            getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
+            getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(mId)) {
                 @Override
                 public void onLoadFinished(Cursor cursor) {
                     C.SingingDAO singing = C.Singing.fromCursor(cursor);
@@ -73,16 +78,38 @@ public class SingingActivity extends SimpleTabActivity {
                     }
                 }
             });
-            // Song list query
-            query = SQL.select(C.Song.id, C.Song.fullName, C.Leader.fullName.func("group_concat", "', '"))
-                            .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
+            updateQuery();
+        }
+
+        @Override
+        public SQL.Query onUpdateQuery() {
+            // Base query
+            SQL.Query query = SQL.select(
+                        C.Song.id,
+                        C.Song.fullName,
+                        C.Leader.fullName.func("group_concat", "', '"))
+                    .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
                     .select(C.Leader.id.func("group_concat")).as("__leaderIds")
-                            .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
+                    .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
                     .from(C.SongLeader)
-                    .whereEq(C.SongLeader.singingId)
-                    .group(C.SongLeader.leadId)
-                        .order(C.SongLeader.singingOrder, "ASC");
-            setQuery(query, String.valueOf(id));
+                    .where(C.SongLeader.singingId, "=", mId)
+                    .group(C.SongLeader.leadId);
+            // Order
+            switch (getSortId()) {
+                case R.id.menu_singing_song_sort_leader:
+                    return query.order(C.Leader.lastName, "ASC");
+                case R.id.menu_singing_song_sort_page:
+                    return query.order(C.Song.pageSort, "ASC");
+                case R.id.menu_singing_song_sort_order:
+                default:
+                    return query.order(C.SongLeader.singingOrder, "ASC");
+            }
+        }
+
+        @Override
+        public SQL.Query onUpdateSearch(SQL.Query query, String searchTerm) {
+            return query.where(C.Leader.fullName, "LIKE", "%" + searchTerm + "%")
+                        .or(C.Song.fullName, "LIKE", "%" + searchTerm + "%");
         }
 
         @Override
