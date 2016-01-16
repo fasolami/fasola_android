@@ -353,6 +353,11 @@ public class CursorListFragment extends ListFragment
         setIndexer(new LetterIndexer(null, -1, alphabet));
     }
 
+    /** Sets LetterIndexer with {@code " ABCDEFGHIJKLMNOPQRSTUVWXYZ"}. */
+    public void setAlphabetIndexer() {
+        setAlphabet(" ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    }
+
     /**
      * Sets a {@link BinIndexer}.
      *

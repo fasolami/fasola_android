@@ -179,13 +179,13 @@ public class MainActivity extends SimpleTabActivity {
                                            C.Leader.lastName, "ASC",
                                            C.Leader.fullName, "ASC");
                 case R.id.menu_leader_sort_first_name:
-                    setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                    setAlphabetIndexer();
                     showHeaders(true);
                     return C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
                                    .sectionIndex(C.Leader.fullName, "ASC");
                 case R.id.menu_leader_sort_name:
                 default:
-                    setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                    setAlphabetIndexer();
                     showHeaders(true);
                     return C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
                                    .sectionIndex(C.Leader.lastName, "ASC")
@@ -225,7 +225,7 @@ public class MainActivity extends SimpleTabActivity {
             switch(getSortId()) {
                 case R.id.menu_song_sort_title:
                     if (setSectionIndex) {
-                        setAlphabet("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+                        setAlphabetIndexer();
                         showHeaders(true);
                         return query.sectionIndex(C.Song.title, "ASC");
                     }
