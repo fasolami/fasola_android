@@ -253,6 +253,7 @@ public class PlaybackService extends Service
         mShouldPlay = false;
         mIsPrepared = false;
         mNotification = null;
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PAUSED));
         stopForeground(true);
         stopSelf();
     }
