@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
 import android.widget.MediaController;
 
 import java.util.List;
@@ -16,6 +17,8 @@ public class NowPlayingActivity extends SimpleTabActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setProgressBarIndeterminateVisibility(false);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nowplaying);
         // Setup MediaController
@@ -58,8 +61,14 @@ public class NowPlayingActivity extends SimpleTabActivity {
                     for (Fragment fragment : fragments)
                         if (fragment instanceof SongActivity.SongFragment)
                             ((SongActivity.SongFragment)fragment).setSongId(songId);
+                // Broadcasts
+                if (PlaybackService.BROADCAST_LOADING.equals(getAction()))
+                    setProgressBarIndeterminateVisibility(true);
+                else if (PlaybackService.BROADCAST_PREPARED.equals(getAction()))
+                    setProgressBarIndeterminateVisibility(false);
             } else {
                 songId = -1;
+                setProgressBarIndeterminateVisibility(false);
             }
         }
 
