@@ -30,6 +30,7 @@ public class PlaybackService extends Service
         implements MediaPlayer.OnPreparedListener,
             MediaPlayer.OnCompletionListener,
             MediaPlayer.OnErrorListener,
+            MediaPlayer.OnInfoListener,
             MediaController.MediaPlayerControl,
             AudioManager.OnAudioFocusChangeListener {
 
@@ -86,6 +87,7 @@ public class PlaybackService extends Service
 
     MediaPlayer mMediaPlayer;
     boolean mIsPrepared;
+    boolean mIsLoading;
     boolean mShouldPlay; // Should we play the song once it is prepared?
     Playlist.Song mSong; // Prepared song
     int mErrorCount; // Number of sequential errors
@@ -207,6 +209,10 @@ public class PlaybackService extends Service
         return mIsPrepared;
     }
 
+    /** Returns {@code true} if the {@link MediaPlayer} is loading (not prepared or buffering) */
+    public boolean isLoading() {
+        return ! mIsPrepared || mIsLoading;
+    }
     // region MediaPlayerControl overrides
     //---------------------------------------------------------------------------------------------
     @Override
@@ -405,6 +411,7 @@ public class PlaybackService extends Service
             mMediaPlayer.setOnPreparedListener(this);
             mMediaPlayer.setOnCompletionListener(this);
             mMediaPlayer.setOnErrorListener(this);
+            mMediaPlayer.setOnInfoListener(this);
         }
         return mMediaPlayer;
     }
@@ -474,8 +481,8 @@ public class PlaybackService extends Service
         remote.setImageViewResource(R.id.play_pause, isPlaying()
                 ? android.R.drawable.ic_media_pause
                 : android.R.drawable.ic_media_play);
-        remote.setViewVisibility(R.id.play_pause, isPrepared() ? View.VISIBLE : View.GONE);
-        remote.setViewVisibility(R.id.loading, isPrepared() ? View.GONE : View.VISIBLE);
+        remote.setViewVisibility(R.id.play_pause, isLoading() ? View.GONE : View.VISIBLE);
+        remote.setViewVisibility(R.id.loading, isLoading() ? View.VISIBLE : View.GONE);
         // Update pending intent
         if (mHasMainTask) {
             // Launch NowPlayingActivity normally
@@ -577,6 +584,26 @@ public class PlaybackService extends Service
         }, ERROR_DELAY_MS);
         return true;
     }
+
+    @Override
+    public boolean onInfo(MediaPlayer mp, int what, int extra) {
+        // Send broadcasts based on buffering state
+        if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
+            mIsLoading = true;
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_LOADING));
+            updateNotification();
+            return true;
+        }
+        else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
+            mIsLoading = false;
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PREPARED));
+            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PLAYING));
+            updateNotification();
+            return true;
+        }
+        return false;
+    }
+
     //---------------------------------------------------------------------------------------------
     //endregion
 
