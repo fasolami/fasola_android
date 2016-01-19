@@ -54,20 +54,30 @@ public class NowPlayingView extends LinearLayout {
         @Override
         public void onChanged() {
             Playlist.Song song = Playlist.getInstance().getCurrent();
-            if (PlaybackService.isRunning() && song != null) {
-                setVisibility(View.VISIBLE);
-                mText.setText(String.format("%s  -  %s %s", song.name, song.year, song.singing));
-                updateButton();
-                // Add error indicator
-                if (getAction() != null) {
-                    int iconResource = 0;
-                    if (getAction().equals(PlaybackService.BROADCAST_ERROR))
-                        iconResource = R.drawable.ic_warning_amber_18dp;
-                    mText.setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0);
-                }
-            }
-            else {
+            if (! PlaybackService.isRunning() || song == null) {
                 setVisibility(View.GONE);
+                return;
+            }
+            setVisibility(View.VISIBLE);
+            mText.setText(String.format("%s  -  %s %s", song.name, song.year, song.singing));
+            updateButton();
+            // Handle broadcasts
+            if (getAction() != null) {
+                // Error indicator
+                if (getAction().equals(PlaybackService.BROADCAST_PREPARED))
+                    mText.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+                else if (getAction().equals(PlaybackService.BROADCAST_ERROR))
+                    mText.setCompoundDrawablesWithIntrinsicBounds(
+                            R.drawable.ic_warning_amber_18dp, 0, 0, 0);
+                // Loading animation
+                else if (getAction().equals(PlaybackService.BROADCAST_LOADING)) {
+                    findViewById(R.id.loading).setVisibility(View.VISIBLE);
+                    findViewById(R.id.play_pause).setVisibility(View.GONE);
+                }
+                else if (getAction().equals(PlaybackService.BROADCAST_PLAYING)) {
+                    findViewById(R.id.loading).setVisibility(View.GONE);
+                    findViewById(R.id.play_pause).setVisibility(View.VISIBLE);
+                }
             }
         }
     };

@@ -7,16 +7,25 @@
         android:layout_weight="1"
         android:textColor="@color/fasola_background"
         android:layout_gravity="center_vertical"
-        android:layout_margin="4dp"
+        android:layout_margin="6dp"
         android:ellipsize="end"
         android:singleLine="true" />
 
     <ImageButton android:id="@+id/play_pause"
+        android:layout_height="match_parent"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:background="?android:attr/selectableItemBackground"
         android:src="@drawable/ic_play_arrow"
+        android:padding="4dp" />
+
+    <ProgressBar
+        android:indeterminate="true"
+        android:id="@+id/loading"
+        android:visibility="gone"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
         android:padding="4dp" />
 
 </merge>

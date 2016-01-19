@@ -65,6 +65,8 @@ public class PlaybackService extends Service
     /** Close notification */
     public static final String ACTION_CLOSE = "org.fasola.fasolaminutes.action.STOP";
 
+    /** Broadcast sent when the {@link MediaPlayer} is loading */
+    public static final String BROADCAST_LOADING = "org.fasola.fasolaminutes.mediaBroadcast.LOADING";
     /** Broadcast sent when the {@link MediaPlayer} is prepared */
     public static final String BROADCAST_PREPARED = "org.fasola.fasolaminutes.mediaBroadcast.PREPARED";
     /** Broadcast sent when the {@link MediaPlayer} has started playing */
@@ -78,8 +80,8 @@ public class PlaybackService extends Service
 
     /** All broadcast actions. */
     public static final String[] BROADCAST_ALL = {
-            BROADCAST_PREPARED, BROADCAST_PLAYING, BROADCAST_PAUSED,
-            BROADCAST_COMPLETED, BROADCAST_ERROR
+            BROADCAST_LOADING, BROADCAST_PREPARED, BROADCAST_PLAYING,
+            BROADCAST_PAUSED, BROADCAST_COMPLETED, BROADCAST_ERROR
     };
 
     MediaPlayer mMediaPlayer;
@@ -323,6 +325,7 @@ public class PlaybackService extends Service
         if (mSong == null)
             return false;
         // Prepare player
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_LOADING));
         mIsPrepared = false;
         ensurePlayer();
         mMediaPlayer.stop();
