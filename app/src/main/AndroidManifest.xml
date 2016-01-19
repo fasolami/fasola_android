@@ -23,15 +23,18 @@
         </activity>
         <activity
             android:name=".LeaderActivity"
-            android:label="@string/title_activity_leader">
+            android:label="@string/title_activity_leader"
+            android:windowSoftInputMode="adjustPan">
         </activity>
         <activity
             android:name=".SongActivity"
-            android:label="@string/title_activity_song">
+            android:label="@string/title_activity_song"
+            android:windowSoftInputMode="adjustPan">
         </activity>
         <activity
             android:name=".SingingActivity"
-            android:label="@string/title_activity_singing">
+            android:label="@string/title_activity_singing"
+            android:windowSoftInputMode="adjustPan">
         </activity>
 
         <service
