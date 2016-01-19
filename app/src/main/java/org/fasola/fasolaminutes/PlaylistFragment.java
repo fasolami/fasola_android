@@ -24,6 +24,9 @@ public class PlaylistFragment extends ListFragment
     DragSortListView mList;
     PlaybackService.Control mPlayer;
     Playlist mPlaylist;
+    DrawerLayout mLayout;
+    View mDrawer;
+    boolean mIsVisible;
 
     public PlaylistFragment() {
     }
@@ -35,17 +38,6 @@ public class PlaylistFragment extends ListFragment
         mList = (DragSortListView)view.findViewById(android.R.id.list);
         mPlaylist = Playlist.getInstance();
         mList.setEmptyView(view.findViewById(android.R.id.empty));
-        // If this is in a drawer, check for drawer opened events and update the scroll position
-        View drawerLayout = view.getRootView().findViewById(R.id.drawer_layout);
-        if (drawerLayout instanceof DrawerLayout) {
-            ((DrawerLayout)drawerLayout).setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-                @Override
-                public void onDrawerOpened(View drawerView) {
-                    if (drawerView.findViewById(mList.getId()) != null)
-                        setUserVisibleHint(true);
-                }
-            });
-        }
         return view;
     }
 
@@ -60,18 +52,45 @@ public class PlaylistFragment extends ListFragment
         setHasOptionsMenu(true);
     }
 
-    // Scroll to playlist position when we become visible
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        // Find a DrawerLayout and parent drawer in the view hierarchy.
+        // These are used in onPrepareOptionsMenu to determine when this fragment is actually
+        // on screen.
+        View view = getView();
+        while (view != null && view.getParent() instanceof View) {
+            if (mDrawer == null && view.getLayoutParams() instanceof DrawerLayout.LayoutParams)
+                mDrawer = view;
+            if (mLayout == null && view instanceof DrawerLayout) {
+                mLayout = (DrawerLayout)view;
+                break;
+            }
+            view = (View)view.getParent();
+        }
+    }
+
+    // call setUserVisibleHint when we become visible
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        // This works in DrawerLayout
-        mList.setSelection(mPlaylist.getPosition());
+        if (mLayout != null && mDrawer != null) {
+            if (mLayout.isDrawerOpen(mDrawer)) {
+                if (! mIsVisible) {
+                    mIsVisible = true;
+                    setUserVisibleHint(true);
+                }
+                // Otherwise we're already visible and this is a menu click
+            }
+            else {
+                mIsVisible = false;
+            }
+        }
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        // This works everywhere else (including ViewPager)
         if (isVisibleToUser && mList != null)
             mList.setSelection(mPlaylist.getPosition());
     }
