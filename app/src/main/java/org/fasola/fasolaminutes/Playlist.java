@@ -292,10 +292,13 @@ public class Playlist extends ArrayList<Playlist.Song> {
         int lastPos = getPosition();
         super.add(to, super.remove(from));
         mObservable.notifyChanged();
-        // Update now playing if we just moved the currently playing song
-        // (otherwise Playlist handles it)
-        if (lastPos == from)
+        // Update now playing
+        if (from == lastPos) // moved playing item
             moveToPosition(to);
+        else if (from < lastPos && to >= lastPos) // moved an item from before to after
+            moveToPosition(lastPos - 1);
+        else if (from > lastPos && to <= lastPos) // moved an item from after to before
+            moveToPosition(lastPos + 1);
     }
 
 
