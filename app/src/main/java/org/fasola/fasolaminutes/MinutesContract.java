@@ -199,7 +199,7 @@ public class MinutesContract {
 
         @Override
         protected void onCreate() {
-            songCount = column(SongLeader.songId.countDistinct());
+            songCount = column(SongLeader.leadId.countDistinct());
             leaderCount = column(SongLeader.leaderId.countDistinct());
         }
 
