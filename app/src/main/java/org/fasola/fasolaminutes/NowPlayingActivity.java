@@ -18,7 +18,6 @@ public class NowPlayingActivity extends SimpleTabActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setProgressBarIndeterminateVisibility(false);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_nowplaying);
         // Setup MediaController
@@ -61,11 +60,10 @@ public class NowPlayingActivity extends SimpleTabActivity {
                     for (Fragment fragment : fragments)
                         if (fragment instanceof SongActivity.SongFragment)
                             ((SongActivity.SongFragment)fragment).setSongId(songId);
-                // Broadcasts
-                if (PlaybackService.BROADCAST_LOADING.equals(getAction()))
-                    setProgressBarIndeterminateVisibility(true);
-                else if (PlaybackService.BROADCAST_PREPARED.equals(getAction()))
-                    setProgressBarIndeterminateVisibility(false);
+                // Loading indicator
+                PlaybackService service = PlaybackService.getInstance();
+                if (service != null)
+                    setProgressBarIndeterminateVisibility(service.isLoading());
             } else {
                 songId = -1;
                 setProgressBarIndeterminateVisibility(false);
