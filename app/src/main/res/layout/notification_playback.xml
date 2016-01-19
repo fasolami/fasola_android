@@ -39,6 +39,16 @@
 		android:background="?android:attr/selectableItemBackground"
 		android:src="@android:drawable/ic_media_play" />
 
+    <ProgressBar
+        android:id="@+id/loading"
+        android:indeterminate="true"
+        android:visibility="visible"
+        style="?android:attr/progressBarStyle"
+        android:layout_gravity="center_vertical"
+        android:layout_height="32dp"
+        android:layout_width="32dp"
+        android:padding="2dp" />
+
 	<ImageButton android:id="@+id/next"
         android:layout_height="wrap_content"
 		android:layout_width="wrap_content"

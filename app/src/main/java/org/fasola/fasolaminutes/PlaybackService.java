@@ -473,6 +473,8 @@ public class PlaybackService extends Service
         remote.setImageViewResource(R.id.play_pause, isPlaying()
                 ? android.R.drawable.ic_media_pause
                 : android.R.drawable.ic_media_play);
+        remote.setViewVisibility(R.id.play_pause, isPrepared() ? View.VISIBLE : View.GONE);
+        remote.setViewVisibility(R.id.loading, isPrepared() ? View.GONE : View.VISIBLE);
         // Update pending intent
         if (mHasMainTask) {
             // Launch NowPlayingActivity normally
