@@ -47,9 +47,9 @@ public class NowPlayingView extends LinearLayout {
     PlaylistObserver mObserver = new PlaylistObserver() {
         @Override
         public void onChanged() {
-            Playlist.Song song = Playlist.getInstance().getCurrent();
             PlaybackService service = PlaybackService.getInstance();
-            if (service == null || song == null) {
+            Playlist.Song song = service != null ? service.getSong() : null;
+            if (song == null) {
                 setVisibility(View.GONE);
                 return;
             }

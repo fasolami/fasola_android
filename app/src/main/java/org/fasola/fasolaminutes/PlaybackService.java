@@ -287,6 +287,11 @@ public class PlaybackService extends Service
         return isPrepared() && mMediaPlayer.isPlaying();
     }
 
+    /** Returns the currently playing song. */
+    public Playlist.Song getSong() {
+        return mSong;
+    }
+
     public boolean isPaused() {
         return ! mShouldPlay;
     }
@@ -472,12 +477,11 @@ public class PlaybackService extends Service
      * @see #createNotification()
      */
     private void updateNotification() {
-        Playlist.Song song = Playlist.getInstance().getCurrent();
         Notification notification = mNotification != null ? mNotification : createNotification();
         // Update content
         RemoteViews remote = notification.contentView;
-        remote.setTextViewText(R.id.title, song != null ? song.name : "");
-        remote.setTextViewText(R.id.singing, song != null ? song.singing : "");
+        remote.setTextViewText(R.id.title, mSong != null ? mSong.name : "");
+        remote.setTextViewText(R.id.singing, mSong != null ? mSong.singing : "");
         remote.setImageViewResource(R.id.play_pause, isPlaying()
                 ? android.R.drawable.ic_media_pause
                 : android.R.drawable.ic_media_play);

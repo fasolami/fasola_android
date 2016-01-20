@@ -50,7 +50,8 @@ public class NowPlayingActivity extends SimpleTabActivity {
         public void onChanged() {
             mController.show(0); // Update seekbar
             // Update title and Fragments
-            Playlist.Song song = Playlist.getInstance().getCurrent();
+            PlaybackService service = PlaybackService.getInstance();
+            Playlist.Song song = service != null ? service.getSong() : null;
             if (song != null) {
                 songId = song.songId;
                 setTitle(song.name);
@@ -61,9 +62,7 @@ public class NowPlayingActivity extends SimpleTabActivity {
                         if (fragment instanceof SongActivity.SongFragment)
                             ((SongActivity.SongFragment)fragment).setSongId(songId);
                 // Loading indicator
-                PlaybackService service = PlaybackService.getInstance();
-                if (service != null)
-                    setProgressBarIndeterminateVisibility(service.isLoading());
+                setProgressBarIndeterminateVisibility(service.isLoading());
             } else {
                 songId = -1;
                 setProgressBarIndeterminateVisibility(false);
