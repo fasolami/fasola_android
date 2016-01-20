@@ -4,9 +4,7 @@ import android.content.Context;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -24,9 +22,6 @@ public class PlaylistFragment extends ListFragment
     DragSortListView mList;
     PlaybackService.Control mPlayer;
     Playlist mPlaylist;
-    DrawerLayout mLayout;
-    View mDrawer;
-    boolean mIsVisible;
 
     public PlaylistFragment() {
     }
@@ -50,50 +45,13 @@ public class PlaylistFragment extends ListFragment
         mList.setFastScrollEnabled(true);
         // Setup MediaController
         mPlayer = new PlaybackService.Control(getActivity());
-        setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        // Find a DrawerLayout and parent drawer in the view hierarchy.
-        // These are used in onPrepareOptionsMenu to determine when this fragment is actually
-        // on screen.
-        View view = getView();
-        while (view != null && view.getParent() instanceof View) {
-            if (mDrawer == null && view.getLayoutParams() instanceof DrawerLayout.LayoutParams)
-                mDrawer = view;
-            if (mLayout == null && view instanceof DrawerLayout) {
-                mLayout = (DrawerLayout)view;
-                break;
-            }
-            view = (View)view.getParent();
-        }
-    }
-
-    // call setUserVisibleHint when we become visible
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        if (mLayout != null && mDrawer != null) {
-            if (mLayout.isDrawerOpen(mDrawer)) {
-                if (! mIsVisible) {
-                    mIsVisible = true;
-                    setUserVisibleHint(true);
-                }
-                // Otherwise we're already visible and this is a menu click
-            }
-            else {
-                mIsVisible = false;
-            }
-        }
     }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser && mList != null)
             mList.setSelection(mPlaylist.getPosition());
+        super.setUserVisibleHint(isVisibleToUser);
     }
 
     @Override

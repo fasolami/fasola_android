@@ -5,9 +5,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,7 +13,6 @@ import android.view.View;
 
 public class MainActivity extends SimpleTabActivity {
     public final static String ACTIVITY_POSITION = "org.fasola.fasolaminutes.POSITION";
-    DrawerLayout mDrawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,35 +24,6 @@ public class MainActivity extends SimpleTabActivity {
         mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount());
         // Set page change listener and initial settings
         setOnPageChangeListener(mPageChangeListener);
-        // Setup drawer
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        // Drawer toggle callbacks
-        mDrawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                super.onDrawerClosed(drawerView);
-                //getActionBar().setTitle(mDrawerTitle);
-                invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                //getActionBar().setTitle(mDrawerTitle);
-                invalidateOptionsMenu();
-            }
-        });
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Close drawers first
-        if (mDrawerLayout.isDrawerOpen(Gravity.LEFT))
-            mDrawerLayout.closeDrawer(Gravity.LEFT);
-        else if (mDrawerLayout.isDrawerOpen(Gravity.RIGHT))
-            mDrawerLayout.closeDrawer(Gravity.RIGHT);
-        else
-            super.onBackPressed();
     }
 
     // Change title and FaSoLa tabs when the page changes
