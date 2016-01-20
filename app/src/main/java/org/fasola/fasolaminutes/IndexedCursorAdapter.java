@@ -3,6 +3,7 @@ package org.fasola.fasolaminutes;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -167,9 +168,15 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
      */
     protected View addOrRemoveImage(View view, ViewGroup parent) {
         if (mAudioColumn > -1) {
-            if (view.getId() != R.id.play_image_layout) {
+            if (view.findViewById(R.id.play_image_layout) == null) {
                 // Use the layout with an image button
                 LinearLayout layout = (LinearLayout)mInflater.inflate(R.layout.list_item_play_image, parent, false);
+                if (view.getParent() != null) {
+                    // If we've gotten here, this is a stickylistheaders.WrapperView, which
+                    // means something is wrong.
+                    Log.e("IndexedCursorAdapter", "View should not have a parent.");
+                    ((ViewGroup) view.getParent()).removeView(view);
+                }
                 layout.addView(view, 0, new LinearLayout.LayoutParams(
                         0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
                 view = layout;
