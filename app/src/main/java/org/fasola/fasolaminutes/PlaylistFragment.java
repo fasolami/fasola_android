@@ -45,8 +45,9 @@ public class PlaylistFragment extends ListFragment
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(new PlaylistListAdapter(getActivity(), mPlaylist));
-        // Setup listener
+        // Setup list
         mList.setDropListener(this);
+        mList.setFastScrollEnabled(true);
         // Setup MediaController
         mPlayer = new PlaybackService.Control(getActivity());
         setHasOptionsMenu(true);
