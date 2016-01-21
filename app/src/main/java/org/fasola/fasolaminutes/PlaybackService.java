@@ -4,6 +4,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,7 +16,11 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.MediaController;
 import android.widget.RemoteViews;
@@ -98,6 +104,8 @@ public class PlaybackService extends Service
     private static final int NOTIFICATION_ID = 1;
     AudioManager mAudioManager;
 
+    MediaSessionCompat mMediaSession;
+
     // Singleton
     static PlaybackService mInstance;
 
@@ -120,6 +128,10 @@ public class PlaybackService extends Service
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         mObserver.registerBroadcastReceiver(getApplicationContext());
         mObserver.registerPlaylistObserver();
+        ComponentName receiver = new ComponentName(getPackageName(), MediaReceiver.class.getName());
+        mMediaSession = new MediaSessionCompat(this, "PlaybackService", receiver, null);
+        mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
+                MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
     }
 
     @Override
@@ -170,9 +182,11 @@ public class PlaybackService extends Service
     public void onAudioFocusChange(int focusChange) {
         if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
             pause();
+            mMediaSession.setActive(false);
         }
         else if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
             start();
+            mMediaSession.setActive(true);
         }
         else if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
             stop();
@@ -227,6 +241,7 @@ public class PlaybackService extends Service
             if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
                 ensurePlayer().start();
                 LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PLAYING));
+                mMediaSession.setActive(true);
             }
         }
         else {
@@ -235,16 +250,17 @@ public class PlaybackService extends Service
             prepare();
         }
         updateNotification();
+        updateMediaSession();
     }
 
     @Override
     public void pause() {
         mShouldPlay = false;
-        if (isPrepared()) {
+        if (isPrepared())
             ensurePlayer().pause();
-            updateNotification();
-            LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PAUSED));
-        }
+        updateNotification();
+        updateMediaSession();
+        LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PAUSED));
     }
 
     /**
@@ -254,6 +270,8 @@ public class PlaybackService extends Service
     public void stop() {
         mSong = null;
         mAudioManager.abandonAudioFocus(this);
+        mMediaSession.setActive(false);
+        mMediaSession.release();
         if (mMediaPlayer != null) {
             mMediaPlayer.release();
             mMediaPlayer = null;
@@ -281,6 +299,7 @@ public class PlaybackService extends Service
         if (isPrepared()) {
             ensurePlayer().seekTo(i);
             updateNotification();
+            updateMediaSession();
         }
     }
 
@@ -353,6 +372,7 @@ public class PlaybackService extends Service
         mShouldPlay = true;
         mMediaPlayer.prepareAsync();
         updateNotification();
+        updateMediaSession();
         return true;
     }
 
@@ -513,6 +533,44 @@ public class PlaybackService extends Service
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
     }
 
+    private void updateMediaSession() {
+        Playlist playlist = Playlist.getInstance();
+        // Get playback state
+        PlaybackStateCompat.Builder state = new PlaybackStateCompat.Builder();
+        if (isPlaying()) {
+            state.setState(PlaybackStateCompat.STATE_PLAYING, getCurrentPosition(), 1);
+        }
+        else if (mSong != null && mSong.status == Playlist.Song.STATUS_ERROR) {
+            state.setState(PlaybackStateCompat.STATE_ERROR, getCurrentPosition(), 1);
+        }
+        else if (isPaused()) {
+            state.setState(PlaybackStateCompat.STATE_PAUSED, getCurrentPosition(), 1);
+        }
+        else if (isLoading()) {
+            if (isPrepared())
+                state.setState(PlaybackStateCompat.STATE_BUFFERING, getCurrentPosition(), 1);
+            else
+                state.setState(PlaybackStateCompat.STATE_CONNECTING, getCurrentPosition(), 1);
+        }
+        state.setActions(
+                PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                (playlist.hasNext() ? PlaybackStateCompat.ACTION_SKIP_TO_NEXT : 0) |
+                (playlist.hasPrevious() ? PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS : 0)
+        );
+        mMediaSession.setPlaybackState(state.build());
+        // Set metadata
+        if (mSong != null)
+            mMediaSession.setMetadata(new MediaMetadataCompat.Builder()
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, mSong.singing)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, mSong.leaders)
+                    .putString(MediaMetadataCompat.METADATA_KEY_TITLE, mSong.name)
+                    .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, getDuration())
+                    .putString(MediaMetadataCompat.METADATA_KEY_DATE, mSong.date)
+                    .build());
+        else
+            mMediaSession.setMetadata(new MediaMetadataCompat.Builder().build());
+    }
+
     /**
      * Observer that pauses playback if the song is removed from the playlist
      */
@@ -537,6 +595,34 @@ public class PlaybackService extends Service
             }
         }
     };
+
+    /** BroadcastReceiver that handles MEDIA_BUTTON events (e.g. lock screen). */
+    public static class MediaReceiver extends BroadcastReceiver {
+        Control mControl = new Control(MinutesApplication.getContext());
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_MEDIA_BUTTON)) {
+                KeyEvent event = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    switch (event.getKeyCode()) {
+                        case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                            PlaybackService service = getInstance();
+                            if (service.isPaused())
+                                mControl.start();
+                            else
+                                mControl.pause();
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                            mControl.startPrevious();
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_NEXT:
+                            mControl.startNext();
+                            break;
+                    }
+                }
+            }
+        }
+    }
 
 
     //region MediaPlayer Callbacks
@@ -598,6 +684,7 @@ public class PlaybackService extends Service
             mIsLoading = true;
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_LOADING));
             updateNotification();
+            updateMediaSession();
             return true;
         }
         else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
@@ -605,6 +692,7 @@ public class PlaybackService extends Service
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PREPARED));
             LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PLAYING));
             updateNotification();
+            updateMediaSession();
             return true;
         }
         return false;
@@ -641,9 +729,7 @@ public class PlaybackService extends Service
         public View.OnClickListener nextListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Playlist.getInstance().moveToNext();
-                if (isRunning())
-                    getInstance().prepare();
+                startNext();
             }
         };
 
@@ -654,13 +740,7 @@ public class PlaybackService extends Service
         public View.OnClickListener prevListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (getCurrentPosition() > RESTART_THRESHOLD)
-                    seekTo(0);
-                else {
-                    Playlist.getInstance().moveToPrev();
-                    if (isRunning())
-                        getInstance().prepare();
-                }
+                startPrevious();
             }
         };
 
@@ -691,6 +771,22 @@ public class PlaybackService extends Service
             if (isRunning())
                 getInstance().prepare();
             start();
+        }
+
+        public void startNext() {
+            Playlist.getInstance().moveToNext();
+            if (isRunning())
+                getInstance().prepare();
+        }
+
+        public void startPrevious() {
+            if (getCurrentPosition() > RESTART_THRESHOLD)
+                seekTo(0);
+            else {
+                Playlist.getInstance().moveToPrev();
+                if (isRunning())
+                    getInstance().prepare();
+            }
         }
 
         @Override
