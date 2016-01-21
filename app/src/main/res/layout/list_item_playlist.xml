@@ -32,6 +32,7 @@
 		android:layout_width="wrap_content"
         android:layout_gravity="center_vertical"
         android:padding="2dp"
+        android:layout_marginRight="?android:attr/scrollbarSize"
 		android:background="?android:attr/selectableItemBackground"
 		android:src="@drawable/ic_clear_grey600_24dp" />
 
