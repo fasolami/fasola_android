@@ -531,12 +531,31 @@ public class CursorListFragment extends ListFragment
 
     @Override
     public void onClick(View v) {
-        onPlayClick(v, getListView().getPositionForView(v));
+        int pos = -1;
+        try {
+            pos = getListView().getPositionForView(v);
+        }
+        catch (NullPointerException ex) {
+            Log.v("CursorListFragment", "NullPointerException in getPositionForView(); " +
+                                        "must have been scrolled out of position");
+        }
+        if (pos != -1)
+            onPlayClick(v, pos);
     }
 
     @Override
     public boolean onLongClick(View v) {
-        return onPlayLongClick(v, getListView().getPositionForView(v));
+        int pos = -1;
+        try {
+            pos = getListView().getPositionForView(v);
+        }
+        catch (NullPointerException ex) {
+            Log.v("CursorListFragment", "NullPointerException in getPositionForView(); " +
+                                        "must have been scrolled out of position");
+        }
+        if (pos != -1)
+            return onPlayLongClick(v, pos);
+        return false;
     }
 
     /**
