@@ -132,6 +132,16 @@ public class Playlist extends ArrayList<Playlist.Song> {
         return mPos;
     }
 
+    /** Is there a previous song? */
+    public boolean hasPrevious() {
+        return mPos > 0;
+    }
+
+    /** Is there a next song? */
+    public boolean hasNext() {
+        return mPos < size() - 1;
+    }
+
     /** Returns the {@link Song} at the cursor or {@code null} */
     public Song getCurrent() {
         if (mPos >= size() || mPos < 0)

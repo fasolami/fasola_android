@@ -75,8 +75,8 @@ public class NowPlayingActivity extends SimpleTabActivity {
             Playlist playlist = Playlist.getInstance();
             int pos = playlist.getPosition();
             mController.setPrevNextListeners(
-                    pos < playlist.size() - 1 ? mPlayer.nextListener : null,
-                    pos > 0 ? mPlayer.prevListener : null
+                    playlist.hasNext() ? mPlayer.nextListener : null,
+                    playlist.hasPrevious() ? mPlayer.prevListener : null
             );
         }
     };
