@@ -361,7 +361,8 @@ public class PlaybackService extends Service
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_LOADING));
         mIsPrepared = false;
         ensurePlayer();
-        mMediaPlayer.stop();
+        if (mMediaPlayer.isPlaying())
+            mMediaPlayer.stop();
         mMediaPlayer.reset();
         try {
             mMediaPlayer.setDataSource(mSong.url);
