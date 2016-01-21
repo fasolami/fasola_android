@@ -18,10 +18,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.MediaController;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * A singleton foreground service for music playback
@@ -736,4 +738,118 @@ public class PlaybackService extends Service
             return isRunning() ? getInstance().getAudioSessionId() : 0;
         }
     }
+
+    //region playSong/Singing overrides
+    //---------------------------------------------------------------------------------------------
+    /**
+     * Plays or enqueues a list of urls from the beginning.
+     *
+     * @param context a context
+     * @param action PlaybackService.ACTION enums (Usually PLAY_MEDIA or ENQUEUE_MEDIA)
+     * @param urls array of urls
+     */
+    public static void playSongs(Context context, String action, String... urls) {
+        playSongs(context, action, 0, urls);
+    }
+
+    /**
+     * Plays or enqueues a Cursor from the beginning.
+     *
+     * @param context a context
+     * @param action PlaybackService.ACTION enums (Usually PLAY_MEDIA or ENQUEUE_MEDIA)
+     * @param cursor cursor with {@link CursorListFragment#AUDIO_COLUMN} column
+     */
+    public static void playSongs(Context context, String action, Cursor cursor) {
+        playSongs(context, action, 0, cursor);
+    }
+
+    /**
+     * Plays or enqueues a singing from the beginning.
+     *
+     * @param context a context
+     * @param action PlaybackService.ACTION enums (Usually PLAY_MEDIA or ENQUEUE_MEDIA)
+     * @param singingId singing id
+     */
+    public static void playSinging(final Context context, final String action, long singingId) {
+        // Query for songs
+        SQL.Query query = C.SongLeader.select(C.SongLeader.leadId)
+                            .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
+                            .where(C.SongLeader.singingId, "=", singingId)
+                                .and(C.SongLeader.audioUrl, "IS NOT", "NULL")
+                            .group(C.SongLeader.leadId)
+                            .order(C.SongLeader.singingOrder, "ASC");
+        // Start query and play when finished
+        MinutesLoader loader = new MinutesLoader(query) {
+            @Override
+            public void onLoadFinished(Cursor cursor) {
+                playSongs(context, action, cursor);
+            }
+        };
+        loader.startLoading();
+    }
+
+    /**
+     * Plays or enqueues all songs in a Cursor (with recording urls).
+     *
+     * @param context a context
+     * @param action PlaybackService.ACTION enums (Usually PLAY_MEDIA or ENQUEUE_MEDIA)
+     * @param position position in {@code cursor} to start playback
+     * @param cursor cursor with {@link CursorListFragment#AUDIO_COLUMN} column
+     */
+    public static void playSongs(Context context, String action, int position, Cursor cursor) {
+        int urlColumn = cursor.getColumnIndex(CursorListFragment.AUDIO_COLUMN);
+        if (! cursor.moveToFirst())
+            return;
+        // Make a list of urls to add
+        List<String> urls = new ArrayList<>();
+        // Index of song to play in urls list
+        // NB: If any songs are missing urls, they will not be added to the urls list, and thus
+        // playIndex is not always the same as (list) position
+        int playIndex = 0;
+        do {
+            if (! cursor.isNull(urlColumn)) {
+                urls.add(cursor.getString(urlColumn)); // Enqueue next songs
+                if (cursor.getPosition() == position)
+                    playIndex = urls.size() - 1;
+            }
+        }
+        while (cursor.moveToNext());
+        // Send the intent
+        if (urls.isEmpty())
+            Log.e("CursorListFragment", "No recordings; ImageView should have been hidden");
+        else
+            playSongs(context, action, playIndex, urls.toArray(new String[urls.size()]));
+    }
+
+    /**
+     * Plays or enqueues a list of songs and notifies the user with a toast.
+     *
+     * @param context a context
+     * @param action PlaybackService.ACTION enums (Usually PLAY_MEDIA or ENQUEUE_MEDIA)
+     * @param playIndex index in the url list of the first song to play
+     * @param urls array of urls
+     */
+    public static void playSongs(Context context, String action, int playIndex, String... urls) {
+        // Send the intent
+        Intent intent = new Intent(context, PlaybackService.class);
+        intent.setAction(action);
+        if (urls.length > 1)
+            intent.putExtra(PlaybackService.EXTRA_URL_LIST, urls);
+        else
+            intent.putExtra(PlaybackService.EXTRA_URL, urls[0]);
+        intent.putExtra(PlaybackService.EXTRA_PLAY_INDEX, playIndex);
+        context.startService(intent);
+        // Show toast
+        String message = context.getResources().getQuantityString(
+            action.equals(PlaybackService.ACTION_PLAY_MEDIA) ?
+                R.plurals.play_songs :
+                R.plurals.enqueue_songs,
+            urls.length,
+            urls.length
+        );
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+    }
+
+    //---------------------------------------------------------------------------------------------
+    //endregion playSong/Singing overrides
 }

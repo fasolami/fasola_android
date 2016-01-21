@@ -315,24 +315,19 @@ public class MainActivity extends SimpleTabActivity {
 
         @Override
         public void onPlayClick(View v, int position) {
-            // Get singing id
             Cursor cursor = getListAdapter().getCursor();
             cursor.moveToPosition(position);
             int singingId = cursor.getInt(0);
-            // Query for songs
-            SQL.Query query = C.SongLeader.select(C.SongLeader.leadId)
-                                .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
-                                .where(C.SongLeader.singingId, "=", singingId)
-                                    .and(C.SongLeader.audioUrl, "IS NOT", "NULL")
-                                .group(C.SongLeader.leadId)
-                                .order(C.SongLeader.singingOrder, "ASC");
-            // Start query and play when finished
-            getLoaderManager().restartLoader(100, null, new MinutesLoader(query) {
-                @Override
-                public void onLoadFinished(Cursor cursor) {
-                    playSongs(cursor, 0);
-                }
-            });
+            PlaybackService.playSinging(getActivity(), PlaybackService.ACTION_PLAY_MEDIA, singingId);
+        }
+
+        @Override
+        public boolean onPlayLongClick(View v, int position) {
+            Cursor cursor = getListAdapter().getCursor();
+            cursor.moveToPosition(position);
+            int singingId = cursor.getInt(0);
+            PlaybackService.playSinging(getActivity(), PlaybackService.ACTION_ENQUEUE_MEDIA, singingId);
+            return true;
         }
     }
 }

@@ -15,12 +15,10 @@ import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.Toast;
 
 import junit.framework.Assert;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * ListFragment that displays SQL queries.
@@ -555,7 +553,10 @@ public class CursorListFragment extends ListFragment
         if (! cursor.moveToPosition(position))
             return;
         // Send the intent
-        playSongs(PlaybackService.ACTION_PLAY_MEDIA, cursor.getString(urlColumn));
+        PlaybackService.playSongs(
+                getActivity(),
+                PlaybackService.ACTION_PLAY_MEDIA,
+                cursor.getString(urlColumn));
     }
 
     /**
@@ -572,77 +573,11 @@ public class CursorListFragment extends ListFragment
         if (! cursor.moveToPosition(position))
             return true;
         // Send the intent
-        playSongs(PlaybackService.ACTION_ENQUEUE_MEDIA, cursor.getString(urlColumn));
+        PlaybackService.playSongs(
+                getActivity(),
+                PlaybackService.ACTION_ENQUEUE_MEDIA,
+                cursor.getString(urlColumn));
         return true;
-    }
-
-    /**
-     * Plays all songs in the cursor with recording urls.
-     *
-     * @param cursor cursor with {@link #AUDIO_COLUMN} column
-     * @param position position in {@code cursor} to start playback
-     */
-    public void playSongs(Cursor cursor, int position) {
-        int urlColumn = cursor.getColumnIndex(AUDIO_COLUMN);
-        if (! cursor.moveToFirst())
-            return;
-        // Make a list of urls to add
-        List<String> urls = new ArrayList<>();
-        // Index of song to play in urls list
-        // NB: If any songs are missing urls, they will not be added to the urls list, and thus
-        // playIndex is not always the same as (list) position
-        int playIndex = 0;
-        do {
-            if (! cursor.isNull(urlColumn)) {
-                urls.add(cursor.getString(urlColumn)); // Enqueue next songs
-                if (cursor.getPosition() == position)
-                    playIndex = urls.size() - 1;
-            }
-        }
-        while (cursor.moveToNext());
-        // Send the intent
-        if (urls.isEmpty())
-            Log.e("CursorListFragment", "No recordings; ImageView should have been hidden");
-        else
-            playSongs(PlaybackService.ACTION_PLAY_MEDIA, playIndex, urls.toArray(new String[urls.size()]));
-    }
-
-    /**
-     * Plays or enqueues a list of urls from the beginning.
-     *
-     * @param action PlaybackService.ACTION enums (Usually PLAY_MEDIA or ENQUEUE_MEDIA)
-     * @param urls array of urls
-     */
-    public void playSongs(String action, String... urls) {
-        playSongs(action, 0, urls);
-    }
-
-    /**
-     * Plays or enqueues a list of songs and notifies the user with a toast.
-     *
-     * @param action PlaybackService.ACTION enums (Usually PLAY_MEDIA or ENQUEUE_MEDIA)
-     * @param playIndex index in the url list of the first song to play
-     * @param urls array of urls
-     */
-    public void playSongs(String action, int playIndex, String... urls) {
-        // Send the intent
-        Intent intent = new Intent(getActivity(), PlaybackService.class);
-        intent.setAction(action);
-        if (urls.length > 1)
-            intent.putExtra(PlaybackService.EXTRA_URL_LIST, urls);
-        else
-            intent.putExtra(PlaybackService.EXTRA_URL, urls[0]);
-        intent.putExtra(PlaybackService.EXTRA_PLAY_INDEX, playIndex);
-        getActivity().startService(intent);
-        // Show toast
-        String message = getResources().getQuantityString(
-            action.equals(PlaybackService.ACTION_PLAY_MEDIA) ?
-                R.plurals.play_songs :
-                R.plurals.enqueue_songs,
-            urls.length,
-            urls.length
-        );
-        Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
     }
 
     @Override
