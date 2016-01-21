@@ -3,6 +3,7 @@ package org.fasola.fasolaminutes;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -24,6 +25,7 @@ public class MainActivity extends SimpleTabActivity {
         mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount());
         // Set page change listener and initial settings
         setOnPageChangeListener(mPageChangeListener);
+        handleIntent(getIntent());
     }
 
     // Change title and FaSoLa tabs when the page changes
@@ -51,6 +53,10 @@ public class MainActivity extends SimpleTabActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        handleIntent(intent);
+    }
+
+    protected void handleIntent(Intent intent) {
         super.onNewIntent(intent);
         // Change to the requested fragment (by position)
         int position = intent.getIntExtra(ACTIVITY_POSITION, -1);
@@ -61,6 +67,35 @@ public class MainActivity extends SimpleTabActivity {
                 mViewPager.setCurrentItem(position, true);
             else
                 mPageChangeListener.onPageSelected(position);
+        }
+        // Recordings deep link:
+        // fasola://recordings?singing=singingId
+        Uri data = intent.getData();
+        if (data != null &&
+                "fasola".equals(data.getScheme()) &&
+                "recordings".equals(data.getHost())) {
+            // Got a recordings url
+            try {
+                long singingId = Long.parseLong(data.getQueryParameter("singing"));
+                // Start a new singing and the NowPlayingActivity
+                PlaybackService.playSinging(this, PlaybackService.ACTION_PLAY_MEDIA, singingId);
+                startActivity(new Intent(this, NowPlayingActivity.class));
+            }
+            catch (NumberFormatException | UnsupportedOperationException ex) {
+                Log.w("MainActivity", "Bad url: " + data.toString());
+            }
+            // Or play a random singing recording
+            if (data.getLastPathSegment().equals("random")) {
+                SQL.Query query = SQL.select(C.Singing.id)
+                        .where(C.Singing.recordingCount, ">", "10")
+                        .order("RANDOM()")
+                        .limit(1);
+                long singingId = MinutesDb.getInstance().queryLong(query.toString());
+                if (singingId > -1) {
+                    PlaybackService.playSinging(this, PlaybackService.ACTION_PLAY_MEDIA, singingId);
+                    startActivity(new Intent(this, NowPlayingActivity.class));
+                }
+            }
         }
     }
 
