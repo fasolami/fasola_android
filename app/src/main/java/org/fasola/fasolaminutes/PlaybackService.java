@@ -4,7 +4,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -20,7 +19,6 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.MediaController;
 import android.widget.RemoteViews;
@@ -128,7 +126,7 @@ public class PlaybackService extends Service
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         mObserver.registerBroadcastReceiver(getApplicationContext());
         mObserver.registerPlaylistObserver();
-        ComponentName receiver = new ComponentName(getPackageName(), MediaReceiver.class.getName());
+        ComponentName receiver = new ComponentName(getPackageName(), MediaButtonReceiver.class.getName());
         mMediaSession = new MediaSessionCompat(this, "PlaybackService", receiver, null);
         mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
@@ -596,35 +594,6 @@ public class PlaybackService extends Service
             }
         }
     };
-
-    /** BroadcastReceiver that handles MEDIA_BUTTON events (e.g. lock screen). */
-    public static class MediaReceiver extends BroadcastReceiver {
-        Control mControl = new Control(MinutesApplication.getContext());
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_MEDIA_BUTTON)) {
-                KeyEvent event = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
-                if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                    switch (event.getKeyCode()) {
-                        case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                            PlaybackService service = getInstance();
-                            if (service.isPaused())
-                                mControl.start();
-                            else
-                                mControl.pause();
-                            break;
-                        case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                            mControl.startPrevious();
-                            break;
-                        case KeyEvent.KEYCODE_MEDIA_NEXT:
-                            mControl.startNext();
-                            break;
-                    }
-                }
-            }
-        }
-    }
-
 
     //region MediaPlayer Callbacks
     //---------------------------------------------------------------------------------------------
