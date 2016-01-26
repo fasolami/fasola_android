@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SearchView;
 
 import java.util.List;
 
@@ -26,6 +27,11 @@ public class BackActivity extends FragmentActivity {
     Fragment mLeftFragment;
     Fragment mRightFragment;
 
+    // Save a reference to the current Fragment's SearchView so we can gracefully
+    // deactivate any lingering handlers in invalidateOptionsMenu.
+    SearchView mSearchView = null;
+    boolean mHasActivitySearchView = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +43,34 @@ public class BackActivity extends FragmentActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean ret = super.onCreateOptionsMenu(menu);
         SQLiteDebugActivity.createOptionsMenu(getMenuInflater(), menu);
+        mHasActivitySearchView = menu.findItem(R.id.menu_search) != null;
         return ret;
+    }
+
+    // Set mSearchView
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        boolean ret = super.onPrepareOptionsMenu(menu);
+        // Don't save the search view if it belongs to the Activity
+        if (mHasActivitySearchView) {
+            mSearchView = null;
+            return ret;
+        }
+        MenuItem searchItem = menu.findItem(R.id.menu_search);
+        if (searchItem == null)
+            mSearchView = null;
+        else
+            mSearchView = (SearchView)searchItem.getActionView();
+        return ret;
+    }
+
+    // Remove SearchView listeners because the SearchView will be collapsed and
+    // cleared when the menu is invalidated.
+    @Override
+    public void invalidateOptionsMenu() {
+        if (! mHasActivitySearchView && mSearchView != null)
+            mSearchView.setOnQueryTextListener(null);
+        super.invalidateOptionsMenu();
     }
 
     @Override
