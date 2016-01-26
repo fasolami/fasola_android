@@ -205,7 +205,10 @@ public class SongActivity extends SimpleTabActivity {
             setItemLayout(R.layout.list_item_singing);
             setRangeIndexer();
             long id = getArguments().getLong(EXTRA_ID, -1);
-            setQuery(SQL.select(C.SongLeader.id, C.Singing.name, C.Singing.startDate, C.Singing.location)
+            setQuery(SQL.select(C.SongLeader.id,
+                                C.Leader.fullName,
+                                C.Singing.year + " || ' ' || " + C.Singing.name,
+                                C.Singing.location)
                         .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
                         .sectionIndex(C.Singing.year)
                         .group(C.SongLeader.leadId)
