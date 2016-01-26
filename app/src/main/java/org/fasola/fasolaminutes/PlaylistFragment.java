@@ -119,7 +119,7 @@ public class PlaylistFragment extends ListFragment
             // Text
             Playlist.Song song = getSong(i);
             ((TextView) view.findViewById(android.R.id.text1)).setText(song.name);
-            ((TextView) view.findViewById(android.R.id.text2)).setText(song.singing);
+            ((TextView) view.findViewById(android.R.id.text2)).setText(String.format("%s %s", song.year, song.singing));
             ((TextView) view.findViewById(R.id.text3)).setText(song.leaders);
             // Status indicator
             int iconResource = 0;
