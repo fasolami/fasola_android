@@ -53,14 +53,16 @@ public class NowPlayingActivity extends SimpleTabActivity {
             PlaybackService service = PlaybackService.getInstance();
             Playlist.Song song = service != null ? service.getSong() : null;
             if (song != null) {
-                songId = song.songId;
                 setTitle(song.name);
                 // Update fragments
-                List<Fragment> fragments = getSupportFragmentManager().getFragments();
-                if (fragments != null)
-                    for (Fragment fragment : fragments)
-                        if (fragment instanceof SongActivity.SongFragment)
-                            ((SongActivity.SongFragment)fragment).setSongId(songId);
+                if (song.songId != songId) {
+                    songId = song.songId;
+                    List<Fragment> fragments = getSupportFragmentManager().getFragments();
+                    if (fragments != null)
+                        for (Fragment fragment : fragments)
+                            if (fragment instanceof SongActivity.SongFragment)
+                                ((SongActivity.SongFragment) fragment).setSongId(songId);
+                }
                 // Loading indicator
                 setProgressBarIndeterminateVisibility(service.isLoading());
             } else {
