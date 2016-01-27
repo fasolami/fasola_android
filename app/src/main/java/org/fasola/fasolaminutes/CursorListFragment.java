@@ -2,6 +2,7 @@ package org.fasola.fasolaminutes;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.ListFragment;
@@ -13,8 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.widget.HeaderViewListAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 
 import junit.framework.Assert;
 
@@ -57,6 +61,8 @@ public class CursorListFragment extends ListFragment
     protected String mSearchTerm = "";
     protected SQL.Query mOriginalQuery;
     protected int mSortId = -1;
+    protected int mRecordingCount = 0;
+    protected View mRecordingCountView;
     protected int mMenuResourceId = -1;
     protected int mDeferredIndexerType = NO_INDEXER;
     protected LetterIndexer mDeferredIndexer;
@@ -258,17 +264,14 @@ public class CursorListFragment extends ListFragment
     // Create the menu specified in setMenuResource
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(mMenuResourceId, menu);
+        if (mMenuResourceId != -1)
+            inflater.inflate(mMenuResourceId, menu);
         // Check the initial sort
         MenuItem item = menu.findItem(mSortId);
-        if (item == null) {
-            if (mSortId != -1)
-                Log.w("CursorListFragment", "Invalid sortId specified; guessing initial sortId");
-            mSortId = menu.getItem(0).getItemId();
-            menu.getItem(0).setChecked(true);
-        }
-        else
+        if (item != null)
             item.setChecked(true);
+        else if (mSortId != -1)
+            Log.w("CursorListFragment", "Invalid sortId specified");
     }
 
 
@@ -319,6 +322,43 @@ public class CursorListFragment extends ListFragment
         });
         // Set cached search text
         searchView.setQuery(mSearchTerm, false);
+    }
+
+    void updateRecordingCount() {
+        int count = getRecordingCount(getListAdapter().getCursor());
+        if (count != mRecordingCount) {
+            mRecordingCount = count;
+            if (mRecordingCountView == null) {
+                mRecordingCountView = View.inflate(
+                        getActivity(), R.layout.list_header_recording_count, null);
+                addHeaderView(mRecordingCountView, null, false);
+                // Play/enqueue click handlers
+                mRecordingCountView.findViewById(R.id.play_recordings).setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                PlaybackService.playSongs(getActivity(),
+                                        PlaybackService.ACTION_PLAY_MEDIA,
+                                        getListAdapter().getCursor());
+                            }
+                        });
+                mRecordingCountView.findViewById(R.id.enqueue_recordings).setOnClickListener(
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                PlaybackService.playSongs(getActivity(),
+                                        PlaybackService.ACTION_ENQUEUE_MEDIA,
+                                        getListAdapter().getCursor());
+                            }
+                        });
+            }
+            ((TextView)mRecordingCountView.findViewById(R.id.play_recordings)).setText(
+                getResources().getQuantityString(R.plurals.play_songs, count, count)
+            );
+            ((TextView)mRecordingCountView.findViewById(R.id.enqueue_recordings)).setText(
+                getResources().getQuantityString(R.plurals.enqueue_songs, count, count)
+            );
+        }
     }
 
     /**
@@ -466,10 +506,30 @@ public class CursorListFragment extends ListFragment
         getListView().setFastScrollEnabled(enabled);
     }
 
-    /** Returns list adapter casted to {@code IndexedCursorAdapter}. */
+    /**
+     * Returns list adapter casted to {@code IndexedCursorAdapter}.
+     * Handles HeaderViewListAdapter wrapping.
+     */
     @Override
     public IndexedCursorAdapter getListAdapter() {
-        return (IndexedCursorAdapter) getListView().getAdapter();
+        ListAdapter adapter = getListView().getAdapter();
+        if (adapter instanceof HeaderViewListAdapter)
+            adapter = ((HeaderViewListAdapter)adapter).getWrappedAdapter();
+        return (IndexedCursorAdapter)adapter;
+    }
+
+    // Backport addHeaderView at any time to versions < KITKAT
+    public void addHeaderView(View v, Object data, boolean isSelectable) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT &&
+                ! (getListView().getAdapter() instanceof HeaderViewListAdapter)) {
+            IndexedCursorAdapter oldAdapter = getListAdapter();
+            setListAdapter(null);
+            getListView().addHeaderView(v, data, isSelectable);
+            setListAdapter(oldAdapter);
+        }
+        else {
+            getListView().addHeaderView(v, data, isSelectable);
+        }
     }
 
     // region Loader Callbacks
@@ -507,6 +567,8 @@ public class CursorListFragment extends ListFragment
             getListView().onRestoreInstanceState(mListState);
             mListState = null;
         }
+
+        updateRecordingCount();
     }
 
     @Override
@@ -665,5 +727,35 @@ public class CursorListFragment extends ListFragment
             }
         }
         return to;
+    }
+
+    /**
+     * Gets the number of audioUrls in a cursor.
+     *
+     * <p>AUDIO_COLUMN can be used to display a count below the recording icon,
+     * or it can have an actual url for a single tune.  This function ignores
+     * total recording counts, and instead returns the total number of
+     * audio urls in the cursor.
+     *
+     * @param cursor cursor with AUDIO_COLUMN as one of the columns
+     * @return total number of audioUrls in the cursor
+     */
+    public static int getRecordingCount(Cursor cursor) {
+        if (cursor == null)
+            return 0;
+        int audioCol = cursor.getColumnIndex(AUDIO_COLUMN);
+        if (audioCol == -1)
+            return 0;
+        int count = 0;
+        int pos = cursor.getPosition();
+        if (! cursor.moveToFirst())
+            return 0;
+        do {
+            String url = cursor.getString(audioCol);
+            if (! (url == null || url.isEmpty() || Character.isDigit(url.charAt(0))))
+                count += 1;
+        } while (cursor.moveToNext());
+        cursor.moveToPosition(pos);
+        return count;
     }
 }

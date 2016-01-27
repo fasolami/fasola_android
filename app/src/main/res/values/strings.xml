@@ -50,13 +50,21 @@
         <item quantity="one">%d Singing</item>
         <item quantity="other">%d Singings</item>
     </plurals>
-    <plurals name="play_songs">
+    <plurals name="playing_songs">
         <item quantity="one">Playing %d song</item>
         <item quantity="other">Playing %d songs</item>
     </plurals>
-    <plurals name="enqueue_songs">
+    <plurals name="enqueuing_songs">
         <item quantity="one">%d song enqueued</item>
         <item quantity="other">%d songs enqueued</item>
+    </plurals>
+    <plurals name="play_songs">
+        <item quantity="one">Play one recording</item>
+        <item quantity="other">Play %d recordings</item>
+    </plurals>
+    <plurals name="enqueue_songs">
+        <item quantity="one">Enqueue one recording</item>
+        <item quantity="other">Enqueue %d recordings</item>
     </plurals>
     <string name="title_activity_playlist">Playlist</string>
     <string name="tune_label">Tune:</string>
