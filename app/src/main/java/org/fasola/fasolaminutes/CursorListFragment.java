@@ -61,7 +61,6 @@ public class CursorListFragment extends ListFragment
     protected String mSearchTerm = "";
     protected SQL.Query mOriginalQuery;
     protected int mSortId = -1;
-    protected int mRecordingCount = 0;
     protected View mRecordingCountView;
     protected int mMenuResourceId = -1;
     protected int mDeferredIndexerType = NO_INDEXER;
@@ -326,12 +325,10 @@ public class CursorListFragment extends ListFragment
 
     void updateRecordingCount() {
         int count = getRecordingCount(getListAdapter().getCursor());
-        if (count != mRecordingCount) {
-            mRecordingCount = count;
+        if (count > 0) {
             if (mRecordingCountView == null) {
                 mRecordingCountView = View.inflate(
                         getActivity(), R.layout.list_header_recording_count, null);
-                addHeaderView(mRecordingCountView, null, false);
                 // Play/enqueue click handlers
                 mRecordingCountView.findViewById(R.id.play_recordings).setOnClickListener(
                         new View.OnClickListener() {
@@ -358,6 +355,12 @@ public class CursorListFragment extends ListFragment
             ((TextView)mRecordingCountView.findViewById(R.id.enqueue_recordings)).setText(
                 getResources().getQuantityString(R.plurals.enqueue_songs, count, count)
             );
+            if (! (getListView().getAdapter() instanceof HeaderViewListAdapter))
+                addHeaderView(mRecordingCountView, null, false);
+            mRecordingCountView.setVisibility(View.VISIBLE);
+        }
+        else if (mRecordingCountView != null) {
+            mRecordingCountView.setVisibility(View.GONE);
         }
     }
 
