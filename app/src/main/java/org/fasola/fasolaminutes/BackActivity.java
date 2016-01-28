@@ -115,11 +115,15 @@ public class BackActivity extends FragmentActivity {
         // (A) Lock the drawer when it is closed; and
         // (B) Call setUserVisibleHint on fragments within drawers
         mDrawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
+            boolean mWasUpEnabled; // Was the up button
+
             @Override
             public void onDrawerClosed(View drawerView) {
                 Fragment fragment = getDrawerFragment(drawerView);
                 if (fragment != null)
                     fragment.setUserVisibleHint(false);
+                if (getActionBar() != null && ! mWasUpEnabled)
+                    getActionBar().setDisplayHomeAsUpEnabled(false);
                 mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, drawerView);
                 invalidateOptionsMenu();
             }
@@ -130,6 +134,11 @@ public class BackActivity extends FragmentActivity {
                 if (fragment != null)
                     fragment.setUserVisibleHint(true);
                 mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, drawerView);
+                if (getActionBar() != null) {
+                    mWasUpEnabled = (getActionBar().getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0;
+                    if (! mWasUpEnabled)
+                        getActionBar().setDisplayHomeAsUpEnabled(true);
+                }
                 invalidateOptionsMenu();
             }
         });
