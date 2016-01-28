@@ -11,7 +11,8 @@ import android.widget.TextView;
 
 public class NowPlayingView extends LinearLayout {
     ImageButton mPlayPause;
-    TextView mText;
+    TextView mTitle;
+    TextView mSubtitle;
     PlaybackService.Control mPlayer;
 
     public NowPlayingView(Context context, AttributeSet attrs) {
@@ -23,7 +24,8 @@ public class NowPlayingView extends LinearLayout {
         setBackgroundColor(getResources().getColor(R.color.fasola_foreground));
         setClickable(true);
         // Set members
-        mText = (TextView) findViewById(R.id.song_title);
+        mTitle = (TextView) findViewById(R.id.nowplaying_title);
+        mSubtitle = (TextView) findViewById(R.id.nowplaying_subtitle);
         mPlayPause = (ImageButton) findViewById(R.id.play_pause);
         // Events
         mPlayer = new PlaybackService.Control(getContext());
@@ -54,7 +56,8 @@ public class NowPlayingView extends LinearLayout {
                 return;
             }
             setVisibility(View.VISIBLE);
-            mText.setText(String.format("%s  -  %s %s", song.name, song.year, song.singing));
+            mTitle.setText(String.format("%s  -  %s", song.name, song.leaders));
+            mSubtitle.setText(String.format("%s %s", song.year, song.singing));
             mPlayPause.setImageResource(mPlayer.isPlaying() ?
                     R.drawable.ic_pause :
                     R.drawable.ic_play_arrow);
@@ -62,7 +65,7 @@ public class NowPlayingView extends LinearLayout {
             int iconResource = 0;
             if (song.status == Playlist.Song.STATUS_ERROR)
                 iconResource = R.drawable.ic_warning_amber_18dp;
-            mText.setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0);
+            mTitle.setCompoundDrawablesWithIntrinsicBounds(iconResource, 0, 0, 0);
             // Loading animation
             if (service.isLoading()) {
                 findViewById(R.id.loading).setVisibility(View.VISIBLE);

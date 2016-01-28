@@ -1,16 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <TextView android:id="@+id/song_title"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="0dp"
-        android:layout_height="@dimen/clickable_min"
+        android:layout_height="wrap_content"
+        android:minHeight="@dimen/clickable_min"
         android:layout_weight="1"
-        style="?android:attr/textAppearanceMedium"
-        android:textColor="@color/fasola_background"
-        android:gravity="center_vertical"
-        android:padding="6dp"
-        android:ellipsize="end"
-        android:singleLine="true" />
+        android:padding="6dp" >
+
+        <TextView android:id="@+id/nowplaying_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:textColor="@color/fasola_background"
+            android:gravity="center_vertical"
+            android:ellipsize="end"
+            android:singleLine="true" />
+
+        <TextView android:id="@+id/nowplaying_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="#ffbbbbbb"
+            android:gravity="center_vertical"
+            android:ellipsize="end"
+            android:singleLine="true" />
+
+    </LinearLayout>
 
     <ImageButton android:id="@+id/play_pause"
         android:layout_height="@dimen/clickable_min"
