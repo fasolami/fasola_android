@@ -49,7 +49,7 @@
                 android:layout_width="match_parent"/>
 
             <fragment
-                android:title="Similar Songs"
+                android:title="Also Led"
                 android:name="org.fasola.fasolaminutes.SongActivity$SongNeighborsFragment"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"/>
