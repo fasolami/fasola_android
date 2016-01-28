@@ -3,29 +3,30 @@
 
     <TextView android:id="@+id/song_title"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/clickable_min"
         android:layout_weight="1"
+        style="?android:attr/textAppearanceMedium"
         android:textColor="@color/fasola_background"
-        android:layout_gravity="center_vertical"
-        android:layout_margin="6dp"
+        android:gravity="center_vertical"
+        android:padding="6dp"
         android:ellipsize="end"
         android:singleLine="true" />
 
     <ImageButton android:id="@+id/play_pause"
-        android:layout_height="match_parent"
-        android:layout_width="wrap_content"
+        android:layout_height="@dimen/clickable_min"
+        android:layout_width="@dimen/clickable_min"
         android:layout_gravity="center_vertical"
         android:background="?android:attr/selectableItemBackground"
         android:src="@drawable/ic_play_arrow"
         android:padding="4dp" />
 
     <ProgressBar
+        android:layout_height="@dimen/clickable_min"
+        android:layout_width="@dimen/clickable_min"
         android:indeterminate="true"
         android:id="@+id/loading"
         android:visibility="gone"
-        style="?android:attr/progressBarStyleSmall"
-        android:layout_height="match_parent"
-        android:layout_width="wrap_content"
+        style="?android:attr/progressBarStyle"
         android:padding="4dp" />
 
 </merge>

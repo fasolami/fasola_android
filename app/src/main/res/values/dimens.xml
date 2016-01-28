@@ -8,6 +8,9 @@
     <!-- Amount to tighten items in a multiline list item -->
     <dimen name="multiline_item_lineheight_offset">-4sp</dimen>
 
+    <!-- Smallest clickable size -->
+    <dimen name="clickable_min">48dp</dimen>
+
     <!-- Per the design guidelines, navigation drawers should be between 240dp and 320dp:
          https://developer.android.com/design/patterns/navigation-drawer.html -->
     <dimen name="navigation_drawer_width">240dp</dimen>
