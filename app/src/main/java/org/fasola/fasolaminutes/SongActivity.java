@@ -3,6 +3,7 @@ package org.fasola.fasolaminutes;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Html;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.LeadingMarginSpan;
@@ -90,8 +91,8 @@ public class SongActivity extends SimpleTabActivity {
                     View view = getView();
                     C.SongDAO song = C.Song.fromCursor(cursor);
                     if (song != null) {
-                        ((TextView) view.findViewById(R.id.words)).setText(song.poet.getString());
-                        ((TextView) view.findViewById(R.id.tune)).setText(song.composer.getString());
+                        ((TextView) view.findViewById(R.id.words)).setText(Html.fromHtml(song.poet.getString()));
+                        ((TextView) view.findViewById(R.id.tune)).setText(Html.fromHtml(song.composer.getString()));
                         ((TextView) view.findViewById(R.id.key)).setText(song.key.getString());
                         ((TextView) view.findViewById(R.id.time)).setText(song.time.getString());
                         ((TextView) view.findViewById(R.id.meter)).setText(song.meter.getString());
@@ -206,14 +207,14 @@ public class SongActivity extends SimpleTabActivity {
             setRangeIndexer();
             long id = getArguments().getLong(EXTRA_ID, -1);
             setQuery(SQL.select(C.SongLeader.id,
-                                C.Leader.fullName,
-                                C.Singing.year + " || ' ' || " + C.Singing.name,
-                                C.Singing.location)
-                        .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
-                        .sectionIndex(C.Singing.year)
-                        .group(C.SongLeader.leadId)
-                        .where(C.SongLeader.songId, "=", id)
-                            .and(C.SongLeader.audioUrl, "IS NOT", "NULL"));
+                    C.Leader.fullName,
+                    C.Singing.year + " || ' ' || " + C.Singing.name,
+                    C.Singing.location)
+                    .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
+                    .sectionIndex(C.Singing.year)
+                    .group(C.SongLeader.leadId)
+                    .where(C.SongLeader.songId, "=", id)
+                    .and(C.SongLeader.audioUrl, "IS NOT", "NULL"));
         }
     }
 }
