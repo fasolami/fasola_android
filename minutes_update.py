@@ -11,6 +11,14 @@ dbname = os.path.join(dirname, DATABASE_PATH)
 print "Opening database: %r" % dbname
 db = sqlite3.connect(dbname, detect_types=sqlite3.PARSE_DECLTYPES)
 
+def execute_file(db, filename):
+    try:
+        with open(filename, 'r') as f:
+            for line in re.split(r';\r?\n', f.read()):
+                db.execute(line.strip().decode('utf-8'))
+    except IOError as e:
+        print "Error", e
+
 def col_exists(db, table, col):
     """Test whether this column exists in the specified table"""
     try:
@@ -239,6 +247,30 @@ if not has_recording_ct or FORCE_UPDATE:
 # Add composer and poet
 # ----------------------------------------------------------------------------
 
+# Update from poet_update.sql
+print "Updating poet data from SQL file"
+execute_file(db, os.path.join(dirname, 'poet_update.sql'))
+
+arranged = set([
+    '31t', '31b','32t', '33t', '33b', '37b', '41', '46', '51', '53', '62',
+    '72b', '74b', '76t', '77t', '79', '80b', '82t', '82b', '87t', '93', '94',
+    '95', '96', '97', '98', '99',
+    
+    '100', '101t', '102', '104', '108b', '109', '113', '116', '120', '122',
+    '123t', '124', '128', '133', '153', '154', '160b', '161', '162', '176t',
+    
+    '204', '229', '231', '267', '294',
+    
+    '309', '310', '312t', '323b', '332', '334', '335', '338', '339', '341',
+    '346', '354b', '378b', '385b', '388', '399b',
+    
+    '412', '413', '414', '421', '457', '496',
+    
+    '513', '551', '567',
+])
+
+arranged_poet = set(['101t', '119', '156', '294'])
+
 def namelistjoin(*args):
     """Join a list of names like so: a, b & c"""
     names = []
@@ -254,15 +286,26 @@ def makenames(aFirst, aLast, aDate, bFirst, bLast, bDate, book):
     """Return a poet/composer line with names and dates"""
     def namejoin(a, b):
         return a + ' '  + b if a and b else a + b
+    # Make book italic
+    if book:
+        # Check for "Name's Book Title" and don't italicize Name
+        s = re.split(ur'(\u2019s?\s)', book, maxsplit=1)
+        if len(s) == 3:
+            book = '%s%s<i>%s</i>' % (s[0], s[1], s[2])
+        else:
+            book = '<i>%s</i>' % book
     names = namelistjoin(
         namejoin(aFirst, aLast),
         namejoin(bFirst, bLast),
         book
     )
     if aDate:
-        names = ', '.join((names, aDate))
-    if aDate and bDate:
-        names = '; '.join((
+        if names:
+            return ', '.join((names, aDate))
+        else:
+            return aDate
+    elif aDate and bDate:
+        return '; '.join((
             namejoin(aFirst, aLast) + ', ' + aDate,
             (namejoin(bFirst, bLast) or book) + ', ' + bDate
         ))
@@ -273,16 +316,18 @@ if not has_composer or FORCE_UPDATE:
     print "Adding 'composer' column to 'songs' table"
     if not has_composer:
         db.execute("ALTER TABLE songs ADD COLUMN composer TEXT DEFAULT NULL")
-    stmt = "SELECT id, Comp1First, Comp1Last, Comp1Date, Comp2First, Comp2Last, Comp2Date, CompBookTitle FROM songs"
-    for (id, aFirst, aLast, aDate, bFirst, bLast, bDate, book) in db.execute(stmt):
+    stmt = "SELECT PageNum, Comp1First, Comp1Last, Comp1Date, Comp2First, Comp2Last, Comp2Date, CompBookTitle FROM songs"
+    for (page, aFirst, aLast, aDate, bFirst, bLast, bDate, book) in db.execute(stmt):
         name = makenames(
             aFirst, aLast, aDate,
             bFirst, bLast, bDate,
             book
         )
+        if page in arranged:
+            name = 'Arr. ' + name
         db.execute(
-            "UPDATE songs SET composer = ? WHERE id = ?",
-            (name, id)
+            "UPDATE songs SET composer = ? WHERE PageNum = ?",
+            (name, page)
         )
 
 has_poet = col_exists(db, 'songs', 'poet')
@@ -290,18 +335,23 @@ if not has_poet or FORCE_UPDATE:
     print "Adding 'poet' column to 'songs' table"
     if not has_poet:
         db.execute("ALTER TABLE songs ADD COLUMN poet TEXT DEFAULT NULL")
-    stmt = "SELECT id, Poet1First, Poet1Last, Poet1Date, Poet2First, Poet2Last, Poet2Date, PoetBookTitle FROM songs"
-    for (id, aFirst, aLast, aDate, bFirst, bLast, bDate, book) in db.execute(stmt):
+    stmt = "SELECT PageNum, Poet1First, Poet1Last, Poet1Date, Poet2First, Poet2Last, Poet2Date, PoetBookTitle FROM songs"
+    for (page, aFirst, aLast, aDate, bFirst, bLast, bDate, book) in db.execute(stmt):
         name = makenames(
             aFirst, aLast, aDate,
             bFirst, bLast, bDate,
             book
         )
+        if page in arranged_poet:
+            name = 'Arr. ' + name
         db.execute(
-            "UPDATE songs SET poet = ? WHERE id = ?",
-            (name, id)
+            "UPDATE songs SET poet = ? WHERE PageNum = ?",
+            (name, page)
         )
 
+# Update from composer_poet.sql
+print "Updating composers/poets display text from SQL file"
+execute_file(db, os.path.join(dirname, 'composer_poet.sql'))
 
 # ----------------------------------------------------------------------------
 # Vacuum and commit
