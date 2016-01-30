@@ -164,11 +164,17 @@ public class BackActivity extends FragmentActivity implements DrawerLayout.Drawe
     // * Call setUserVisibleHint and setMenuVisibility on fragments within drawers
 
     boolean mWasUpEnabled; // Was the up button enabled before the drawer was opened?
+    CharSequence mOldTitle;
+    CharSequence mOldSubtitle;
 
     @Override
     public void onDrawerClosed(View drawerView) {
-        if (getActionBar() != null && ! mWasUpEnabled)
-            getActionBar().setDisplayHomeAsUpEnabled(false);
+        if (getActionBar() != null) {
+            if (! mWasUpEnabled)
+                getActionBar().setDisplayHomeAsUpEnabled(false);
+            setTitle(mOldTitle);
+            getActionBar().setSubtitle(mOldSubtitle);
+        }
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, drawerView);
         Fragment fragment = getDrawerFragment(drawerView);
         if (fragment != null) {
@@ -184,6 +190,8 @@ public class BackActivity extends FragmentActivity implements DrawerLayout.Drawe
             mWasUpEnabled = (getActionBar().getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0;
             if (! mWasUpEnabled)
                 getActionBar().setDisplayHomeAsUpEnabled(true);
+            mOldTitle = getTitle();
+            mOldSubtitle = getActionBar().getSubtitle();
         }
         Fragment fragment = getDrawerFragment(drawerView);
         if (fragment != null) {
