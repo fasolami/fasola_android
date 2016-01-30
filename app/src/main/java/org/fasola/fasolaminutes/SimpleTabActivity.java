@@ -125,6 +125,23 @@ public abstract class SimpleTabActivity extends BackActivity {
         }
     };
 
+    // Call setMenuVisibility on pager fragments when the drawer is opened
+    @Override
+    public void onDrawerOpened(View drawerView) {
+        Fragment fragment = getCurrentFragment();
+        if (fragment != null)
+            fragment.setMenuVisibility(false);
+        super.onDrawerOpened(drawerView);
+    }
+
+    @Override
+    public void onDrawerClosed(View drawerView) {
+        Fragment fragment = getCurrentFragment();
+        if (fragment != null)
+            fragment.setMenuVisibility(true);
+        super.onDrawerClosed(drawerView);
+    }
+
     /**
      * Override to initialize a new fragment.  Defaults to setting Activity bundle args as extras.
      * @param fragment The new fragment.
