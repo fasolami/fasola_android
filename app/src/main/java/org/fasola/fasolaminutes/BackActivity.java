@@ -120,12 +120,12 @@ public class BackActivity extends FragmentActivity implements DrawerLayout.Drawe
                 while (view != null && view != mDrawerLayout && view.getParent() instanceof View) {
                     if (view.getLayoutParams() instanceof DrawerLayout.LayoutParams) {
                         int gravity = ((DrawerLayout.LayoutParams)view.getLayoutParams()).gravity;
-                        if ((gravity & Gravity.LEFT) != 0) {
+                        if ((gravity & Gravity.LEFT) == Gravity.LEFT) {
                             fragment.setMenuVisibility(false);
                             fragment.setUserVisibleHint(false);
                             mLeftFragment = fragment;
                         }
-                        if ((gravity & Gravity.RIGHT) != 0) {
+                        if ((gravity & Gravity.RIGHT) == Gravity.RIGHT) {
                             fragment.setMenuVisibility(false);
                             fragment.setUserVisibleHint(false);
                             mRightFragment = fragment;
