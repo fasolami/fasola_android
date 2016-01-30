@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/menu_now_playing"
+        android:title="@string/menu_now_playing"
+        android:showAsAction="ifRoom" />
+
+    <item android:id="@+id/menu_clear_playlist"
+        android:title="@string/menu_clear_playlist"
+        android:showAsAction="ifRoom" />
+
+</menu>

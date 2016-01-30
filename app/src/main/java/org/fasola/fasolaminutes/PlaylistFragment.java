@@ -2,12 +2,14 @@ package org.fasola.fasolaminutes;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -94,6 +96,21 @@ public class PlaylistFragment extends ListFragment
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_playlist_fragment, menu);
+        if (getActivity() instanceof NowPlayingActivity)
+            menu.findItem(R.id.menu_now_playing).setVisible(false);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_now_playing) {
+            startActivity(new Intent(getActivity(), NowPlayingActivity.class));
+            return true;
+        }
+        else if (item.getItemId() == R.id.menu_clear_playlist) {
+            mPlaylist.clear();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
