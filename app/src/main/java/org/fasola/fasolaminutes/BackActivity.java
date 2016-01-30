@@ -22,7 +22,7 @@ import java.util.List;
  * <p>Notifies Fragments in drawers when the are open or closed using setUserVisibleHint.
  * Prevents user from opening drawers by sliding from the edge of the screen.
  */
-public class BackActivity extends FragmentActivity {
+public class BackActivity extends FragmentActivity implements DrawerLayout.DrawerListener {
     DrawerLayout mDrawerLayout;
     Fragment mLeftFragment;
     Fragment mRightFragment;
@@ -111,37 +111,7 @@ public class BackActivity extends FragmentActivity {
             return;
         mDrawerLayout = (DrawerLayout)drawerLayout;
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        // Setup listeners that
-        // (A) Lock the drawer when it is closed; and
-        // (B) Call setUserVisibleHint on fragments within drawers
-        mDrawerLayout.setDrawerListener(new DrawerLayout.SimpleDrawerListener() {
-            boolean mWasUpEnabled; // Was the up button
-
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                Fragment fragment = getDrawerFragment(drawerView);
-                if (fragment != null)
-                    fragment.setUserVisibleHint(false);
-                if (getActionBar() != null && ! mWasUpEnabled)
-                    getActionBar().setDisplayHomeAsUpEnabled(false);
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, drawerView);
-                invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                Fragment fragment = getDrawerFragment(drawerView);
-                if (fragment != null)
-                    fragment.setUserVisibleHint(true);
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, drawerView);
-                if (getActionBar() != null) {
-                    mWasUpEnabled = (getActionBar().getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0;
-                    if (! mWasUpEnabled)
-                        getActionBar().setDisplayHomeAsUpEnabled(true);
-                }
-                invalidateOptionsMenu();
-            }
-        });
+        mDrawerLayout.setDrawerListener(this);
         // Find fragments in left and right drawers
         List<Fragment> fragmentList = getSupportFragmentManager().getFragments();
         if (fragmentList != null) {
@@ -150,10 +120,16 @@ public class BackActivity extends FragmentActivity {
                 while (view != null && view != mDrawerLayout && view.getParent() instanceof View) {
                     if (view.getLayoutParams() instanceof DrawerLayout.LayoutParams) {
                         int gravity = ((DrawerLayout.LayoutParams)view.getLayoutParams()).gravity;
-                        if ((gravity & Gravity.LEFT) != 0)
+                        if ((gravity & Gravity.LEFT) != 0) {
+                            fragment.setMenuVisibility(false);
+                            fragment.setUserVisibleHint(false);
                             mLeftFragment = fragment;
-                        if ((gravity & Gravity.RIGHT) != 0)
+                        }
+                        if ((gravity & Gravity.RIGHT) != 0) {
+                            fragment.setMenuVisibility(false);
+                            fragment.setUserVisibleHint(false);
                             mRightFragment = fragment;
+                        }
                         break;
                     }
                     view = (View)view.getParent();
@@ -163,6 +139,70 @@ public class BackActivity extends FragmentActivity {
             }
         }
     }
+
+    // Is this fragment part of a drawer?
+    public boolean isDrawer(Fragment fragment) {
+        return fragment == mLeftFragment || fragment == mRightFragment;
+    }
+
+    // Is this fragment a visible drawer?
+    public boolean isDrawerVisible(Fragment fragment) {
+        if (mDrawerLayout == null)
+            return false;
+        if (fragment == mLeftFragment)
+            return mDrawerLayout.isDrawerOpen(Gravity.LEFT);
+        else if (fragment == mRightFragment)
+            return mDrawerLayout.isDrawerOpen(Gravity.RIGHT);
+        return false;
+    }
+
+    // region DrawerLayout listeners
+    //---------------------------------------------------------------------------------------------
+
+    // Setup listeners that
+    // * Lock the drawer when it is closed; and
+    // * Call setUserVisibleHint and setMenuVisibility on fragments within drawers
+
+    boolean mWasUpEnabled; // Was the up button enabled before the drawer was opened?
+
+    @Override
+    public void onDrawerClosed(View drawerView) {
+        if (getActionBar() != null && ! mWasUpEnabled)
+            getActionBar().setDisplayHomeAsUpEnabled(false);
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, drawerView);
+        Fragment fragment = getDrawerFragment(drawerView);
+        if (fragment != null) {
+            fragment.setMenuVisibility(false);
+            fragment.setUserVisibleHint(false);
+        }
+    }
+
+    @Override
+    public void onDrawerOpened(View drawerView) {
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED, drawerView);
+        if (getActionBar() != null) {
+            mWasUpEnabled = (getActionBar().getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0;
+            if (! mWasUpEnabled)
+                getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        Fragment fragment = getDrawerFragment(drawerView);
+        if (fragment != null) {
+            fragment.setMenuVisibility(true);
+            fragment.setUserVisibleHint(true);
+        }
+    }
+
+    @Override
+    public void onDrawerSlide(View drawerView, float slideOffset) {
+    }
+
+    @Override
+    public void onDrawerStateChanged(int newState) {
+    }
+
+    //---------------------------------------------------------------------------------------------
+    // endregion DrawerLayout listeners
+
 
     /** Returns the fragment in the given drawer (or null if none). */
     protected Fragment getDrawerFragment(int gravity) {
