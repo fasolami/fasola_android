@@ -82,5 +82,6 @@
     <string name="menu_singing_song_sort_order">By lead order</string>
     <string name="menu_singing_song_sort_page">By page number</string>
     <string name="menu_singing_song_sort_leader">By leader name</string>
+    <string name="title_playlist">Playlist</string>
 
 </resources>

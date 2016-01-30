@@ -1,10 +1,13 @@
 package org.fasola.fasolaminutes;
 
+import android.app.Activity;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -33,6 +36,7 @@ public class PlaylistFragment extends ListFragment
         mList = (DragSortListView)view.findViewById(android.R.id.list);
         mPlaylist = Playlist.getInstance();
         mList.setEmptyView(view.findViewById(android.R.id.empty));
+        setHasOptionsMenu(true);
         return view;
     }
 
@@ -49,8 +53,16 @@ public class PlaylistFragment extends ListFragment
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
-        if (isVisibleToUser && mList != null)
-            mList.setSelection(mPlaylist.getPosition());
+        if (isVisibleToUser) {
+            if (mList != null)
+                mList.setSelection(mPlaylist.getPosition());
+            Activity activity = getActivity();
+            if (activity instanceof BackActivity && ((BackActivity)activity).isDrawerVisible(this)) {
+                activity.setTitle(R.string.title_playlist);
+                if (activity.getActionBar() != null)
+                    activity.getActionBar().setSubtitle(String.format("%d items", mPlaylist.size()));
+            }
+        }
         super.setUserVisibleHint(isVisibleToUser);
     }
 
@@ -58,6 +70,30 @@ public class PlaylistFragment extends ListFragment
     public void onResume() {
         super.onResume();
         ((BaseAdapter)getListAdapter()).notifyDataSetChanged();
+        mObserver.registerPlaylistObserver();
+    }
+
+    @Override
+    public void onPause() {
+        mObserver.unregister();
+        super.onPause();
+    }
+
+    PlaylistObserver mObserver = new PlaylistObserver() {
+        @Override
+        public void onPlaylistChanged() {
+            Activity activity = getActivity();
+            if (activity instanceof BackActivity &&
+                    ((BackActivity)activity).isDrawerVisible(PlaylistFragment.this) &&
+                    activity.getActionBar() != null) {
+                activity.getActionBar().setSubtitle(String.format("%d items", mPlaylist.size()));
+            }
+        }
+    };
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_playlist_fragment, menu);
     }
 
     @Override
