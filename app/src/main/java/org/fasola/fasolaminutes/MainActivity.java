@@ -101,17 +101,9 @@ public class MainActivity extends SimpleTabActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        menu.clear();
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        Log.v("MainActivity", "onPrepareOptionsMenu called");
-        Log.v("MainActivity", String.valueOf(menu.hasVisibleItems()));
-        return super.onPrepareOptionsMenu(menu);
     }
 
     public static class LeaderListFragment extends CursorStickyListFragment {
