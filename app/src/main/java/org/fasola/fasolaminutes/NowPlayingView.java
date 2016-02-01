@@ -2,6 +2,8 @@ package org.fasola.fasolaminutes;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +15,7 @@ public class NowPlayingView extends LinearLayout {
     ImageButton mPlayPause;
     TextView mTitle;
     TextView mSubtitle;
+    Drawable mProgressDrawable;
     PlaybackService.Control mPlayer;
 
     public NowPlayingView(Context context, AttributeSet attrs) {
@@ -21,7 +24,8 @@ public class NowPlayingView extends LinearLayout {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_now_playing, this, true);
-        setBackgroundColor(getResources().getColor(R.color.fasola_foreground));
+        setBackgroundResource(R.drawable.now_playing_progress);
+        mProgressDrawable = ((LayerDrawable) getBackground()).findDrawableByLayerId(android.R.id.progress);
         setClickable(true);
         // Set members
         mTitle = (TextView) findViewById(R.id.nowplaying_title);
@@ -61,6 +65,7 @@ public class NowPlayingView extends LinearLayout {
             mPlayPause.setImageResource(mPlayer.isPlaying() ?
                     R.drawable.ic_pause :
                     R.drawable.ic_play_arrow);
+            updateProgress();
             // Error icon
             int iconResource = 0;
             if (song.status == Playlist.Song.STATUS_ERROR)
@@ -78,6 +83,47 @@ public class NowPlayingView extends LinearLayout {
         }
     };
 
+    /** Update the progress bar and start the progress runnable. */
+    public void updateProgress() {
+        if (mProgressDrawable == null)
+            return;
+        if (mPlayer.getDuration() > 0)
+            mProgressDrawable.setLevel(mPlayer.getCurrentPosition() * 10000 / mPlayer.getDuration());
+        else
+            mProgressDrawable.setLevel(0);
+        if (mPlayer.isPlaying())
+            startProgress();
+        else
+            stopProgress();
+    }
+
+    boolean mRunnableIsRunning; // Flag to prevent multiple postDelayed of the same runnable
+
+    // Start progress bar runnable if runnable was not already started
+    private void startProgress() {
+        if (! mRunnableIsRunning) {
+            mRunnableIsRunning = true;
+            postDelayed(mProgressRunnable, 1000);
+        }
+    }
+
+    // Stop progress bar runnable
+    private void stopProgress() {
+        mRunnableIsRunning = false;
+        removeCallbacks(mProgressRunnable);
+    }
+
+    Runnable mProgressRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mPlayer.isPlaying()) {
+                mRunnableIsRunning = true;
+                postDelayed(mProgressRunnable, 1000);
+            }
+            updateProgress();
+        }
+    };
+
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
@@ -87,6 +133,7 @@ public class NowPlayingView extends LinearLayout {
 
     @Override
     protected void onDetachedFromWindow() {
+        stopProgress();
         mObserver.unregister();
         super.onDetachedFromWindow();
     }

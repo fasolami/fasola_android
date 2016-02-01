@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@android:id/background"
+        android:drawable="@color/fasola_foreground" />
+
+    <item android:id="@android:id/progress">
+
+        <clip
+            android:clipOrientation="horizontal"
+            android:gravity="left|fill_vertical">
+
+            <color android:color="#55888888" />
+
+        </clip>
+
+    </item>
+
+</layer-list>
