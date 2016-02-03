@@ -75,25 +75,23 @@ public class MainActivity extends SimpleTabActivity {
                 "fasola".equals(data.getScheme()) &&
                 "recordings".equals(data.getHost())) {
             // Got a recordings url
-            try {
-                long singingId = Long.parseLong(data.getQueryParameter("singing"));
-                // Start a new singing and the NowPlayingActivity
-                PlaybackService.playSinging(this, PlaybackService.ACTION_PLAY_MEDIA, singingId);
-                startActivity(new Intent(this, NowPlayingActivity.class));
-            }
-            catch (NumberFormatException | UnsupportedOperationException ex) {
-                Log.w("MainActivity", "Bad url: " + data.toString());
-            }
-            // Or play a random singing recording
             if (data.getLastPathSegment().equals("random")) {
+                // Start a random singing
                 SQL.Query query = SQL.select(C.Singing.id)
-                        .where(C.Singing.recordingCount, ">", "10")
-                        .order("RANDOM()")
-                        .limit(1);
+                                     .where(C.Singing.recordingCount, ">", "10")
+                                     .order("RANDOM()")
+                                     .limit(1);
                 long singingId = MinutesDb.getInstance().queryLong(query.toString());
-                if (singingId > -1) {
+                if (singingId > -1)
                     PlaybackService.playSinging(this, PlaybackService.ACTION_PLAY_MEDIA, singingId);
-                    startActivity(new Intent(this, NowPlayingActivity.class));
+            }
+            else {
+                try {
+                    // Start the specified singing
+                    long singingId = Long.parseLong(data.getQueryParameter("singing"));
+                    PlaybackService.playSinging(this, PlaybackService.ACTION_PLAY_MEDIA, singingId);
+                } catch (NumberFormatException | UnsupportedOperationException ex) {
+                    Log.w("MainActivity", "Bad url: " + data.toString());
                 }
             }
         }
