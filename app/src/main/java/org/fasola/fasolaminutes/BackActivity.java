@@ -116,6 +116,8 @@ public class BackActivity extends FragmentActivity implements DrawerLayout.Drawe
         List<Fragment> fragmentList = getSupportFragmentManager().getFragments();
         if (fragmentList != null) {
             for (Fragment fragment : fragmentList) {
+                if (fragment == null)
+                    continue; // This can happen, e.g. with a dialog fragment
                 View view = fragment.getView();
                 while (view != null && view != mDrawerLayout && view.getParent() instanceof View) {
                     if (view.getLayoutParams() instanceof DrawerLayout.LayoutParams) {
