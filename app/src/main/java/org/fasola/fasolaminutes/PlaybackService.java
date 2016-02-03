@@ -578,6 +578,8 @@ public class PlaybackService extends Service
             setFilter(Intent.ACTION_HEADSET_PLUG);
         }
 
+        boolean mWasPlugged = false;
+
         // Pause playback when song is removed from playlist
         @Override
         public void onPlaylistChanged() {
@@ -588,9 +590,11 @@ public class PlaybackService extends Service
         // Pause playback when headset is unplugged
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG) &&
-                    intent.getIntExtra("state", -1) == 0) {
-                pause();
+            if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
+                boolean isPlugged = intent.getIntExtra("state", 0) > 0;
+                if (mWasPlugged && ! isPlugged)
+                    pause();
+                mWasPlugged = isPlugged;
             }
         }
     };
