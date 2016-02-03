@@ -342,6 +342,19 @@ public class PlaybackService extends Service
     //---------------------------------------------------------------------------------------------
     //endregion
 
+    /** Updates the current song from the playlist position. */
+    public void updateSong() {
+        mSong = Playlist.getInstance().getCurrent();
+        ensurePlayer();
+        if (mMediaPlayer.isPlaying())
+            mMediaPlayer.stop();
+        mMediaPlayer.reset();
+        mIsPrepared = false;
+        mIsLoading = false;
+        updateNotification();
+        updateMediaSession();
+    }
+
     /**
      * Prepares and plays the current song in the playlist (async)
      *
@@ -351,27 +364,18 @@ public class PlaybackService extends Service
      * @see #onPrepared(MediaPlayer)
      */
     public boolean prepare() {
-        // Get the song
-        mSong = Playlist.getInstance().getCurrent();
+        updateSong();
         if (mSong == null)
             return false;
         // Prepare player
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_LOADING));
-        mIsPrepared = false;
-        ensurePlayer();
-        if (mMediaPlayer.isPlaying())
-            mMediaPlayer.stop();
-        mMediaPlayer.reset();
         try {
             mMediaPlayer.setDataSource(mSong.url);
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException e) {
             // TODO: something useful... a broadcast?
-            Log.e(TAG, "IOException with url: " + mSong.url);
+            Log.e(TAG, "Exception with url: " + mSong.url);
         }
-        mShouldPlay = true;
         mMediaPlayer.prepareAsync();
-        updateNotification();
-        updateMediaSession();
         return true;
     }
 
