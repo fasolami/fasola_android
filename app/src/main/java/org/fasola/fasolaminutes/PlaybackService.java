@@ -227,7 +227,7 @@ public class PlaybackService extends Service
 
     /** Returns {@code true} if the {@link MediaPlayer} is loading (not prepared or buffering) */
     public boolean isLoading() {
-        return ! mIsPrepared || mIsLoading;
+        return mIsLoading;
     }
     // region MediaPlayerControl overrides
     //---------------------------------------------------------------------------------------------
@@ -278,6 +278,7 @@ public class PlaybackService extends Service
         }
         mShouldPlay = false;
         mIsPrepared = false;
+        mIsLoading = false;
         mNotification = null;
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_PAUSED));
         stopForeground(true);
@@ -372,6 +373,7 @@ public class PlaybackService extends Service
             return false;
         // Prepare player
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_LOADING));
+        mIsLoading = true;
         try {
             mMediaPlayer.setDataSource(mSong.url);
         } catch (IOException | IllegalStateException e) {
@@ -612,6 +614,7 @@ public class PlaybackService extends Service
     public void onPrepared(MediaPlayer mp) {
         Log.v(TAG, "Prepared; starting playback");
         mIsPrepared = true;
+        mIsLoading = false;
         mErrorCount = 0;
         if (mSong != null)
             mSong.status = Playlist.Song.STATUS_OK;
