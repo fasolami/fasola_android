@@ -10,6 +10,8 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -92,6 +94,8 @@ public class PlaybackService extends Service
     boolean mIsPrepared;
     boolean mIsLoading;
     boolean mShouldPlay; // Should we play the song once it is prepared?
+    ConnectivityManager mConnectivityManager;
+    int mConnectionType = -1;
     Playlist.Song mSong; // Prepared song
     int mErrorCount; // Number of sequential errors
     NotificationManager mNotificationManager;
@@ -121,6 +125,7 @@ public class PlaybackService extends Service
         mInstance = this;
         mControl = new Control(this);
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         mObserver.registerBroadcastReceiver(getApplicationContext());
         mObserver.registerPlaylistObserver();
@@ -218,6 +223,12 @@ public class PlaybackService extends Service
     public boolean isLoading() {
         return mIsLoading;
     }
+
+    /** Returns {@code true} if any connection exists. */
+    public boolean isConnected() {
+        return mConnectionType >= 0;
+    }
+
     // region MediaPlayerControl overrides
     //---------------------------------------------------------------------------------------------
     @Override
@@ -570,7 +581,7 @@ public class PlaybackService extends Service
      */
     PlaylistObserver mObserver = new PlaylistObserver() {
         {
-            setFilter(Intent.ACTION_HEADSET_PLUG);
+            setFilter(Intent.ACTION_HEADSET_PLUG, ConnectivityManager.CONNECTIVITY_ACTION);
         }
 
         boolean mWasPlugged = false;
@@ -582,7 +593,8 @@ public class PlaybackService extends Service
                 pause();
         }
 
-        // Pause playback when headset is unplugged
+        // Pause playback when headset is unplugged or when wifi is unavailable
+        // Update network state
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
@@ -590,6 +602,20 @@ public class PlaybackService extends Service
                 if (mWasPlugged && ! isPlugged)
                     pause();
                 mWasPlugged = isPlugged;
+            }
+            else if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
+                if (intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)) {
+                    mConnectionType = -1;
+                }
+                else {
+                    NetworkInfo network = mConnectivityManager.getActiveNetworkInfo();
+                    if (network != null && network.isConnectedOrConnecting())
+                        mConnectionType = network.getType();
+                    else
+                        mConnectionType = -1;
+                }
+                if (isConnected() && ! ConnectionStatus.canPlay(context))
+                    pause();
             }
         }
     };
@@ -625,6 +651,10 @@ public class PlaybackService extends Service
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        if (! isConnected()) {
+            pause();
+            return true;
+        }
         Log.e(TAG, "Error: " + String.valueOf(what));
         if (mSong != null)
             mSong.status = Playlist.Song.STATUS_ERROR;
