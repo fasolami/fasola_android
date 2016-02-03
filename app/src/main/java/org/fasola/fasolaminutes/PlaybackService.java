@@ -908,8 +908,8 @@ public class PlaybackService extends Service
         // Show toast
         String message = context.getResources().getQuantityString(
             action.equals(PlaybackService.ACTION_PLAY_MEDIA) ?
-                R.plurals.play_songs :
-                R.plurals.enqueue_songs,
+                R.plurals.playing_songs:
+                R.plurals.enqueuing_songs,
             urls.length,
             urls.length
         );
