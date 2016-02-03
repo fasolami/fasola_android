@@ -11,6 +11,9 @@ import java.util.List;
 
 
 public class NowPlayingActivity extends SimpleTabActivity {
+    /** Intent action used to prompt the user for streaming. */
+    public static final String PROMPT_STREAMING = "org.fasola.fasolaminutes.PROMPT_STREAMING";
+
     long songId = -1;
     MediaController mController;
     PlaybackService.Control mPlayer;
@@ -24,6 +27,9 @@ public class NowPlayingActivity extends SimpleTabActivity {
         mController = (MediaController)findViewById(R.id.media_controller);
         mPlayer = new PlaybackService.Control(this);
         mController.setMediaPlayer(mPlayer);
+        // Check for streaming prompt
+        if (PROMPT_STREAMING.equals(getIntent().getAction()))
+            ConnectionStatus.promptStreaming(this);
     }
 
     @Override
@@ -49,9 +55,12 @@ public class NowPlayingActivity extends SimpleTabActivity {
         @Override
         public void onChanged() {
             mController.show(0); // Update seekbar
-            // Update title and Fragments
             PlaybackService service = PlaybackService.getInstance();
-            Playlist.Song song = service != null ? service.getSong() : null;
+            Playlist.Song song;
+            if (service != null)
+                song = service.getSong();
+            else
+                song = Playlist.getInstance().getCurrent();
             if (song != null) {
                 setTitle(song.name);
                 // Update fragments
@@ -63,9 +72,9 @@ public class NowPlayingActivity extends SimpleTabActivity {
                             if (fragment instanceof SongActivity.SongFragment)
                                 ((SongActivity.SongFragment) fragment).setSongId(songId);
                 }
-                // Loading indicator
-                setProgressBarIndeterminateVisibility(service.isLoading());
-            } else {
+                setProgressBarIndeterminateVisibility(service != null && service.isLoading());
+            }
+            else {
                 songId = -1;
                 setProgressBarIndeterminateVisibility(false);
             }

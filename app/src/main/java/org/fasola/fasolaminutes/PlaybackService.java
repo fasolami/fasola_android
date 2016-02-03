@@ -59,8 +59,6 @@ public class PlaybackService extends Service
     /** Index of EXTRA_URL_LIST that should start playing */
     public static final String EXTRA_PLAY_INDEX = "org.fasola.fasolaminutes.media.EXTRA_INDEX";
 
-    /** Play */
-    public static final String ACTION_PLAY = "org.fasola.fasolaminutes.action.PLAY";
     /** Notification Play/Pause */
     public static final String ACTION_PLAY_PAUSE = "org.fasola.fasolaminutes.action.PLAY_PAUSE";
     /** Notification Next */
@@ -143,8 +141,12 @@ public class PlaybackService extends Service
         // Enqueue/play
         else if (action.equals(ACTION_PLAY_MEDIA) || action.equals(ACTION_ENQUEUE_MEDIA)) {
             int play = -1;
-            if (action.equals(ACTION_PLAY_MEDIA))
+            if (action.equals(ACTION_PLAY_MEDIA)) {
+                // If we're playing songs, remove all previous songs from the playlist
+                Playlist.getInstance().clear();
+                updateSong();
                 play = intent.getIntExtra(EXTRA_PLAY_INDEX, 0);
+            }
             if (intent.hasExtra(EXTRA_LEAD_ID))
                 enqueueLead(play, C.SongLeader.leadId, intent.getLongExtra(EXTRA_LEAD_ID, -1));
             else if (intent.hasExtra(EXTRA_URL))
@@ -152,9 +154,12 @@ public class PlaybackService extends Service
             else if (intent.hasExtra(EXTRA_URL_LIST))
                 enqueueLead(play, C.SongLeader.audioUrl, (Object[])intent.getStringArrayExtra(EXTRA_URL_LIST));
         }
-        // Controls
-        else if (action.equals(ACTION_PLAY)) {
-            start();
+        // ConnectionStatus
+        else if (action.equals(ConnectionStatus.ACTION_PLAY)) {
+            if (ConnectionStatus.canPlay(this))
+                start();
+            else
+                ConnectionStatus.promptStreaming(this);
         }
         // Notification controls
         else if (action.equals(ACTION_PLAY_PAUSE)) {
@@ -421,14 +426,12 @@ public class PlaybackService extends Service
 
                 // Add to the playlist and start playback
                 Playlist pl = Playlist.getInstance();
+                pl.addAll(songs);
                 if (playIndex > -1) {
-                    // If we're just playing songs, remove all previous songs from the playlist
-                    pl.replaceWith(songs);
                     pl.moveToPosition(playIndex);
-                    prepare();
-                }
-                else {
-                    pl.addAll(songs);
+                    updateSong();
+                    if (mShouldPlay)
+                        prepare();
                 }
             }
         });
@@ -751,14 +754,7 @@ public class PlaybackService extends Service
 
         @Override
         public void start() {
-            if (isRunning())
-                getInstance().start();
-            else {
-                // Start the service and play
-                Intent intent = new Intent(mContext, PlaybackService.class);
-                intent.setAction(PlaybackService.ACTION_PLAY);
-                mContext.startService(intent);
-            }
+            ConnectionStatus.promptStreaming(mContext);
         }
 
         /**
@@ -950,6 +946,8 @@ public class PlaybackService extends Service
             urls.length
         );
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        if (action.equals(PlaybackService.ACTION_PLAY_MEDIA))
+            ConnectionStatus.promptStreaming(context);
     }
 
     //---------------------------------------------------------------------------------------------
