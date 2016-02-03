@@ -24,10 +24,10 @@ public class MediaButtonReceiver extends BroadcastReceiver {
                             mControl.pause();
                         break;
                     case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                        mControl.startPrevious();
+                        mControl.previous();
                         break;
                     case KeyEvent.KEYCODE_MEDIA_NEXT:
-                        mControl.startNext();
+                        mControl.next();
                         break;
                 }
             }

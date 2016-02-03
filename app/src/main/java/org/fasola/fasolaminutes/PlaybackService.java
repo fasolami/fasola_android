@@ -713,7 +713,7 @@ public class PlaybackService extends Service
         public View.OnClickListener nextListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startNext();
+                next();
             }
         };
 
@@ -724,7 +724,7 @@ public class PlaybackService extends Service
         public View.OnClickListener prevListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startPrevious();
+                previous();
             }
         };
 
@@ -753,23 +753,29 @@ public class PlaybackService extends Service
         public void start(int pos) {
             Playlist.getInstance().moveToPosition(pos);
             if (isRunning())
-                getInstance().prepare();
+                getInstance().updateSong();
             start();
         }
 
-        public void startNext() {
+        public void next() {
             Playlist.getInstance().moveToNext();
-            if (isRunning())
-                getInstance().prepare();
+            if (isRunning()) {
+                getInstance().updateSong();
+                if (! getInstance().isPaused())
+                    start();
+            }
         }
 
-        public void startPrevious() {
+        public void previous() {
             if (getCurrentPosition() > RESTART_THRESHOLD)
                 seekTo(0);
             else {
                 Playlist.getInstance().moveToPrev();
-                if (isRunning())
-                    getInstance().prepare();
+                if (isRunning()) {
+                    getInstance().updateSong();
+                    if (! getInstance().isPaused())
+                        start();
+                }
             }
         }
 
