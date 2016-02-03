@@ -136,7 +136,7 @@ public class PlaybackService extends Service
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent != null ? intent.getAction(): null;
         if (action == null)
-            return START_STICKY;
+            return START_NOT_STICKY;
         // Enqueue/play
         else if (action.equals(ACTION_PLAY_MEDIA) || action.equals(ACTION_ENQUEUE_MEDIA)) {
             int play = -1;
@@ -173,7 +173,7 @@ public class PlaybackService extends Service
         else if (action.equals(ACTION_CLOSE)) {
             stop();
         }
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override
