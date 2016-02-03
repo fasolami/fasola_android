@@ -59,17 +59,11 @@ public class PlaybackService extends Service
 
     /** Play */
     public static final String ACTION_PLAY = "org.fasola.fasolaminutes.action.PLAY";
-    /** Pause */
-    public static final String ACTION_PAUSE = "org.fasola.fasolaminutes.action.PAUSE";
-    /** Play/Pause toggle */
+    /** Notification Play/Pause */
     public static final String ACTION_PLAY_PAUSE = "org.fasola.fasolaminutes.action.PLAY_PAUSE";
-    /** Play the next song */
+    /** Notification Next */
     public static final String ACTION_NEXT = "org.fasola.fasolaminutes.action.NEXT";
-    /** Play the previous song */
-    public static final String ACTION_PREV = "org.fasola.fasolaminutes.action.PREV";
-    /** Stop playback */
-    public static final String ACTION_STOP = "org.fasola.fasolaminutes.action.STOP";
-    /** Close notification */
+    /** Notification Close */
     public static final String ACTION_CLOSE = "org.fasola.fasolaminutes.action.STOP";
 
     /** Broadcast sent when the song is changed */
@@ -94,6 +88,7 @@ public class PlaybackService extends Service
     };
 
     MediaPlayer mMediaPlayer;
+    Control mControl;
     boolean mIsPrepared;
     boolean mIsLoading;
     boolean mShouldPlay; // Should we play the song once it is prepared?
@@ -124,6 +119,7 @@ public class PlaybackService extends Service
     public void onCreate() {
         super.onCreate();
         mInstance = this;
+        mControl = new Control(this);
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         mObserver.registerBroadcastReceiver(getApplicationContext());
@@ -155,22 +151,15 @@ public class PlaybackService extends Service
         else if (action.equals(ACTION_PLAY)) {
             start();
         }
-        else if (action.equals(ACTION_PAUSE)) {
-            pause();
-        }
+        // Notification controls
         else if (action.equals(ACTION_PLAY_PAUSE)) {
-            if (isPlaying())
-                pause();
+            if (isPaused())
+                mControl.start();
             else
-                start();
+                mControl.pause();
         }
         else if (action.equals(ACTION_NEXT)) {
-            Playlist.getInstance().moveToNext();
-            prepare();
-        }
-        else if (action.equals(ACTION_PREV)) {
-            Playlist.getInstance().moveToPrev();
-            prepare();
+            mControl.next();
         }
         else if (action.equals(ACTION_CLOSE)) {
             stop();
@@ -458,18 +447,15 @@ public class PlaybackService extends Service
     private Notification createNotification() {
         // RemoteViews
         RemoteViews remote = new RemoteViews(getPackageName(), R.layout.notification_playback);
-        Intent playIntent = new Intent(this, PlaybackService.class);
-        playIntent.setAction(ACTION_PLAY_PAUSE);
+        Intent playIntent = new Intent(ACTION_PLAY_PAUSE, null, this, PlaybackService.class);
         remote.setOnClickPendingIntent(R.id.play_pause, PendingIntent.getService(
                 this, 0, playIntent, PendingIntent.FLAG_UPDATE_CURRENT
         ));
-        Intent nextIntent = new Intent(this, PlaybackService.class);
-        nextIntent.setAction(ACTION_NEXT);
+        Intent nextIntent = new Intent(ACTION_NEXT, null, this, PlaybackService.class);
         remote.setOnClickPendingIntent(R.id.next, PendingIntent.getService(
                 this, 0, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT
         ));
-        Intent closeIntent = new Intent(this, PlaybackService.class);
-        closeIntent.setAction(ACTION_CLOSE);
+        Intent closeIntent = new Intent(ACTION_CLOSE, null, this, PlaybackService.class);
         remote.setOnClickPendingIntent(R.id.close, PendingIntent.getService(
                 this, 0, closeIntent, PendingIntent.FLAG_UPDATE_CURRENT
         ));
