@@ -510,26 +510,42 @@ public class PlaybackService extends Service
         Notification notification = mNotification != null ? mNotification : createNotification();
         // Update content
         RemoteViews remote = notification.contentView;
-        remote.setTextViewText(R.id.title, mSong != null ? mSong.name : "");
-        remote.setTextViewText(R.id.singing, mSong != null ? mSong.singing : "");
-        remote.setImageViewResource(R.id.play_pause, isPlaying()
-                ? android.R.drawable.ic_media_pause
-                : android.R.drawable.ic_media_play);
-        remote.setViewVisibility(R.id.play_pause, isLoading() ? View.GONE : View.VISIBLE);
-        remote.setViewVisibility(R.id.loading, isLoading() ? View.VISIBLE : View.GONE);
-        // Update pending intent
-        if (mHasMainTask) {
-            // Launch NowPlayingActivity normally
-            Intent intent = new Intent(this, NowPlayingActivity.class);
-            notification.contentIntent = PendingIntent.getActivity(
-                    this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        if (ConnectionStatus.canPlay(this)) {
+            remote.setTextViewText(R.id.title, mSong != null ? mSong.name : "");
+            remote.setTextViewText(R.id.singing, mSong != null ? mSong.singing : "");
+            remote.setImageViewResource(R.id.play_pause, isPlaying()
+                    ? android.R.drawable.ic_media_pause
+                    : android.R.drawable.ic_media_play);
+            remote.setViewVisibility(R.id.play_pause, isLoading() ? View.GONE : View.VISIBLE);
+            remote.setViewVisibility(R.id.loading, isLoading() ? View.VISIBLE : View.GONE);
+            remote.setViewVisibility(R.id.next, View.VISIBLE);
+            // Update pending intent
+            if (mHasMainTask) {
+                // Launch NowPlayingActivity normally
+                Intent intent = new Intent(this, NowPlayingActivity.class);
+                notification.contentIntent = PendingIntent.getActivity(
+                        this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
+            else {
+                // Synthesize stack MainActivity -> NowPlayingActivity
+                TaskStackBuilder stack = TaskStackBuilder.create(getApplicationContext());
+                stack.addNextIntent(new Intent(this, MainActivity.class));
+                stack.addNextIntent(new Intent(this, NowPlayingActivity.class));
+                notification.contentIntent = stack.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+            }
         }
         else {
-            // Synthesize stack MainActivity -> NowPlayingActivity
-            TaskStackBuilder stack = TaskStackBuilder.create(getApplicationContext());
-            stack.addNextIntent(new Intent(this, MainActivity.class));
-            stack.addNextIntent(new Intent(this, NowPlayingActivity.class));
-            notification.contentIntent = stack.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+            // No wifi -- hide everything so the user has to open the notification to do anything.
+            remote.setTextViewText(R.id.title, "Streaming is disabled.");
+            remote.setTextViewText(R.id.singing, "Touch to change.");
+            remote.setViewVisibility(R.id.play_pause, View.GONE);
+            remote.setViewVisibility(R.id.next, View.GONE);
+            remote.setViewVisibility(R.id.loading, View.GONE);
+            // Set wifi prompt event
+            Intent intent = new Intent(
+                    ConnectionStatus.ACTION_PLAY, null, this, PlaybackService.class);
+            notification.contentIntent = PendingIntent.getService(
+                    this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
         // Show or update notification
         if (mNotification == null) {
@@ -619,6 +635,8 @@ public class PlaybackService extends Service
                 }
                 if (isConnected() && ! ConnectionStatus.canPlay(context))
                     pause();
+                else
+                    updateNotification(); // pause() updates the notification already.
             }
         }
     };
