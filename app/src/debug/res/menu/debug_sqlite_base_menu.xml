@@ -7,6 +7,6 @@
     <item
         android:id="@+id/menu_catch_sql"
         android:title="Redirect queries"
-        android:orderInCategory="1000"
+        android:orderInCategory="999"
         android:checkable="true"/>
 </menu>

@@ -1,7 +1,6 @@
 package org.fasola.fasolaminutes;
 
 import android.content.Context;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.database.DatabaseUtils;
@@ -13,7 +12,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -263,26 +261,6 @@ public class SQLiteDebugActivity extends BackActivity {
         }
         if (sActivity != null)
             sActivity.mAdapter.notifyDataSetChanged();
-    }
-
-    public static boolean handleOptionsItemSelected(Context context, MenuItem item) {
-        if (item.getItemId() == R.id.menu_sqlite_debug) {
-            context.startActivity(new Intent(context, SQLiteDebugActivity.class));
-            return true;
-        }
-        else if (item.getItemId() == R.id.menu_catch_sql) {
-            item.setChecked(! item.isChecked());
-            DEBUG_SQLITE = item.isChecked();
-            return true;
-        }
-        return false;
-    }
-
-    public static void createOptionsMenu(MenuInflater menuInflater, Menu menu) {
-        menuInflater.inflate(R.menu.debug_sqlite_base_menu, menu);
-        MenuItem item = menu.findItem(R.id.menu_catch_sql);
-        if (item != null)
-            item.setChecked(DEBUG_SQLITE);
     }
 
     static {

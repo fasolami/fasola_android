@@ -42,7 +42,7 @@ public class BackActivity extends FragmentActivity implements DrawerLayout.Drawe
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean ret = super.onCreateOptionsMenu(menu);
-        SQLiteDebugActivity.createOptionsMenu(getMenuInflater(), menu);
+        Debug.createOptionsMenu(getMenuInflater(), menu);
         mHasActivitySearchView = menu.findItem(R.id.menu_search) != null;
         return ret;
     }
@@ -81,7 +81,7 @@ public class BackActivity extends FragmentActivity implements DrawerLayout.Drawe
             onBackPressed();
             return true;
         }
-        else if (SQLiteDebugActivity.handleOptionsItemSelected(this, item)) {
+        else if (Debug.onOptionsItemSelected(this, item)) {
             return true;
         }
         return super.onOptionsItemSelected(item);
