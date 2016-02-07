@@ -53,11 +53,11 @@ public class MainActivity extends SimpleTabActivity {
 
     @Override
     protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         handleIntent(intent);
     }
 
     protected void handleIntent(Intent intent) {
-        super.onNewIntent(intent);
         // Change to the requested fragment (by position)
         int position = intent.getIntExtra(ACTIVITY_POSITION, -1);
         if (position != -1) {
