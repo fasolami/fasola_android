@@ -490,10 +490,18 @@ public class PlaybackService extends Service
     boolean mHasMainTask = true;
     public void setMainTaskRunning(boolean isRunning) {
         // Stop if the app is closing and playback is paused
-        if (! isRunning && isPaused())
-            stop();
+        if (! isRunning && isPaused()) {
+            // Post this for later in case the activity is re-created
+            (new Handler()).post(new Runnable() {
+                @Override
+                public void run() {
+                    if (! mHasMainTask)
+                        stop();
+                }
+            });
+        }
         // Update notification to use synthesized back stack if the app is exiting
-        else if (isRunning != mHasMainTask) {
+        if (isRunning != mHasMainTask) {
             mHasMainTask = isRunning;
             updateNotification();
         }
