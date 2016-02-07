@@ -41,14 +41,30 @@ public class BaseActivity extends FragmentActivity implements DrawerLayout.Drawe
         super.onCreate(savedInstanceState);
         if (! isTaskRoot() && getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
-        onNewIntent(getIntent());
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        handleIntent(getIntent(), savedInstanceState == null);
+        super.onPostCreate(savedInstanceState);
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        handleIntent(intent, false);
+    }
+
+    /**
+     * Handles intents dispatched from onPostCreate and onNewIntent.
+     *
+     * @param intent Intent
+     * @param isFirst is this the first intent passed to the activity?
+     *                True when the application starts.
+     */
+    protected void handleIntent(Intent intent, boolean isFirst) {
         // Check for streaming prompt
-        if (PROMPT_STREAMING.equals(intent.getAction()))
+        if (! isFirst && PROMPT_STREAMING.equals(intent.getAction()))
             ConnectionStatus.promptStreaming(this);
     }
 

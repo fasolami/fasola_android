@@ -25,7 +25,6 @@ public class MainActivity extends SimpleTabActivity {
         mViewPager.setOffscreenPageLimit(mPagerAdapter.getCount());
         // Set page change listener and initial settings
         setOnPageChangeListener(mPageChangeListener);
-        handleIntent(getIntent());
     }
 
     // Change title and FaSoLa tabs when the page changes
@@ -52,12 +51,8 @@ public class MainActivity extends SimpleTabActivity {
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        handleIntent(intent);
-    }
-
-    protected void handleIntent(Intent intent) {
+    protected void handleIntent(Intent intent, boolean isFirst) {
+        super.handleIntent(intent, isFirst);
         // Change to the requested fragment (by position)
         int position = intent.getIntExtra(ACTIVITY_POSITION, -1);
         if (position != -1) {
@@ -68,6 +63,8 @@ public class MainActivity extends SimpleTabActivity {
             else
                 mPageChangeListener.onPageSelected(position);
         }
+        if (! isFirst)
+            return;
         // Recordings deep link:
         // fasola://recordings?singing=singingId
         Uri data = intent.getData();
