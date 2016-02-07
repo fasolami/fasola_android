@@ -87,23 +87,23 @@ public class ConnectionStatus {
                     dialog.show(((FragmentActivity) context).getSupportFragmentManager(), "streaming_dialog");
                     context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
                 }
-                // Prompt with top activity
                 else {
+                    // Prompt with top activity
                     Activity top = MinutesApplication.getTopActivity();
-                    if (top instanceof FragmentActivity) {
-                        ConnectionDialogFragment dialog = new ConnectionDialogFragment();
-                        dialog.show(((FragmentActivity) top).getSupportFragmentManager(), "streaming_dialog");
-                        context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                    if (top instanceof BackActivity) {
+                        context.startActivity(new Intent(context, top.getClass())
+                                .setAction(BackActivity.PROMPT_STREAMING)
+                                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                                        Intent.FLAG_ACTIVITY_SINGLE_TOP));
                     }
+                    // Prompt by opening NowPlayingActivity with synthesized back stack.
                     else if (top == null) {
-                        // Prompt by opening NowPlayingActivity with synthesized back stack.
                         context.startActivities(new Intent[] {
                                 new Intent(context, MainActivity.class)
                                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                                 new Intent(context, NowPlayingActivity.class)
-                                        .setAction(NowPlayingActivity.PROMPT_STREAMING)
+                                        .setAction(BackActivity.PROMPT_STREAMING)
                         });
-                        context.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
                     }
                     else {
                         Log.e("ConnectionStatus", "Expected a FragmentActivity");

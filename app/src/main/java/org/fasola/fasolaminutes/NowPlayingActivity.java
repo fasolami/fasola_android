@@ -11,9 +11,6 @@ import java.util.List;
 
 
 public class NowPlayingActivity extends SimpleTabActivity {
-    /** Intent action used to prompt the user for streaming. */
-    public static final String PROMPT_STREAMING = "org.fasola.fasolaminutes.PROMPT_STREAMING";
-
     long songId = -1;
     MediaController mController;
     PlaybackService.Control mPlayer;
@@ -27,9 +24,6 @@ public class NowPlayingActivity extends SimpleTabActivity {
         mController = (MediaController)findViewById(R.id.media_controller);
         mPlayer = new PlaybackService.Control(this);
         mController.setMediaPlayer(mPlayer);
-        // Check for streaming prompt
-        if (PROMPT_STREAMING.equals(getIntent().getAction()))
-            ConnectionStatus.promptStreaming(this);
     }
 
     @Override

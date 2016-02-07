@@ -1,6 +1,7 @@
 package org.fasola.fasolaminutes;
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -23,6 +24,9 @@ import java.util.List;
  * Prevents user from opening drawers by sliding from the edge of the screen.
  */
 public class BackActivity extends FragmentActivity implements DrawerLayout.DrawerListener {
+    /** Intent action used to prompt the user for streaming. */
+    public static final String PROMPT_STREAMING = "org.fasola.fasolaminutes.PROMPT_STREAMING";
+
     DrawerLayout mDrawerLayout;
     Fragment mLeftFragment;
     Fragment mRightFragment;
@@ -37,6 +41,15 @@ public class BackActivity extends FragmentActivity implements DrawerLayout.Drawe
         super.onCreate(savedInstanceState);
         if (! isTaskRoot() && getActionBar() != null)
             getActionBar().setDisplayHomeAsUpEnabled(true);
+        onNewIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        // Check for streaming prompt
+        if (PROMPT_STREAMING.equals(intent.getAction()))
+            ConnectionStatus.promptStreaming(this);
     }
 
     @Override
