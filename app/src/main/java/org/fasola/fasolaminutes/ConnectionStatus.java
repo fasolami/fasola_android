@@ -49,8 +49,13 @@ public class ConnectionStatus {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo network = cm.getActiveNetworkInfo();
         if (network != null && network.isConnectedOrConnecting()) {
-            if (network.getType() == ConnectivityManager.TYPE_WIFI)
-                return CAN_PLAY;
+            if (network.getType() == ConnectivityManager.TYPE_WIFI) {
+                if (! BuildConfig.DEBUG)
+                    return CAN_PLAY;
+                else {
+                    return Debug.SIMULATE_NO_WIFI ? NO_WIFI : CAN_PLAY;
+                }
+            }
             else
                 return NO_WIFI;
         }

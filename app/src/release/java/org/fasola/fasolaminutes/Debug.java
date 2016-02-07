@@ -9,6 +9,8 @@ import android.view.MenuItem;
  * Stub for release.
  */
 public class Debug {
+    public static final boolean SIMULATE_NO_WIFI = false;
+
     public static boolean onOptionsItemSelected(Context context, MenuItem item) {
         return false;
     }

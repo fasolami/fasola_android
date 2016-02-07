@@ -1,0 +1,12 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_reset_data_streaming"
+        android:orderInCategory="999"
+        android:title="Disallow data streaming" />
+
+    <item
+        android:id="@+id/menu_simulate_no_wifi"
+        android:title="Simulate no wifi"
+        android:orderInCategory="999"
+        android:checkable="true"/>
+</menu>
