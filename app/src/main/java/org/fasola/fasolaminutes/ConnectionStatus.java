@@ -90,19 +90,19 @@ public class ConnectionStatus {
                 else {
                     // Prompt with top activity
                     Activity top = MinutesApplication.getTopActivity();
-                    if (top instanceof BackActivity) {
+                    if (top instanceof BaseActivity) {
                         context.startActivity(new Intent(context, top.getClass())
-                                .setAction(BackActivity.PROMPT_STREAMING)
+                                .setAction(BaseActivity.PROMPT_STREAMING)
                                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                                         Intent.FLAG_ACTIVITY_SINGLE_TOP));
                     }
                     // Prompt by opening NowPlayingActivity with synthesized back stack.
                     else if (top == null) {
-                        context.startActivities(new Intent[] {
+                        context.startActivities(new Intent[]{
                                 new Intent(context, MainActivity.class)
                                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
                                 new Intent(context, NowPlayingActivity.class)
-                                        .setAction(BackActivity.PROMPT_STREAMING)
+                                        .setAction(BaseActivity.PROMPT_STREAMING)
                         });
                     }
                     else {

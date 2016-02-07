@@ -24,7 +24,7 @@ import java.util.List;
  *  Use {@link android.support.v4.view.ViewPager} in the layout file, and define tabs using
  *  {@code <fragment android:title="label" android:name="FragmentClass">}
  */
-public abstract class SimpleTabActivity extends BackActivity {
+public abstract class SimpleTabActivity extends BaseActivity {
     /** PagerAdapter for ViewPager */
     SimplePagerAdapter mPagerAdapter;
 

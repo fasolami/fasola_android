@@ -28,7 +28,7 @@ import java.util.HashMap;
 
 import static java.lang.System.nanoTime;
 
-public class SQLiteDebugActivity extends BackActivity {
+public class SQLiteDebugActivity extends BaseActivity {
     public static boolean DEBUG_SQLITE = false;
     public static boolean isDebug() {
         return DEBUG_SQLITE;

@@ -23,7 +23,7 @@ import java.util.List;
  * <p>Notifies Fragments in drawers when the are open or closed using setUserVisibleHint.
  * Prevents user from opening drawers by sliding from the edge of the screen.
  */
-public class BackActivity extends FragmentActivity implements DrawerLayout.DrawerListener {
+public class BaseActivity extends FragmentActivity implements DrawerLayout.DrawerListener {
     /** Intent action used to prompt the user for streaming. */
     public static final String PROMPT_STREAMING = "org.fasola.fasolaminutes.PROMPT_STREAMING";
 

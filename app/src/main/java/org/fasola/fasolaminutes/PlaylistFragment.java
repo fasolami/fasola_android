@@ -59,7 +59,7 @@ public class PlaylistFragment extends ListFragment
             if (mList != null)
                 mList.setSelection(mPlaylist.getPosition());
             Activity activity = getActivity();
-            if (activity instanceof BackActivity && ((BackActivity)activity).isDrawerVisible(this)) {
+            if (activity instanceof BaseActivity && ((BaseActivity)activity).isDrawerVisible(this)) {
                 activity.setTitle(R.string.title_playlist);
                 if (activity.getActionBar() != null)
                     activity.getActionBar().setSubtitle(String.format("%d items", mPlaylist.size()));
@@ -85,8 +85,8 @@ public class PlaylistFragment extends ListFragment
         @Override
         public void onPlaylistChanged() {
             Activity activity = getActivity();
-            if (activity instanceof BackActivity &&
-                    ((BackActivity)activity).isDrawerVisible(PlaylistFragment.this) &&
+            if (activity instanceof BaseActivity &&
+                    ((BaseActivity)activity).isDrawerVisible(PlaylistFragment.this) &&
                     activity.getActionBar() != null) {
                 activity.getActionBar().setSubtitle(String.format("%d items", mPlaylist.size()));
             }
