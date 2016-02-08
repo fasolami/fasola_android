@@ -18,7 +18,6 @@ import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.TextView;
 
 import junit.framework.Assert;
 
@@ -61,7 +60,7 @@ public class CursorListFragment extends ListFragment
     protected String mSearchTerm = "";
     protected SQL.Query mOriginalQuery;
     protected int mSortId = -1;
-    protected View mRecordingCountView;
+    protected int mRecordingCount;
     protected int mMenuResourceId = -1;
     protected int mDeferredIndexerType = NO_INDEXER;
     protected LetterIndexer mDeferredIndexer;
@@ -271,6 +270,13 @@ public class CursorListFragment extends ListFragment
             item.setChecked(true);
         else if (mSortId != -1)
             Log.w("CursorListFragment", "Invalid sortId specified");
+        // Recording count
+        if (mRecordingCount > 0) {
+            String playTitle = getResources().getQuantityString(R.plurals.play_songs, mRecordingCount, mRecordingCount);
+            menu.add(Menu.NONE, R.id.play_songs, Menu.NONE, playTitle);
+            String enqueueTitle = getResources().getQuantityString(R.plurals.enqueue_songs, mRecordingCount, mRecordingCount);
+            menu.add(Menu.NONE, R.id.enqueue_songs, Menu.NONE, enqueueTitle);
+        }
     }
 
 
@@ -281,6 +287,20 @@ public class CursorListFragment extends ListFragment
             item.setChecked(true);
             mSortId = item.getItemId();
             updateQuery();
+            return true;
+        }
+        else if (item.getItemId() == R.id.play_songs) {
+            PlaybackService.playSongs(
+                    getActivity(),
+                    PlaybackService.ACTION_PLAY_MEDIA,
+                    getListAdapter().getCursor());
+            return true;
+        }
+        else if (item.getItemId() == R.id.enqueue_songs) {
+            PlaybackService.playSongs(
+                    getActivity(),
+                    PlaybackService.ACTION_ENQUEUE_MEDIA,
+                    getListAdapter().getCursor());
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -325,42 +345,10 @@ public class CursorListFragment extends ListFragment
 
     void updateRecordingCount() {
         int count = getRecordingCount(getListAdapter().getCursor());
-        if (count > 0) {
-            if (mRecordingCountView == null) {
-                mRecordingCountView = View.inflate(
-                        getActivity(), R.layout.list_header_recording_count, null);
-                // Play/enqueue click handlers
-                mRecordingCountView.findViewById(R.id.play_recordings).setOnClickListener(
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                PlaybackService.playSongs(getActivity(),
-                                        PlaybackService.ACTION_PLAY_MEDIA,
-                                        getListAdapter().getCursor());
-                            }
-                        });
-                mRecordingCountView.findViewById(R.id.enqueue_recordings).setOnClickListener(
-                        new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                PlaybackService.playSongs(getActivity(),
-                                        PlaybackService.ACTION_ENQUEUE_MEDIA,
-                                        getListAdapter().getCursor());
-                            }
-                        });
-            }
-            ((TextView)mRecordingCountView.findViewById(R.id.play_recordings)).setText(
-                getResources().getQuantityString(R.plurals.play_songs, count, count)
-            );
-            ((TextView)mRecordingCountView.findViewById(R.id.enqueue_recordings)).setText(
-                getResources().getQuantityString(R.plurals.enqueue_songs, count, count)
-            );
-            if (! (getListView().getAdapter() instanceof HeaderViewListAdapter))
-                addHeaderView(mRecordingCountView, null, false);
-            mRecordingCountView.setVisibility(View.VISIBLE);
-        }
-        else if (mRecordingCountView != null) {
-            mRecordingCountView.setVisibility(View.GONE);
+        if (count != mRecordingCount) {
+            mRecordingCount = count;
+            setHasOptionsMenu(true);
+            getActivity().invalidateOptionsMenu();
         }
     }
 

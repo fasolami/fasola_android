@@ -2,4 +2,6 @@
 <resources>
     <item name="play_image" type="id" />
     <item name="drag_handle" type="id" />
+    <item name="play_songs" type="id" />
+    <item name="enqueue_songs" type="id" />
 </resources>
