@@ -127,16 +127,47 @@ public class LeaderActivity extends SimpleTabActivity {
     }
 
     static public class LeaderSongFragment extends CursorListFragment {
+        long mId = -1;
+
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            setMenuResource(R.menu.menu_leader_song_fragment);
+            setDefaultSortId(R.id.menu_song_sort_leads);
             setItemLayout(R.layout.list_item_leader);
             setIntentActivity(SongActivity.class);
-            long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
-            setQuery(C.Song.selectList(C.Song.fullName,
-                                       C.LeaderStats.leadCount.format("'(' || {column} || ')'"))
-                            .where(C.LeaderStats.leaderId, "=", id)
-                            .order(C.LeaderStats.leadCount, "DESC", C.Song.pageSort, "ASC"));
+            setFastScrollEnabled(true);
+            setLeaderId(getActivity().getIntent().getLongExtra(EXTRA_ID, -1));
+        }
+
+        public void setLeaderId(long id) {
+            mId = id;
+            updateQuery();
+        }
+
+        @Override
+        public SQL.Query onUpdateQuery() {
+            // Base query
+            SQL.Query query =
+                    C.Song.selectList(
+                            C.Song.fullName,
+                            C.LeaderStats.leadCount.format("'(' || {column} || ')'")
+                    ).where(C.LeaderStats.leaderId, "=", mId);
+            // Sort
+            switch (mSortId) {
+                case R.id.menu_song_sort_page:
+                    return query.order(C.Song.pageSort);
+                case R.id.menu_song_sort_title:
+                    return query.order(C.Song.title);
+                case R.id.menu_song_sort_leads:
+                default:
+                    return query.order(C.LeaderStats.leadCount, "DESC", C.Song.pageSort, "ASC");
+            }
+        }
+
+        @Override
+        public SQL.Query onUpdateSearch(SQL.Query query, String searchTerm) {
+            return query.where(C.Song.fullName, "LIKE", "%" + searchTerm + "%");
         }
     }
 
