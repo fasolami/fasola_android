@@ -172,16 +172,35 @@ public class LeaderActivity extends SimpleTabActivity {
     }
 
     static public class LeaderSingingFragment extends CursorStickyListFragment {
+        long mId = -1;
+
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            setMenuResource(R.menu.menu_leader_singing_fragment);
             setItemLayout(R.layout.list_item_singing);
             setIntentActivity(SingingActivity.class);
             setRangeIndexer();
-            long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
-            setQuery(C.Singing.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location).distinct()
-                        .sectionIndex(C.Singing.year)
-                        .where(C.SongLeader.leaderId, "=", id));
+            setLeaderId(getActivity().getIntent().getLongExtra(EXTRA_ID, -1));
+        }
+
+        public void setLeaderId(long id) {
+            mId = id;
+            updateQuery();
+        }
+
+        @Override
+        public SQL.Query onUpdateQuery() {
+            return C.Singing.selectList(C.Singing.name, C.Singing.startDate, C.Singing.location)
+                    .distinct()
+                    .sectionIndex(C.Singing.year)
+                    .where(C.SongLeader.leaderId, "=", mId);
+        }
+
+        @Override
+        public SQL.Query onUpdateSearch(SQL.Query query, String searchTerm) {
+            return query.where(C.Singing.name, "LIKE", "%" + searchTerm + "%")
+                        .or(C.Singing.location, "LIKE", "%" + searchTerm + "%");
         }
     }
 
