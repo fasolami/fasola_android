@@ -149,10 +149,8 @@ public class LeaderActivity extends SimpleTabActivity {
         public SQL.Query onUpdateQuery() {
             // Base query
             SQL.Query query =
-                    C.Song.selectList(
-                            C.Song.fullName,
-                            C.LeaderStats.leadCount.format("'(' || {column} || ')'")
-                    ).where(C.LeaderStats.leaderId, "=", mId);
+                    C.Song.selectList(C.Song.fullName, C.LeaderStats.leadCount)
+                            .where(C.LeaderStats.leaderId, "=", mId);
             // Sort
             switch (mSortId) {
                 case R.id.menu_song_sort_page:

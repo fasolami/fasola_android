@@ -58,7 +58,7 @@ public class SongActivity extends SimpleTabActivity {
 
         public void setSongId(long id) {
             SQL.Query query = C.Leader.selectList(C.Leader.fullName,
-                                C.LeaderStats.leadCount.format("'(' || {column} || ')'"))
+                                C.LeaderStats.leadCount)
                             .whereEq(C.LeaderStats.songId)
                             .order(C.LeaderStats.leadCount, "DESC", C.Leader.lastName, "ASC")
                     .limit(20);

@@ -116,14 +116,14 @@ public class MainActivity extends SimpleTabActivity {
                 case R.id.menu_leader_sort_count:
                     setBinCount(7);
                     showHeaders(false);
-                    return C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
+                    return C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount)
                                    .sectionIndex(C.Leader.leadCount, "DESC")
                                    .order(C.Leader.lastName, "ASC", C.Leader.fullName, "ASC");
                 case R.id.menu_leader_sort_entropy:
                     setBins(0, 10, 20, 30, 40, 50, 60, 70, 80, 90);
                     setSectionLabels("0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9");
                     showHeaders(false);
-                    return C.Leader.selectList(C.Leader.fullName, C.Leader.entropyDisplay.format("'(' || {column} || ')'"))
+                    return C.Leader.selectList(C.Leader.fullName, C.Leader.entropyDisplay)
                                    .sectionIndex(C.Leader.entropy.format("CAST({column} * 100 AS INT)"), "DESC")
                                    .order(C.Leader.entropy, "DESC",
                                            C.Leader.lastName, "ASC",
@@ -131,13 +131,13 @@ public class MainActivity extends SimpleTabActivity {
                 case R.id.menu_leader_sort_first_name:
                     setAlphabetIndexer();
                     showHeaders(true);
-                    return C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
+                    return C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount)
                                    .sectionIndex(C.Leader.fullName, "ASC");
                 case R.id.menu_leader_sort_name:
                 default:
                     setAlphabetIndexer();
                     showHeaders(true);
-                    return C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount.format("'(' || {column} || ')'"))
+                    return C.Leader.selectList(C.Leader.fullName, C.Leader.leadCount)
                                    .sectionIndex(C.Leader.lastName, "ASC")
                                    .order(C.Leader.fullName, "ASC");
             }
@@ -167,7 +167,7 @@ public class MainActivity extends SimpleTabActivity {
          */
         private SQL.Query songQuery() {
             return C.Song.selectList(C.Song.number, C.Song.title,
-                                     C.SongStats.leadCount.sum().format("'(' || {column} || ')'"));
+                                     C.SongStats.leadCount.sum());
         }
 
         // Code common to onUpdateQuery and onUpdateSearch
