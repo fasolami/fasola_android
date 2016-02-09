@@ -205,18 +205,51 @@ public class LeaderActivity extends SimpleTabActivity {
     }
 
     static public class LeaderLeadsFragment extends CursorStickyListFragment {
+        long mId = -1;
+
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            setMenuResource(R.menu.menu_leader_leads_fragment);
+            setDefaultSortId(R.id.menu_singing_sort_year);
             setItemLayout(R.layout.list_item_singing);
             setIntentActivity(SingingActivity.class);
-            setRangeIndexer();
-            long id = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
-            setQuery(SQL.select(C.Singing.id, C.Song.fullName, C.Singing.name, C.Singing.startDate)
-                    .select(C.SongLeader.leadId).as(SingingActivity.EXTRA_LEAD_ID)
-                    .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
-                    .sectionIndex(C.Singing.year)
-                    .where(C.SongLeader.leaderId, "=", id));
+            setLeaderId(getActivity().getIntent().getLongExtra(EXTRA_ID, -1));
+        }
+
+        public void setLeaderId(long id) {
+            mId = id;
+            updateQuery();
+        }
+
+        @Override
+        public SQL.Query onUpdateQuery() {
+            SQL.Query query =
+                    SQL.select(C.Singing.id, C.Song.fullName, C.Singing.name, C.Singing.startDate)
+                            .select(C.SongLeader.leadId).as(SingingActivity.EXTRA_LEAD_ID)
+                            .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
+                            .where(C.SongLeader.leaderId, "=", mId);
+            switch(mSortId) {
+                case R.id.menu_song_sort_title:
+                    setStringIndexer();
+                    return query.sectionIndex(C.Song.title, "ASC")
+                                .order(C.Singing.year, "ASC");
+                case R.id.menu_song_sort_page:
+                    setStringIndexer();
+                    return query.sectionIndex(C.Song.fullName)
+                                .order(C.Song.pageSort, "ASC", C.Singing.year, "ASC");
+                case R.id.menu_singing_sort_year:
+                default:
+                    setRangeIndexer();
+                    return query.sectionIndex(C.Singing.year, "ASC");
+            }
+        }
+
+        @Override
+        public SQL.Query onUpdateSearch(SQL.Query query, String searchTerm) {
+            return query.where(C.Singing.name, "LIKE", "%" + searchTerm + "%")
+                    .or(C.Singing.location, "LIKE", "%" + searchTerm + "%")
+                    .or(C.Song.fullName, "LIKE", "%" + searchTerm + "%");
         }
 
         @Override

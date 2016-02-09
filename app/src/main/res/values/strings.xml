@@ -86,5 +86,6 @@
     <string name="menu_now_playing">Now playing</string>
     <string name="title_playlist">Playlist</string>
     <string name="streaming_prompt">Streaming recordings without a wifi connection may use large amounts of data.</string>
+    <string name="search_leads">Search Songs and Singings</string>
 
 </resources>
