@@ -8,8 +8,6 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 
 public class MainActivity extends SimpleTabActivity {
@@ -102,53 +100,15 @@ public class MainActivity extends SimpleTabActivity {
     }
 
     public static class LeaderListFragment extends CursorStickyListFragment {
-        protected int mSortId = R.id.menu_leader_sort_name;
-        protected final static String BUNDLE_SORT = "SORT_ID";
-
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            if (savedInstanceState != null)
-                mSortId = savedInstanceState.getInt(BUNDLE_SORT, mSortId);
-            setHasOptionsMenu(true);
-        }
-
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            setMenuResource(R.menu.menu_leader_list_fragment);
+            setDefaultSortId(R.id.menu_leader_sort_name);
             setIntentActivity(LeaderActivity.class);
             setItemLayout(R.layout.list_item_leader);
             updateQuery();
         }
-
-        @Override
-        public void onSaveInstanceState(final Bundle saveInstanceState) {
-            super.onSaveInstanceState(saveInstanceState);
-            saveInstanceState.putSerializable(BUNDLE_SORT, mSortId);
-        }
-
-        @Override
-        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.menu_leader_list_fragment, menu);
-            // Check the initial sort
-            MenuItem item = menu.findItem(mSortId);
-            if (item != null)
-                item.setChecked(true);
-        }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            // Sort
-            if (item.getGroupId() == R.id.menu_group_sort) {
-                item.setChecked(true);
-                mSortId = item.getItemId();
-                updateQuery();
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
-        }
-
-        // Change query/index based on the selected sort column
 
         @Override
         public SQL.Query onUpdateQuery() {
