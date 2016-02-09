@@ -4,6 +4,9 @@ import android.database.Cursor;
 import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * An indexer that uses a full string instead of just the first letter.
@@ -46,6 +49,13 @@ public class StringIndexer extends LetterIndexer {
                     mIsSorted = false;
                     break;
                 }
+            }
+            // If sections are currently sorted desc, reverse them
+            if (mIsSorted && sortCheck == 1) {
+                mAlphabet = new StringBuilder(mAlphabet).reverse().toString();
+                List<String> sectionReverser = Arrays.asList(sections);
+                Collections.reverse(sectionReverser);
+                sectionReverser.toArray(sections);
             }
         }
     }
