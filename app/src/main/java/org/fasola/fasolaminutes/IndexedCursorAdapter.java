@@ -70,9 +70,6 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         int col = cursor.getColumnIndex(SQL.INDEX_COLUMN);
         if (col != -1)
             return col;
-        // Try first column
-        if (cursor.getColumnCount() > 1)
-            return 1;
         // Nothing
         return -1;
     }
@@ -121,12 +118,8 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
             return;
         Cursor cursor = getCursor();
         int column = getIndexColumn(cursor);
-        if (column != -1) {
-            // Update the indexer cursor/columns
-            mIndexer.setCursor(cursor, column);
-        }
-        else
-            mIndexer.setCursor(null);
+        if (column != -1)
+            mIndexer.setCursor(cursor, column); // Update the indexer cursor/columns
     }
 
     // SectionIndexer overrides

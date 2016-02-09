@@ -540,19 +540,24 @@ public class CursorListFragment extends ListFragment
     @Override
     public void onLoadFinished(Cursor cursor) {
         IndexedCursorAdapter adapter = getListAdapter();
-        // Setup any deferred section indexers
-        if (mDeferredIndexerType == RANGE_INDEXER)
-            mDeferredIndexer = new RangeIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
-        else if (mDeferredIndexerType == STRING_INDEXER)
-            mDeferredIndexer = new StringIndexer(cursor, IndexedCursorAdapter.getIndexColumn(cursor));
-        else if (mDeferredIndexerType == BIN_INDEXER)
-            mDeferredIndexer = BinIndexer.equalIntervals(cursor, IndexedCursorAdapter.getIndexColumn(cursor), mBinCount);
-        // Set the new indexer
-        if (mDeferredIndexer != null) {
-            mDeferredIndexer.setSectionLabels(mSectionLabels);
-            adapter.setIndexer(mDeferredIndexer);
-            mDeferredIndexer = null;
-            mSectionLabels = null;
+        int indexCol = IndexedCursorAdapter.getIndexColumn(cursor);
+        if (indexCol > -1) {
+            // Setup any deferred section indexers
+            if (mDeferredIndexerType == RANGE_INDEXER)
+                mDeferredIndexer = new RangeIndexer(cursor, indexCol);
+            else if (mDeferredIndexerType == STRING_INDEXER)
+                mDeferredIndexer = new StringIndexer(cursor, indexCol);
+            else if (mDeferredIndexerType == BIN_INDEXER)
+                mDeferredIndexer = BinIndexer.equalIntervals(cursor, indexCol, mBinCount);
+            // Set the new indexer
+            if (mDeferredIndexer != null) {
+                mDeferredIndexer.setSectionLabels(mSectionLabels);
+                adapter.setIndexer(mDeferredIndexer);
+                mDeferredIndexer = null;
+                mSectionLabels = null;
+            }
+        } else {
+            adapter.setIndexer(null);
         }
         // Setup the CursorAdapter
         if (cursor.getColumnCount() == 0) {
