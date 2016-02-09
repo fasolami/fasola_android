@@ -166,7 +166,7 @@ public class MainActivity extends SimpleTabActivity {
          * @return {SQL.Query} Default song query
          */
         private SQL.Query songQuery() {
-            return C.Song.selectList(C.Song.number, C.Song.title,
+            return C.Song.selectList(C.Song.number, C.Song.fullTitle,
                                      C.SongStats.leadCount.sum());
         }
 

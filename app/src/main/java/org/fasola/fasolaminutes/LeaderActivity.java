@@ -230,7 +230,7 @@ public class LeaderActivity extends SimpleTabActivity {
             switch(mSortId) {
                 case R.id.menu_song_sort_title:
                     setStringIndexer();
-                    return query.sectionIndex(C.Song.title, "ASC")
+                    return query.sectionIndex(C.Song.fullTitle, "ASC")
                                 .order(C.Singing.year, "ASC");
                 case R.id.menu_song_sort_page:
                     setStringIndexer();

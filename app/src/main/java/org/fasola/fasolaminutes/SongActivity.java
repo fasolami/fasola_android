@@ -193,7 +193,7 @@ public class SongActivity extends SimpleTabActivity {
             setItemLayout(R.layout.list_item_song);
             setIntentActivity(SongActivity.class);
             long id = getArguments().getLong(EXTRA_ID, -1);
-            setQuery(SQL.select(C.Song.id, C.Song.number, C.Song.title)
+            setQuery(SQL.select(C.Song.id, C.Song.number, C.Song.fullTitle)
                         .join(C.SongNeighbor, C.Song.id, C.SongNeighbor.toId)
                         .where(C.SongNeighbor.fromId, "=", id));
         }

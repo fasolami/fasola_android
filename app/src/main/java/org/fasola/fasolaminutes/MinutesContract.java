@@ -98,16 +98,17 @@ public class MinutesContract {
                        .where(SongLeader.songId, "=", Song.id)
                        .having(SongLeader.leaderId.count(), ">" , 1) +
                 ")");
-            fullName = concat(number, "' '", title, titleOrdinal.format(
+            fullTitle = concat(title, titleOrdinal.format(
                 "(CASE WHEN {column} <> '' " +
                     "THEN ' (' || {column} || ')' " +
                     "ELSE '' " +
                 "END)"
             ));
+            fullName = concat(number, "' '", fullTitle);
         }
 
         public SQL.Column title, titleOrdinal, number, composer, poet, lyrics, rawKey, key, time, meter;
-        public SQL.Column fullName, leaderCount, leadCount, coleadCount, pageSort;
+        public SQL.Column fullTitle, fullName, leaderCount, leadCount, coleadCount, pageSort;
     }
 
     /* SongStats table */
