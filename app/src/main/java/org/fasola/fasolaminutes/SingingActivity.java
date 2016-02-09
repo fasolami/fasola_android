@@ -189,7 +189,12 @@ public class SingingActivity extends SimpleTabActivity {
                 public void onLoadFinished(Cursor cursor) {
                     C.SingingDAO singing = C.Singing.fromCursor(cursor);
                     if (singing != null) {
-                        String text = singing.fullText.getString();
+                        String text = singing.fullText.getString()
+                                .replaceAll(
+                                        "[\\[{<]" +
+                                            "(?:\\d+[tb]?//)?(\\d+[tb]?)" +
+                                        "[\\]}>]",
+                                    "$1");
                         // TextView chokes on very long text (e.g. full text for camp)
                         // Fake it with a ListView of smaller TextViews for better performance
                         ListView list = (ListView) view.findViewById(R.id.full_text);
