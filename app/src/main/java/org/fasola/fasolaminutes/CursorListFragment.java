@@ -500,10 +500,7 @@ public class CursorListFragment extends ListFragment
         // I can't find another way to jump to a position without smooth-scrolling
         list.setSelection(position);
         getListAdapter().setHighlight(position);
-        // Update the view's background if it is currently visible
-        View view = list.getChildAt(position - list.getFirstVisiblePosition());
-        if (view != null)
-            getListAdapter().getView(position, view, getListView()); // NB: should reuse the view
+        list.invalidate();
     }
 
     /** Force use of fast scroll */
