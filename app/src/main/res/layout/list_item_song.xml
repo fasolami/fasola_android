@@ -28,5 +28,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceListItemSmall"
-        android:layout_gravity="center_vertical" />
+        android:layout_gravity="center_vertical"
+        android:textColor="@color/list_item_secondary" />
 </LinearLayout>
