@@ -61,6 +61,7 @@ public class CursorListFragment extends ListFragment
     protected SQL.Query mOriginalQuery;
     protected int mSortId = -1;
     protected int mRecordingCount;
+    protected boolean mHasRecordingMenu;
     protected int mMenuResourceId = -1;
     protected int mDeferredIndexerType = NO_INDEXER;
     protected LetterIndexer mDeferredIndexer;
@@ -272,6 +273,7 @@ public class CursorListFragment extends ListFragment
             Log.w("CursorListFragment", "Invalid sortId specified");
         // Recording count
         if (mRecordingCount > 0) {
+            mHasRecordingMenu = true;
             String playTitle = getResources().getQuantityString(R.plurals.play_songs, mRecordingCount, mRecordingCount);
             menu.add(Menu.NONE, R.id.play_songs, Menu.NONE, playTitle);
             String enqueueTitle = getResources().getQuantityString(R.plurals.enqueue_songs, mRecordingCount, mRecordingCount);
@@ -312,6 +314,17 @@ public class CursorListFragment extends ListFragment
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
+        // Update recording counts
+        if (mHasRecordingMenu) {
+            MenuItem item = menu.findItem(R.id.play_songs);
+            item.setTitle(getResources().getQuantityString(
+                    R.plurals.play_songs, mRecordingCount, mRecordingCount));
+            item.setVisible(mRecordingCount > 0);
+            item = menu.findItem(R.id.enqueue_songs);
+            item.setTitle(getResources().getQuantityString(
+                    R.plurals.enqueue_songs, mRecordingCount, mRecordingCount));
+            item.setVisible(mRecordingCount > 0);
+        }
         // Get the SearchView
         final MenuItem searchItem = menu.findItem(R.id.menu_search);
         if (searchItem == null)
@@ -346,9 +359,11 @@ public class CursorListFragment extends ListFragment
     void updateRecordingCount() {
         int count = getRecordingCount(getListAdapter().getCursor());
         if (count != mRecordingCount) {
+            if (! mHasRecordingMenu) {
+                setHasOptionsMenu(true);
+                getActivity().invalidateOptionsMenu();
+            }
             mRecordingCount = count;
-            setHasOptionsMenu(true);
-            getActivity().invalidateOptionsMenu();
         }
     }
 
