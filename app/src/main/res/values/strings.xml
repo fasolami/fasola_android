@@ -87,5 +87,7 @@
     <string name="title_playlist">Playlist</string>
     <string name="streaming_prompt">Streaming recordings without a wifi connection may use large amounts of data.</string>
     <string name="search_leads">Search Songs and Singings</string>
+    <string name="leader_chart_title">Singings per year</string>
+    <string name="song_chart_title">Leads per year</string>
 
 </resources>
