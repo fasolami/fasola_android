@@ -134,7 +134,7 @@ public class LeaderActivity extends SimpleTabActivity {
             super.onViewCreated(view, savedInstanceState);
             setMenuResource(R.menu.menu_leader_song_fragment);
             setDefaultSortId(R.id.menu_song_sort_leads);
-            setItemLayout(R.layout.list_item_leader);
+            setItemLayout(R.layout.list_item_song);
             setIntentActivity(SongActivity.class);
             setFastScrollEnabled(true);
             setLeaderId(getActivity().getIntent().getLongExtra(EXTRA_ID, -1));
@@ -149,7 +149,7 @@ public class LeaderActivity extends SimpleTabActivity {
         public SQL.Query onUpdateQuery() {
             // Base query
             SQL.Query query =
-                    C.Song.selectList(C.Song.fullName, C.LeaderStats.leadCount)
+                    C.Song.selectList(C.Song.number, C.Song.fullTitle, C.LeaderStats.leadCount)
                             .where(C.LeaderStats.leaderId, "=", mId);
             // Sort
             switch (mSortId) {
