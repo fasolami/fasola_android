@@ -40,6 +40,11 @@ public class LeaderActivity extends SimpleTabActivity {
         }
     }
 
+    // Common interface for leader fragments
+    public interface LeaderFragment {
+        void setLeaderId(long id);
+    }
+
     static public class LeaderStatsFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -126,7 +131,7 @@ public class LeaderActivity extends SimpleTabActivity {
         }
     }
 
-    static public class LeaderSongFragment extends CursorListFragment {
+    static public class LeaderSongFragment extends CursorListFragment implements LeaderFragment {
         long mId = -1;
 
         @Override
@@ -169,7 +174,8 @@ public class LeaderActivity extends SimpleTabActivity {
         }
     }
 
-    static public class LeaderSingingFragment extends CursorStickyListFragment {
+    static public class LeaderSingingFragment extends CursorStickyListFragment
+            implements LeaderFragment {
         long mId = -1;
 
         @Override
@@ -202,7 +208,8 @@ public class LeaderActivity extends SimpleTabActivity {
         }
     }
 
-    static public class LeaderLeadsFragment extends CursorStickyListFragment {
+    static public class LeaderLeadsFragment extends CursorStickyListFragment
+            implements LeaderFragment {
         long mId = -1;
 
         @Override
