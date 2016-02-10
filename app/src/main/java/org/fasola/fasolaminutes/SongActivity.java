@@ -51,18 +51,17 @@ public class SongActivity extends SimpleTabActivity {
             super.onViewCreated(view, savedInstanceState);
             setItemLayout(R.layout.list_item_leader);
             setIntentActivity(LeaderActivity.class);
-            long songId = getArguments().getLong(EXTRA_ID, -1);
-            if (songId != -1)
-                setSongId(songId);
+            setSongId(getArguments().getLong(EXTRA_ID, -1));
         }
 
-        public void setSongId(long id) {
+        public void setSongId(long songId) {
+            getArguments().putLong(EXTRA_ID, songId);
             SQL.Query query = C.Leader.selectList(C.Leader.fullName,
                                 C.LeaderStats.leadCount)
                             .whereEq(C.LeaderStats.songId)
                             .order(C.LeaderStats.leadCount, "DESC", C.Leader.lastName, "ASC")
                     .limit(20);
-            setQuery(query, String.valueOf(id));
+            setQuery(query, String.valueOf(songId));
         }
     }
 
@@ -76,16 +75,15 @@ public class SongActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            long id = getArguments().getLong(CursorListFragment.EXTRA_ID, -1);
-            if (id != -1)
-                setSongId(id);
+            setSongId(getArguments().getLong(CursorListFragment.EXTRA_ID, -1));
         }
 
-        public void setSongId(long id) {
+        public void setSongId(long songId) {
+            getArguments().putLong(CursorListFragment.EXTRA_ID, songId);
             SQL.Query query = C.Song.select(C.Song.lyrics, C.Song.poet, C.Song.composer,
                                             C.Song.key, C.Song.time, C.Song.meter)
                                     .whereEq(C.Song.id);
-            getLoaderManager().restartLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
+            getLoaderManager().restartLoader(1, null, new MinutesLoader(query, String.valueOf(songId)) {
                 @Override
                 public void onLoadFinished(Cursor cursor) {
                     View view = getView();
