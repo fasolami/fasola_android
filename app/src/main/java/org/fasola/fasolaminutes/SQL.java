@@ -648,9 +648,14 @@ public class SQL {
         }
 
         private String escapeWhere(Object val) {
+            if (val == null) {
+                return "NULL";
+            } else if (val instanceof Number || val instanceof SQL.Column) {
+                return val.toString();
+            }
             String strVal = val.toString();
             String cmp = strVal.toUpperCase();
-            if (!(cmp.equals("?") || cmp.equals("NULL") || val instanceof SQL.Column))
+            if (! (strVal.equals("?") || cmp.equals("NULL")))
                 return DatabaseUtils.sqlEscapeString(strVal);
             return strVal;
         }
