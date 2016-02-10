@@ -17,6 +17,12 @@
         android:layout_weight="1">
 
         <fragment
+            android:title="Lead Info"
+            android:name="org.fasola.fasolaminutes.NowPlayingActivity$NowPlayingInfoFragment"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
+
+        <fragment
             android:title="Words"
             android:name="org.fasola.fasolaminutes.SongActivity$SongWordsFragment"
             android:layout_height="match_parent"
