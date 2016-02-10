@@ -731,7 +731,7 @@ public class CursorListFragment extends ListFragment
                     to[i] = R.id.text3;
                     break;
                 default:
-                    Assert.fail(String.format("ID: R.id.text%d does not exist", i));
+                    Assert.fail(String.format("ID: R.id.text%d does not exist", i+1));
             }
         }
         return to;
