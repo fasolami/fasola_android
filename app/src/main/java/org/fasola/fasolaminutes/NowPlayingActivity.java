@@ -105,13 +105,13 @@ public class NowPlayingActivity extends SimpleTabActivity {
 
     @Override
     public void onNewFragment(Fragment fragment) {
-        if (mSong == null)
-            return;
         Bundle args = new Bundle();
-        if (fragment instanceof SongActivity.SongFragment)
-            args.putLong(CursorListFragment.EXTRA_ID, mSong.songId);
-        else
-            args.putLong(CursorListFragment.EXTRA_ID, mSong.leadId);
+        if (mSong != null) {
+            if (fragment instanceof SongActivity.SongFragment)
+                args.putLong(CursorListFragment.EXTRA_ID, mSong.songId);
+            else
+                args.putLong(CursorListFragment.EXTRA_ID, mSong.leadId);
+        }
         fragment.setArguments(args);
     }
 
