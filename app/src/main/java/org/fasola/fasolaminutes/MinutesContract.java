@@ -10,7 +10,7 @@ public class MinutesContract {
     protected MinutesContract() {
     }
 
-    public static final int DB_VERSION = 10;
+    public static final int DB_VERSION = 11;
     public static final String DB_NAME = "minutes.db";
 
     // Contract classes (see below for definitions

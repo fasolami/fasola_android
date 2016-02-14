@@ -163,6 +163,8 @@ if not has_lead_id or FORCE_UPDATE:
             (lead_id, id)
         )
 
+# Add an index
+db.execute("CREATE INDEX lead_index ON song_leader_joins (lead_id)");
 
 # ----------------------------------------------------------------------------
 # Fix song stats (distinct lead_id = one lead, instead of each leader_id)
