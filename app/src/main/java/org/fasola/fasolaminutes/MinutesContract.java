@@ -200,8 +200,8 @@ public class MinutesContract {
 
         @Override
         protected void onCreate() {
-            songCount = column(SongLeader.leadId.countDistinct());
-            leaderCount = column(SongLeader.leaderId.countDistinct());
+            songCount = subQuery(SongLeader.leadId.countDistinct());
+            leaderCount = subQuery(SongLeader.leaderId.countDistinct());
         }
 
         public SQL.Column name, startDate, location, fullText, year, recordingCount, songCount, leaderCount;
