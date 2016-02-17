@@ -57,7 +57,7 @@ public class SingingActivity extends SimpleTabActivity {
             setIntentActivity(LeaderActivity.class);
             mId = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             // Singing info query
-            SQL.Query query = C.Singing.select(C.Singing.name, C.Singing.location,
+            SQL.Query query = C.Singing.select(C.Singing.name, C.Singing.location, C.Singing.startDate,
                                                C.Singing.songCount, C.Singing.leaderCount)
                                         .whereEq(C.Singing.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(mId)) {
@@ -67,12 +67,14 @@ public class SingingActivity extends SimpleTabActivity {
                     if (singing != null) {
                         String name = singing.name.getString();
                         String location = singing.location.getString();
+                        String date = singing.startDate.getString();
                         int nSongs = singing.songCount.getInt();
                         int nLeaders = singing.leaderCount.getInt();
                         String songs = getResources().getQuantityString(R.plurals.songsLed, nSongs, nSongs);
                         String leaders = getResources().getQuantityString(R.plurals.leaders, nLeaders, nLeaders);
                         ((TextView) view.findViewById(R.id.title)).setText(name);
                         ((TextView) view.findViewById(R.id.location)).setText(location);
+                        ((TextView) view.findViewById(R.id.date)).setText(date);
                         ((TextView) view.findViewById(R.id.songs)).setText(songs);
                         ((TextView) view.findViewById(R.id.leaders)).setText(leaders);
                     }
