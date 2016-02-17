@@ -28,6 +28,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:id="@+id/recording_count"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:fontFamily="sans-serif-light"
             android:gravity="center_horizontal" />
     </LinearLayout>
 
