@@ -348,7 +348,8 @@ public class CursorListFragment extends ListFragment
 
             @Override
             public boolean onQueryTextChange(String query) {
-                setSearch(query);
+                // db uses curly apostrophes
+                setSearch(query.replace('\'', '\u2019'));
                 return true;
             }
         });
