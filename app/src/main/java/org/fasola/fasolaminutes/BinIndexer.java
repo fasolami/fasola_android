@@ -78,7 +78,8 @@ public class BinIndexer extends StringIndexer {
         int[] bins = new int[sectionCount];
         // Get min/max
         int pos = cursor.getPosition();
-        cursor.moveToFirst();
+        if (! cursor.moveToFirst())
+            return new int[0];
         double first = cursor.getDouble(sortedColumnIndex);
         cursor.moveToLast();
         double last = cursor.getDouble(sortedColumnIndex);
