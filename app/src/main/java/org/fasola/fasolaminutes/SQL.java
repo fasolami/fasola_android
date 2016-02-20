@@ -4,7 +4,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -27,6 +26,10 @@ public class SQL {
     public static class JoinException extends RuntimeException {
         public JoinException() {
             super();
+        }
+
+        public JoinException(String msg) {
+            super(msg);
         }
 
         public JoinException(BaseTable table1, BaseTable table2) {
@@ -582,30 +585,49 @@ public class SQL {
 
         // Search for a columns to complete this join
         protected Query _join(BaseTable t1, BaseTable t2, boolean isLeft) {
+            // Table already joined
             if (joins.containsKey(t2.toString()))
                 return this;
+            // Simple join exists
             JoinEntry entry = BaseTable.getJoin(t1, t2);
             if (entry != null)
                 return _join(t2, entry.text, entry.isLeft || isLeft);
-            // Look for a many to many join path if we don't have a simple join
+            // Look for a simple join from already joined tables
+            for (String joinTable : joins.keySet()) {
+                entry = BaseTable.getJoin(joinTable, t2);
+                if (entry != null)
+                    return _join(t2, entry.text, entry.isLeft || isLeft);
+            }
+            // Look for many : many join
+            String joinTable = "";
             Map<String, JoinEntry> map = BaseTable.joinMap.get(t1.TABLE_NAME);
             if (map == null)
                 throw new JoinException(t1, t2);
-            for (String other : map.keySet()) {
-                entry = BaseTable.getJoin(other, t2);
-                if (entry != null) {
-                    // Join to the intermediate table
-                    JoinEntry firstJoin = BaseTable.getJoin(t1, other);
-                    if (firstJoin == null)
-                        throw new JoinException(t1, t2);
-                    Log.w("SQL", "many to many join for tables: " + t1 + ", " + t2);
-                    _join(other, firstJoin.text, firstJoin.isLeft || isLeft);
-                    // Join to the second table
-                    _join(t2, entry.text, entry.isLeft || isLeft);
-                    return this;
+            for (String intermediate : map.keySet()) {
+                if (BaseTable.getJoin(intermediate, t2) != null) {
+                    // Require ambiguous many : many joins to be resolved explicitly
+                    // e.g. select(...).join()
+                    if (joinTable.isEmpty())
+                        joinTable = intermediate;
+                    else
+                        throw new JoinException(
+                                "Multiple join paths exist between " + t1 + " and " + t2 + ". " +
+                                "Ambiguity can be resolved by join()'ing an intermediate table");
                 }
             }
-            throw new JoinException(t1, t2);
+            if (joinTable.isEmpty())
+                throw new JoinException(t1, t2);
+            // Join to the intermediate table
+            JoinEntry firstJoin = BaseTable.getJoin(t1, joinTable);
+            if (firstJoin == null)
+                throw new JoinException(t1, t2);
+            _join(joinTable, firstJoin.text, firstJoin.isLeft || isLeft);
+            // Join to the second table
+            JoinEntry secondJoin = BaseTable.getJoin(joinTable, t2);
+            if (secondJoin == null)
+                throw new JoinException(t1, t2);
+            _join(t2, secondJoin.text, secondJoin.isLeft || isLeft);
+            return this;
         }
 
         protected Query _join(Object table, String joinOn, boolean isLeft) {
