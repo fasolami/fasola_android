@@ -570,8 +570,16 @@ public class SQL {
             return _join(t1, t2, false);
         }
 
+        public Query join(BaseTable t2) {
+            return join(fromTable, t2);
+        }
+
         public Query leftJoin(BaseTable t1, BaseTable t2) {
             return _join(t1, t2, true);
+        }
+
+        public Query leftJoin(BaseTable t2) {
+            return leftJoin(fromTable, t2);
         }
 
         // Join on specified columns
