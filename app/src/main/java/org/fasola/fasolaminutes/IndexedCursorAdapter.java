@@ -125,12 +125,12 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
     // SectionIndexer overrides
     @Override
     public int getPositionForSection(int sectionIndex) {
-        return mIndexer.getPositionForSection(sectionIndex);
+        return mIndexer != null ? mIndexer.getPositionForSection(sectionIndex) : 0;
     }
 
     @Override
     public int getSectionForPosition(int position) {
-        return mIndexer.getSectionForPosition(position);
+        return mIndexer != null ? mIndexer.getSectionForPosition(position) : 0;
     }
 
     @Override
@@ -223,7 +223,7 @@ public class IndexedCursorAdapter extends SimpleCursorAdapter implements Section
         TextView headerView = (TextView) convertView.findViewById(R.id.list_header_text);
         headerView.setText(text);
         // Set count
-        int sectionCount = mIndexer.getCountForSection(section);
+        int sectionCount = mIndexer != null ? mIndexer.getCountForSection(section) : 0;
         TextView countView = (TextView) convertView.findViewById(R.id.list_header_count);
         countView.setText(String.valueOf(sectionCount));
         return convertView;
