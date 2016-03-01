@@ -576,6 +576,8 @@ public class CursorListFragment extends ListFragment
         // Set fastScroll if we have an index column
         getListView().setFastScrollEnabled(
                 mUseFastScroll || (adapter.hasIndex() && adapter.hasIndexer()));
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT)
+            FastScrollWrapper.wrap(getListView());
         // Update list state
         if (mListState != null) {
             getListView().onRestoreInstanceState(mListState);
