@@ -155,10 +155,12 @@ public class MinutesContract {
                 // Turn into percent of total leads
                 .format("SUM({}) / %s", leadCount)
             );
+            // All leaders in a lead
+            allNames = column(C.Leader.fullName.func("group_concat", "', '"));
         }
 
         public SQL.Column fullName, lastName, leadCount, entropy, entropyDisplay,
-                          singingCount, songCount, aka, majorPercent;
+                          singingCount, songCount, aka, majorPercent, allNames;
     }
 
     /* LeaderNameAliases table */

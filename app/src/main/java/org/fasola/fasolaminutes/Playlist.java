@@ -93,7 +93,7 @@ public class Playlist extends ArrayList<Playlist.Song> {
                 C.SongLeader.songId,
                 C.SongLeader.leadId,
                 C.Song.fullName,
-                C.Leader.fullName.func("group_concat", "', '"),
+                C.Leader.allNames,
                 C.Singing.name,
                 C.Singing.startDate,
                 C.Singing.year,
