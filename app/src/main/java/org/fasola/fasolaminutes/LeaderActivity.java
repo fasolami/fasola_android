@@ -103,19 +103,28 @@ public class LeaderActivity extends SimpleTabActivity {
             getLoaderManager().initLoader(2, null, new MinutesLoader(chartQuery, String.valueOf(id)) {
                 @Override
                 public void onLoadFinished(Cursor cursor) {
-                    // Chart data
-                    ArrayList<BarEntry> entries = new ArrayList<>();
+                    // X axis labels
                     ArrayList<String> labels = new ArrayList<>();
-                    int year = -1;
+                    int minYear = -1;
+                    int maxYear = -1;
+                    if (! cursor.moveToFirst())
+                        return;
+                    minYear = cursor.getInt(1);
+                    cursor.moveToLast();
+                    maxYear = cursor.getInt(1);
+                    cursor.moveToPosition(-1);
+                    if (maxYear - minYear < MinutesApplication.MIN_X_AXIS_RANGE) {
+                        minYear -= MinutesApplication.MIN_X_AXIS_RANGE / 2;
+                        maxYear += MinutesApplication.MIN_X_AXIS_RANGE / 2;
+                    }
+                    // Add labels
+                    for (int year = minYear; year <= maxYear; ++year)
+                        labels.add(String.valueOf(year));
+                    // Data
+                    ArrayList<BarEntry> entries = new ArrayList<>();
                     while (cursor.moveToNext()) {
-                        int thisYear = cursor.getInt(1);
-                        if (year == -1)
-                            year = thisYear;
-                        // Add x labels up to the current year (in cas of gaps between years)
-                        for (; year <= thisYear; ++year)
-                            labels.add(String.valueOf(year));
-                        // Add y value for the current year
-                        entries.add(new BarEntry(cursor.getInt(0), labels.size()-1));
+                        int year = cursor.getInt(1);
+                        entries.add(new BarEntry(cursor.getInt(0), year - minYear));
                     }
                     // Set data
                     BarDataSet dataset = new BarDataSet(entries, "Singings Attended");

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.BarLineChartBase;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.utils.ValueFormatter;
 
@@ -33,6 +34,9 @@ public class MinutesApplication extends Application
         MinutesDb.getInstance(mContext);
         registerActivityLifecycleCallbacks(this);
     }
+
+    public final static int MIN_Y_AXIS = 4;
+    public final static int MIN_X_AXIS_RANGE = 2; // must be even
 
     public static void applyDefaultChartStyle(BarLineChartBase chart) {
         chart.getLegend().setEnabled(false);
@@ -63,13 +67,29 @@ public class MinutesApplication extends Application
         chart.getAxisRight().setValueFormatter(formatter);
         chart.getAxisLeft().setValueFormatter(formatter);
         chart.getData().setValueFormatter(formatter);
-        // Data color
-        DataSet data = chart.getData().getDataSetByIndex(0);
-        if (data != null)
-            data.setColor(getContext().getResources().getColor(R.color.fasola_foreground));
-        data = chart.getData().getDataSetByIndex(1);
-        if (data != null)
-            data.setColor(getContext().getResources().getColor(R.color.tab_background));
+        // Datasets
+        float maxLeft = 0;
+        float maxRight = 0;
+        for (int i = 0; i < chart.getData().getDataSetCount(); ++i) {
+            DataSet data = chart.getData().getDataSetByIndex(i);
+            // Data color
+            if (i == 0)
+                data.setColor(getContext().getResources().getColor(R.color.fasola_foreground));
+            else if (i == 1)
+                data.setColor(getContext().getResources().getColor(R.color.tab_background));
+            if (data.getAxisDependency() == YAxis.AxisDependency.LEFT)
+                maxLeft = Math.max(maxLeft, data.getYMax());
+            else
+                maxRight = Math.max(maxRight, data.getYMax());
+        }
+        // Set max y axis value
+        if (maxLeft > 0 && maxLeft < MIN_Y_AXIS)
+            chart.getAxisLeft().setAxisMaxValue(MIN_Y_AXIS);
+        if (maxRight > 0 && maxRight < MIN_Y_AXIS)
+            chart.getAxisRight().setAxisMaxValue(MIN_Y_AXIS);
+        // No zoom
+        chart.setPinchZoom(false);
+        chart.setDoubleTapToZoomEnabled(false);
     }
 
     public static Activity getTopActivity() {
