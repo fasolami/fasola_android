@@ -10,7 +10,9 @@ import com.github.mikephil.charting.charts.BarLineChartBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.DataSet;
-import com.github.mikephil.charting.utils.ValueFormatter;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.utils.ViewPortHandler;
 
 /**
  * Application Override
@@ -46,32 +48,32 @@ public class MinutesApplication extends Application
         chart.getAxisRight().setDrawGridLines(false);
         chart.getAxisRight().setDrawAxisLine(false);
         chart.getAxisRight().setDrawLabels(false);
+        chart.getAxisRight().setDrawZeroLine(false);
         chart.getAxisLeft().setDrawGridLines(false);
         chart.getAxisLeft().setDrawAxisLine(false);
         chart.getAxisLeft().setDrawLabels(false);
+        chart.getAxisLeft().setDrawZeroLine(false);
         chart.setDrawGridBackground(false);
         if (chart instanceof BarChart)
             ((BarChart) chart).setDrawBarShadow(false);
-        // Avoid decimals
-        ValueFormatter formatter = new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float v) {
-                return String.format("%d", (long) v);
-            }
-        };
+        // Fix label count
         int labelCount = (int)(chart.getYChartMax() - chart.getYChartMin());
         if (labelCount < chart.getAxisLeft().getLabelCount())
             chart.getAxisLeft().setLabelCount(labelCount, true);
         if (labelCount < chart.getAxisRight().getLabelCount())
             chart.getAxisRight().setLabelCount(labelCount, true);
-        chart.getAxisRight().setValueFormatter(formatter);
-        chart.getAxisLeft().setValueFormatter(formatter);
-        chart.getData().setValueFormatter(formatter);
+        // Avoid decimals
+        chart.getData().setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
+                return String.format("%d", (long) value);
+            }
+        });
         // Datasets
         float maxLeft = 0;
         float maxRight = 0;
         for (int i = 0; i < chart.getData().getDataSetCount(); ++i) {
-            DataSet data = chart.getData().getDataSetByIndex(i);
+            DataSet data = (DataSet)chart.getData().getDataSetByIndex(i);
             // Data color
             if (i == 0)
                 data.setColor(getContext().getResources().getColor(R.color.fasola_foreground));

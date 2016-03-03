@@ -166,12 +166,9 @@ public class SongActivity extends SimpleTabActivity {
                         countVals.add(new BarEntry(stats.leadCount.getInt(), xVals.size()));
                         xVals.add(stats.year.getString());
                     }
-                    // Make chart data
-                    BarDataSet countSet = new BarDataSet(countVals, "Times Led");
-                    ArrayList<BarDataSet> dataSets = new ArrayList<>();
-                    dataSets.add(countSet);
                     // Set chart data
-                    BarData data = new BarData(xVals, dataSets);
+                    BarDataSet countSet = new BarDataSet(countVals, "Times Led");
+                    BarData data = new BarData(xVals, countSet);
                     chart.setDescription("");
                     chart.setData(data);
                     // Style chart
