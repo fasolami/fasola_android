@@ -89,9 +89,13 @@ public class MinutesApplication extends Application
             chart.getAxisLeft().setAxisMaxValue(MIN_Y_AXIS);
         if (maxRight > 0 && maxRight < MIN_Y_AXIS)
             chart.getAxisRight().setAxisMaxValue(MIN_Y_AXIS);
+        chart.getAxisRight().setAxisMinValue(0);
+        chart.getAxisLeft().setAxisMinValue(0);
         // No zoom
         chart.setPinchZoom(false);
         chart.setDoubleTapToZoomEnabled(false);
+        // Recalculate everything since we've changed min/max, etc.
+        chart.notifyDataSetChanged();
     }
 
     public static Activity getTopActivity() {
