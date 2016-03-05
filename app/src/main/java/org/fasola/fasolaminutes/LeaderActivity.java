@@ -116,6 +116,14 @@ public class LeaderActivity extends SimpleTabActivity {
                     if (maxYear - minYear < MinutesApplication.MIN_X_AXIS_RANGE) {
                         minYear -= MinutesApplication.MIN_X_AXIS_RANGE / 2;
                         maxYear += MinutesApplication.MIN_X_AXIS_RANGE / 2;
+                        // Constrain by global min/max year
+                        if (maxYear > C.MAX_YEAR) {
+                            minYear -= (maxYear - C.MAX_YEAR);
+                            maxYear = C.MAX_YEAR;
+                        } else if (minYear < C.MIN_YEAR) {
+                            maxYear += (C.MIN_YEAR - minYear);
+                            minYear = C.MIN_YEAR;
+                        }
                     }
                     // Add labels
                     for (int year = minYear; year <= maxYear; ++year)
