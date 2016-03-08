@@ -474,8 +474,9 @@ public class SQL {
         protected BaseTable fromTable;
         protected Map<String, String> joins = new LinkedHashMap<>(); // table name, join statement
         protected QueryStringBuilder strGroup = new QueryStringBuilder(" GROUP BY");
-        protected QueryStringBuilder strHaving = new QueryStringBuilder(" HAVING");
+        protected List<QueryStringBuilder> havingList = new ArrayList<>();
         protected List<QueryStringBuilder> whereList = new ArrayList<>();
+        protected List<QueryStringBuilder> lastList; // last where/having list to use for and and or
         protected QueryStringBuilder strOrder = new QueryStringBuilder(" ORDER BY");
         protected Object limit;
         protected Object offset;
@@ -495,10 +496,13 @@ public class SQL {
             fromTable = other.fromTable;
             joins = new LinkedHashMap<>(other.joins);
             strGroup = new QueryStringBuilder(other.strGroup);
-            strHaving = new QueryStringBuilder(other.strHaving);
             whereList = new ArrayList<>();
             for (QueryStringBuilder q : other.whereList)
                 whereList.add(new QueryStringBuilder(q));
+            havingList = new ArrayList<>();
+            for (QueryStringBuilder q : other.havingList)
+                havingList.add(new QueryStringBuilder(q));
+            lastList = other.lastList;
             strOrder = new QueryStringBuilder(other.strOrder);
             limit = other.limit;
             offset = other.offset;
@@ -651,22 +655,28 @@ public class SQL {
                 joinColumns.add((Column) col);
         }
 
-        // WHERE
-        // -----
+        // WHERE/HAVING
+        // ------------
+
+        // Call either where() or having()
+        // and(), or() operate on whichever where() or having() was used most recently
+
         public Query where(Object col, Object oper, Object val) {
-            // Don't use AND or OR before WHERE so there will be a valid QueryStringBuilder
-            // Don't add another QueryStringBuilder if the last one is empty
-            if (whereList.isEmpty() || ! whereList.get(whereList.size() - 1).isEmpty())
-                whereList.add(new QueryStringBuilder());
-            return _addWhere(col, oper, val);
+            lastList = whereList;
+            return _whereHaving(col, oper, val);
+        }
+
+        public Query having(Object col, Object oper, Object val) {
+            lastList = havingList;
+            return _whereHaving(col, oper, val);
         }
 
         public Query and(Object col, Object oper, Object val) {
-            return _addWhere(" AND", col, oper, val);
+            return _addWhereHaving(" AND", col, oper, val);
         }
 
         public Query or(Object col, Object oper, Object val) {
-            return _addWhere(" OR", col, oper, val);
+            return _addWhereHaving(" OR", col, oper, val);
         }
 
         // Better semantics for WHERE column = ? AND column = ? ...
@@ -677,7 +687,7 @@ public class SQL {
             return this;
         }
 
-        private String escapeWhere(Object val) {
+        private String _escapeWhereHaving(Object val) {
             if (val == null) {
                 return "NULL";
             } else if (val instanceof Number || val instanceof SQL.Column) {
@@ -690,8 +700,19 @@ public class SQL {
             return strVal;
         }
 
-        protected Query _addWhere(Object bool, Object col, Object oper, Object val) {
-            QueryStringBuilder q = whereList.get(whereList.size() - 1);
+        protected Query _whereHaving(Object col, Object oper, Object val) {
+            // Don't add another QueryStringBuilder if the last one is empty
+            if (lastList.isEmpty() || ! lastList.get(lastList.size() - 1).isEmpty())
+                lastList.add(new QueryStringBuilder());
+            return _addWhereHaving(col, oper, val);
+        }
+
+        protected Query _addWhereHaving(Object col, Object oper, Object val) {
+            return _addWhereHaving("", col, oper, val);
+        }
+
+        protected Query _addWhereHaving(Object bool, Object col, Object oper, Object val) {
+            QueryStringBuilder q = lastList.get(lastList.size() - 1);
             if (oper == null)
                 oper = "=";
             if (val == null)
@@ -701,11 +722,11 @@ public class SQL {
                 Object[] valArray = (Object[]) val;
                 String[] escapedVals = new String[valArray.length];
                 for (int i = 0; i < valArray.length; i++)
-                    escapedVals[i] = escapeWhere(valArray[i].toString());
+                    escapedVals[i] = _escapeWhereHaving(valArray[i].toString());
                 val = "(" + TextUtils.join(",", escapedVals) + ")";
             }
             else {
-                val = escapeWhere(val);
+                val = _escapeWhereHaving(val);
             }
             q.append(bool, " ", col, oper, val);
             // Add join
@@ -713,39 +734,13 @@ public class SQL {
             return this;
         }
 
-        protected Query _addWhere(Object col, Object oper, Object val) {
-            return _addWhere("", col, oper, val);
-        }
-
-        // Where can be used as a filter
-        public Query pushWhere() {
-            whereList.add(new QueryStringBuilder());
-            return this;
-        }
-
-        public Query pushWhere(Object col, Object oper, Object val) {
-            pushWhere();
-            return where(col, oper, val);
-        }
-
-        public Query popWhere() {
-            whereList.remove(whereList.size() - 1);
-            return this;
-        }
-
-        // GROUP BY, HAVING, ORDER BY, LIMIT
-        // ---------------------------------
+        // GROUP BY, ORDER BY, LIMIT
+        // -------------------------
         public Query group(Object... cols) {
             if (! strGroup.isEmpty())
                 strGroup.append(",");
             strGroup.append(" ").appendDelim(", ", cols);
             addJoinColumn(cols[0]);
-            return this;
-        }
-
-        public Query having(Object... args) {
-            strHaving.append(" ").appendDelim(" ", args);
-            addJoinColumn(args[0]);
             return this;
         }
 
@@ -835,19 +830,9 @@ public class SQL {
             for (String str : joins.values())
                 q.append(str);
             // Where/Group By/Having
-            if (whereList.size() > 0) {
-                boolean hasWhere = false;
-                for (QueryStringBuilder where : whereList) {
-                    if (! where.isEmpty()) {
-                        // Make sure we actually have a where clause before adding "WHERE"
-                        if (! hasWhere)
-                            q.append(" WHERE");
-                        q.append(hasWhere ? " AND " : "",  "(", where, ")");
-                        hasWhere = true;
-                    }
-                }
-            }
-            q.append(strGroup).append(strHaving);
+            toString_whereHaving(q, whereList, "WHERE");
+            q.append(strGroup);
+            toString_whereHaving(q, havingList, "HAVING");
             // Union
             if (union != null)
                 for (Query other : union)
@@ -860,6 +845,23 @@ public class SQL {
             if (offset != null)
                 q.append(" OFFSET ").append(offset);
             return q.toString();
+        }
+
+        // Process where or having list
+        private void toString_whereHaving(QueryStringBuilder q, List<QueryStringBuilder> list, String type) {
+            if (list.size() > 0) {
+                boolean hasClause = false;
+                for (QueryStringBuilder subClause : list) {
+                    if (! subClause.isEmpty()) {
+                        // Make sure we actually have a where clause before adding "WHERE"
+                        if (! hasClause) {
+                            q.append(" " + type);
+                        }
+                        q.append(hasClause ? " AND " : "",  "(", subClause, ")");
+                        hasClause = true;
+                    }
+                }
+            }
         }
 
         // Helper class that provides better append methods
