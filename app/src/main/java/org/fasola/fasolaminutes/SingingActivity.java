@@ -89,7 +89,7 @@ public class SingingActivity extends SimpleTabActivity {
             SQL.Query query = SQL.select(
                         C.Song.id,
                         C.Song.fullName,
-                        C.Leader.fullName.func("group_concat", "', '"))
+                        C.Leader.allNames)
                     .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
                     .select(C.Leader.id.func("group_concat")).as("__leaderIds")
                     .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
@@ -114,8 +114,9 @@ public class SingingActivity extends SimpleTabActivity {
 
         @Override
         public SQL.Query onUpdateSearch(SQL.Query query, String searchTerm) {
-            return query.where(C.Leader.fullName, "LIKE", "%" + searchTerm + "%")
-                        .or(C.Song.fullName, "LIKE", "%" + searchTerm + "%");
+            // having since Leader.allNames is a group_concat
+            return query.having(C.Leader.allNames, "LIKE", "%" + searchTerm + "%")
+                    .or(C.Song.fullName, "LIKE", "%" + searchTerm + "%");
         }
 
         @Override
