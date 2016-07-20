@@ -47,10 +47,25 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin" />
 
-    <ViewStub
-        android:id="@android:id/list"
+    <FrameLayout
+        android:layout_below="@+id/leaders"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/leaders" />
+        android:layout_height="match_parent">
+
+        <ViewStub
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@android:id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:gravity="center"
+            android:visibility="gone"
+            android:textAppearance="@android:style/TextAppearance.Medium"/>
+
+    </FrameLayout>
 
 </RelativeLayout>

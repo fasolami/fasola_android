@@ -55,10 +55,11 @@ public class SingingActivity extends SimpleTabActivity {
             setFastScrollEnabled(true);
             setItemLayout(R.layout.list_item_singing_song);
             setIntentActivity(LeaderActivity.class);
+            ((TextView) view.findViewById(android.R.id.empty)).setText("");
             mId = getActivity().getIntent().getLongExtra(EXTRA_ID, -1);
             // Singing info query
             SQL.Query query = C.Singing.select(C.Singing.name, C.Singing.location, C.Singing.startDate,
-                                               C.Singing.songCount, C.Singing.leaderCount)
+                                               C.Singing.songCount, C.Singing.leaderCount, C.Singing.isDenson)
                                         .whereEq(C.Singing.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(mId)) {
                 @Override
@@ -77,6 +78,9 @@ public class SingingActivity extends SimpleTabActivity {
                         ((TextView) view.findViewById(R.id.date)).setText(date);
                         ((TextView) view.findViewById(R.id.songs)).setText(songs);
                         ((TextView) view.findViewById(R.id.leaders)).setText(leaders);
+                        // Show a message if this is not a Denson book singing
+                        if (singing.isDenson.getString().equals("0"))
+                            ((TextView) view.findViewById(android.R.id.empty)).setText(R.string.empty_singing);
                     }
                 }
             });

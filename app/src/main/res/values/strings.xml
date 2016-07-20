@@ -71,6 +71,10 @@
     <string name="words_label">Words:</string>
     <string name="tab_playlist">Playlist</string>
     <string name="empty_playlist"><b>Playlist is empty.</b>\n\nAdd recordings by browsing Leaders, Songs, or Singings.</string>
+    <string name="empty_singing">
+        This singing is either not from <i>The Sacred Harp, 1991 Edition</i> or it uses multiple books.\n\n
+        Minutes text is available in the "full text" tab.
+    </string>
     <string name="menu_singing_sort_year">By year</string>
     <string name="menu_singing_sort_recordings">By recording count</string>
     <string name="key_label">Key:</string>

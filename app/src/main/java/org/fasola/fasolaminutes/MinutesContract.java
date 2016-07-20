@@ -200,6 +200,7 @@ public class MinutesContract {
             fullText = column("Minutes");
             recordingCount = column("RecordingCt");
             year = column("Year");
+            isDenson = column("IsDenson");
         }
 
         @Override
@@ -208,7 +209,7 @@ public class MinutesContract {
             leaderCount = subQuery(SongLeader.leaderId.countDistinct());
         }
 
-        public SQL.Column name, startDate, location, fullText, year, recordingCount, songCount, leaderCount;
+        public SQL.Column name, startDate, location, fullText, year, recordingCount, songCount, leaderCount, isDenson;
     }
 
     /* Song-Singing-Leader join table */
