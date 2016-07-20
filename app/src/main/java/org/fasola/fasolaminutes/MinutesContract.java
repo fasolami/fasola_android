@@ -223,7 +223,21 @@ public class MinutesContract {
             audioUrl = column("audio_url");
         }
 
-        public SQL.Column songId, singingId, leaderId, leadId, audioUrl;
+        @Override
+        protected void onCreate() {
+            // Names of co-leaders of this song
+            // This is a wacky subquery that uses song_leader_joins twice, so it's easier to
+            // write out by hand to make sure the correct aliases and joins are used
+            coleaders = subQuery(
+                "SELECT group_concat(coleaders_l.name, ', ') AS coleaders" +
+                " FROM leaders coleaders_l" +
+                " JOIN song_leader_joins coleaders_slj ON coleaders_slj.leader_id = coleaders_l.id" +
+		        " WHERE coleaders_slj.lead_id = song_leader_joins.lead_id" +
+                    " AND coleaders_slj.leader_id <> song_leader_joins.leader_id"
+            );
+        }
+
+        public SQL.Column songId, singingId, leaderId, leadId, audioUrl, coleaders;
         public String singingOrder;
     }
 
