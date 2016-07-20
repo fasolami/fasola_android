@@ -83,40 +83,69 @@ public class SingingActivity extends SimpleTabActivity {
             updateQuery();
         }
 
+        /** The normal query */
+        private SQL.Query standardQuery() {
+            return SQL.select(
+                    C.Song.id,
+                    C.Song.fullName,
+                    C.Leader.allNames)
+                .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
+                .select(C.Leader.id.func("group_concat")).as("__leaderIds")
+                .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
+                .from(C.SongLeader)
+                .where(C.SongLeader.singingId, "=", mId)
+                .group(C.SongLeader.leadId);
+        }
+
+        /** A query that separates leaders into parts */
+        private SQL.Query leaderQuery() {
+            return SQL.select(
+                    C.Song.id,
+                    C.Song.fullName,
+                    C.Leader.fullName +
+                        " || ' ' || " +
+                        C.SongLeader.coleaders.format(
+                            "CASE WHEN {column} IS NOT NULL" +
+                                " THEN '(with ' || {column} || ')'" +
+                                " ELSE '' " +
+                            " END"))
+                .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
+                    .select(C.Leader.id).as("__leaderIds")
+                .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
+                .from(C.SongLeader)
+                .where(C.SongLeader.singingId, "=", mId);
+        }
+
         @Override
         public SQL.Query onUpdateQuery() {
-            // Base query
-            SQL.Query query = SQL.select(
-                        C.Song.id,
-                        C.Song.fullName,
-                        C.Leader.allNames)
-                    .select(C.SongLeader.leadId).as(EXTRA_LEAD_ID)
-                    .select(C.Leader.id.func("group_concat")).as("__leaderIds")
-                    .select(C.SongLeader.audioUrl).as(CursorListFragment.AUDIO_COLUMN)
-                    .from(C.SongLeader)
-                    .where(C.SongLeader.singingId, "=", mId)
-                    .group(C.SongLeader.leadId);
             // Order
             switch (getSortId()) {
                 case R.id.menu_singing_song_sort_leader:
                     showHeaders(true);
                     setAlphabetIndexer();
-                    return query.sectionIndex(C.Leader.lastName, "ASC");
+                    return leaderQuery().sectionIndex(C.Leader.lastName)
+                                .order(C.Leader.lastName, "ASC", C.Leader.fullName, "ASC");
                 case R.id.menu_singing_song_sort_page:
                     showHeaders(false);
-                    return query.order(C.Song.pageSort, "ASC");
+                    return standardQuery().order(C.Song.pageSort, "ASC");
                 case R.id.menu_singing_song_sort_order:
                 default:
                     showHeaders(false);
-                    return query.order(C.SongLeader.singingOrder, "ASC");
+                    return standardQuery().order(C.SongLeader.singingOrder, "ASC");
             }
         }
 
         @Override
         public SQL.Query onUpdateSearch(SQL.Query query, String searchTerm) {
-            // having since Leader.allNames is a group_concat
-            return query.having(C.Leader.allNames, "LIKE", "%" + searchTerm + "%")
-                    .or(C.Song.fullName, "LIKE", "%" + searchTerm + "%");
+            switch (getSortId()) {
+                case R.id.menu_singing_song_sort_leader:
+                    return query.where(C.Leader.fullName, "LIKE", "%" + searchTerm + "%")
+                                .or(C.Song.fullName, "LIKE", "%" + searchTerm + "%");
+                default:
+                    // having since Leader.allNames is a group_concat
+                    return query.having(C.Leader.allNames, "LIKE", "%" + searchTerm + "%")
+                                .or(C.Song.fullName, "LIKE", "%" + searchTerm + "%");
+            }
         }
 
         @Override
