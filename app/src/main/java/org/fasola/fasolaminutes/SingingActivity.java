@@ -203,7 +203,7 @@ public class SingingActivity extends SimpleTabActivity {
                 data.putStringArray("leaderIds", leaderIds);
                 int title = R.string.select_leader;
                 int leaderColumn = 2;
-                String[] names = cursor.getString(leaderColumn).split(", ");
+                String[] names = cursor.getString(leaderColumn).split(" \\(")[0].split(", ");
                 if ((flags & PROMPT_SONG) != 0) {
                     // Add song data
                     data.putLong("songId", songId);
