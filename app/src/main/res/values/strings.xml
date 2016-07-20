@@ -27,7 +27,8 @@
     <string name="menu_song_sort_page">By page number</string>
     <string name="menu_song_sort_title">By title</string>
     <string name="menu_song_sort_leads">By lead count</string>
-    <string name="select_leader">Pick a leader</string>
+    <string name="select_leader">Pick a leader to view</string>
+    <string name="select_song_or_leader">Pick one to view</string>
     <string name="play_recording_text">Play Recording</string>
 
     <plurals name="timesLed">

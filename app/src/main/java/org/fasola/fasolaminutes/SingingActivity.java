@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -50,6 +51,7 @@ public class SingingActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            getListView().setOnItemLongClickListener(mOnLongClickListener);
             setMenuResource(R.menu.menu_singing_songs_list_fragment);
             setDefaultSortId(R.id.menu_singing_song_sort_order);
             setFastScrollEnabled(true);
@@ -161,49 +163,99 @@ public class SingingActivity extends SimpleTabActivity {
             super.onLoadFinished(cursor);
         }
 
+        // Click: prompt if multiple leaders
         @Override
         public void onListItemClick(ListView l, View v, int position, long id) {
+            navigationPrompt(position, PROMPT_LEADERS);
+        }
+
+        // Long click: prompt song and leaders
+        final private AdapterView.OnItemLongClickListener mOnLongClickListener
+                = new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
+                navigationPrompt(position, PROMPT_SONG|PROMPT_LEADERS|PROMPT_FORCE);
+                return true;
+            }
+        };
+
+
+        static final int PROMPT_SONG = 1;
+        static final int PROMPT_LEADERS = 2;
+        static final int PROMPT_FORCE = 4;
+
+        private void navigationPrompt(int position, int flags) {
             Cursor cursor = getListAdapter().getCursor();
-            if (cursor.moveToPosition(position)) {
-                long leadId = cursor.getLong(cursor.getColumnIndex(EXTRA_LEAD_ID));
-                // Check for multiple leaders
-                int idColumn = cursor.getColumnIndex("__leaderIds");
-                String[] leaderIds = cursor.getString(idColumn).split(",");
-                if (leaderIds.length == 1) {
-                    // Single leader: start the activity
-                    sendIntent(Long.parseLong(leaderIds[0]), leadId);
+            if (!cursor.moveToPosition(position))
+                return;
+            long songId = cursor.getLong(0);
+            long leadId = cursor.getLong(cursor.getColumnIndex(EXTRA_LEAD_ID));
+            String[] leaderIds = cursor.getString(cursor.getColumnIndex("__leaderIds")).split(",");
+            // Check for multiple leaders
+            if (leaderIds.length == 1 && (flags & PROMPT_FORCE) == 0) {
+                // Single leader: start the activity
+                sendLeaderIntent(Long.parseLong(leaderIds[0]), leadId);
+            } else {
+                // Multiple leaders (or PROMPT_FORCE): prompt
+                // Set data
+                Bundle data = new Bundle();
+                data.putLong("leadId", leadId);
+                data.putStringArray("leaderIds", leaderIds);
+                int title = R.string.select_leader;
+                int leaderColumn = 2;
+                String[] names = cursor.getString(leaderColumn).split(", ");
+                if ((flags & PROMPT_SONG) != 0) {
+                    // Add song data
+                    data.putLong("songId", songId);
+                    title = R.string.select_song_or_leader;
+                    // Prepend song title to the list of names
+                    String[] newNames = new String[names.length + 1];
+                    int songColumn = 1;
+                    newNames[0] = cursor.getString(songColumn);
+                    System.arraycopy(names, 0, newNames, 1, names.length);
+                    names = newNames;
                 }
-                else {
-                    // Multiple leaders: prompt
-                    int leaderColumn = 2;
-                    String[] names = cursor.getString(leaderColumn).split(", ");
-                    // Add data
-                    Bundle data = new Bundle();
-                    data.putLong("leadId", leadId);
-                    data.putStringArray("leaderIds", leaderIds);
-                    // show the dialog
-                    ListDialogFragment dialog = ListDialogFragment.newInstance(
-                        R.string.select_leader, names, data);
-                    dialog.setTargetFragment(this, 1);
-                    dialog.show(getFragmentManager(), "select_leader");
-                }
+                // Show the dialog
+                ListDialogFragment dialog = ListDialogFragment.newInstance(title, names, data);
+                dialog.setTargetFragment(this, 1);
+                dialog.show(getFragmentManager(), "select_leader");
             }
         }
 
         @Override
         public void onListDialogClick(DialogFragment dialog, int which, Bundle data) {
             String[] leaderIds = data.getStringArray("leaderIds");
+            long songId = data.getLong("songId", -1);
             long leadId = data.getLong("leadId");
-            sendIntent(Long.parseLong(leaderIds[which]), leadId);
+            if (songId > -1) {
+                if (which == 0) {
+                    // If we sent a song, 0 means the song id
+                    sendSongIntent(songId);
+                    return;
+                } else {
+                    // searching leaderIds array -- which is 1-based if we sent a songId
+                    --which;
+                }
+            }
+            sendLeaderIntent(Long.parseLong(leaderIds[which]), leadId);
         }
 
         // Start a LeaderActivity with id and leadId
-        protected void sendIntent(long leaderId, long leadId) {
+        protected void sendLeaderIntent(long leaderId, long leadId) {
             Log.v("CursorListFragment", "Starting " + mIntentClass.getSimpleName() +
                     " with id=" + String.valueOf(leaderId));
             Intent intent = new Intent(getActivity(), mIntentClass);
             intent.putExtra(CursorListFragment.EXTRA_ID, leaderId);
             intent.putExtra(EXTRA_LEAD_ID, leadId);
+            startActivity(intent);
+        }
+
+        // Start a SongActivity with id
+        protected void sendSongIntent(long songId) {
+            Log.v("CursorListFragment", "Starting " + SongActivity.class.getSimpleName() +
+                    " with id=" + String.valueOf(songId));
+            Intent intent = new Intent(getActivity(), SongActivity.class);
+            intent.putExtra(CursorListFragment.EXTRA_ID, songId);
             startActivity(intent);
         }
     }
