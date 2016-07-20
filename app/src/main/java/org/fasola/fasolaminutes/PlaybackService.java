@@ -91,6 +91,7 @@ public class PlaybackService extends Service
     Control mControl;
     boolean mIsPrepared;
     boolean mIsLoading;
+    boolean mIsRemoved; // Was the current song removed from the playlist?
     boolean mShouldPlay; // Should we play the song once it is prepared?
     ConnectivityManager mConnectivityManager;
     int mConnectionType = -1;
@@ -359,6 +360,7 @@ public class PlaybackService extends Service
         mMediaPlayer.reset();
         mIsPrepared = false;
         mIsLoading = false;
+        mIsRemoved = false;
         updateNotification();
         updateMediaSession();
         LocalBroadcastManager.getInstance(this).sendBroadcast(new Intent(BROADCAST_NEW_SONG));
@@ -613,11 +615,14 @@ public class PlaybackService extends Service
 
         boolean mWasPlugged = false;
 
+
         // Pause playback when song is removed from playlist
         @Override
         public void onPlaylistChanged() {
-            if (mSong != null && ! Playlist.getInstance().contains(mSong))
+            if (mSong != null && ! Playlist.getInstance().contains(mSong) && !mIsRemoved) {
+                mIsRemoved = true;
                 pause();
+            }
         }
 
         // Pause playback when headset is unplugged or when wifi is unavailable
