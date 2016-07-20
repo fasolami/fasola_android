@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -115,9 +116,7 @@ public class SQL {
          * @return The query as a new column
          */
         public Column subQuery(String query) {
-            Column col = new Column(this, "");
-            col.setName("(" + query + ")"); // Column constructor adds table prefix to name
-            return column(col);
+            return column(Column.SubQuery(this, query));
         }
 
         /**
@@ -292,6 +291,7 @@ public class SQL {
         private String name;
         private String key;
         private BaseTable table;
+        private boolean isSubquery = false;
 
         protected Column() {
             setName("");
@@ -300,6 +300,14 @@ public class SQL {
         public Column(BaseTable table, String columnName) {
             this.table = table;
             setName(table.toString() + "." + columnName);
+        }
+
+        public static Column SubQuery(BaseTable table, String subquery) {
+            Column col = new Column();
+            col.table = table;
+            col.setName("(" + subquery + ")");
+            col.isSubquery = true;
+            return col;
         }
 
         public String toString() {
@@ -326,6 +334,16 @@ public class SQL {
 
         // Column formatting: Use {column} for the column
         public Column format(String fmt, Object... args) {
+            if (isSubquery) {
+                // Extract the column part of the subquery
+                Pattern pattern = Pattern.compile("^\\(SELECT\\s+(.*?)\\s+(?=AS|FROM)", Pattern.CASE_INSENSITIVE);
+                Matcher matcher = pattern.matcher(name);
+                if (matcher.find()) {
+                    // Format and return
+                    String column = QueryColumn.formatString(fmt, matcher.group(1), args);
+                    return Column.SubQuery(table, "(SELECT " + column + " " + name.substring(matcher.end()));
+                }
+            }
             return QueryColumn.fromFormat(fmt, this, args);
         }
 
@@ -417,13 +435,17 @@ public class SQL {
         protected static Column fromFormat(String fmt, Column col, Object... args) {
             QueryColumn q = new QueryColumn(col);
             q.addTables(args);
+            q.setName(formatString(fmt, col, args));
+            return q;
+        }
+
+        public static String formatString(String fmt, Object col, Object... args) {
             // fmt uses {} or {column} as the column placeholder
             String colName = col.toString().replace("%", "%%");
-            q.setName(String.format(
+            return String.format(
                 fmt.replace("{}", colName).replace("{column}", colName),
                 args
-            ));
-            return q;
+            );
         }
 
         // Add any required tables to the table list
