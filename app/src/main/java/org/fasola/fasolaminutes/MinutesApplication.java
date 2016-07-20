@@ -92,8 +92,7 @@ public class MinutesApplication extends Application
         chart.getAxisRight().setAxisMinValue(0);
         chart.getAxisLeft().setAxisMinValue(0);
         // No zoom
-        chart.setPinchZoom(false);
-        chart.setDoubleTapToZoomEnabled(false);
+        chart.setScaleEnabled(false);
         // Recalculate everything since we've changed min/max, etc.
         chart.notifyDataSetChanged();
     }
