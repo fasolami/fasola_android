@@ -160,9 +160,10 @@ public class CursorListFragment extends ListFragment
      * <p>Layout should include up to three {@code TextViews} with the following ids:
      * <ul><li>{@code android.R.id.text1}
      * <li>{@code android.R.id.text2}
-     * <li>{@code R.id.text3} (NB: text3 is *not* in the android namespace)
+     * <li>{@code R.id.text3}
+     * <li>{@code R.id.text4}
      * </ul>
-     *
+     * NB: text3 and text4 are *not* in the android namespace
      * @param layoutId resource id for list items
      * @see #setQuery
      */
@@ -756,12 +757,15 @@ public class CursorListFragment extends ListFragment
                 case 1:
                     to[i] = android.R.id.text2;
                     break;
-                // android doesn't include ids past text2, so this is a custom id
+                // android doesn't include ids past text2, so these are a custom id
                 case 2:
                     to[i] = R.id.text3;
                     break;
+                case 3:
+                    to[i] = R.id.text4;
+                    break;
                 default:
-                    Assert.fail(String.format("ID: R.id.text%d does not exist", i+1));
+                    Assert.fail(String.format("ID: R.id.text%d is unsupported", i+1));
             }
         }
         return to;
