@@ -66,6 +66,8 @@ public class CursorListFragment extends ListFragment
     protected int mRecordingCount;
     protected boolean mHasRecordingMenu;
     protected int mMenuResourceId = -1;
+    protected int mLayoutId = -1;
+    protected boolean mUpdateAdapter = false;
     protected int mDeferredIndexerType = NO_INDEXER;
     protected LetterIndexer mDeferredIndexer;
     protected String[] mSectionLabels;
@@ -165,6 +167,9 @@ public class CursorListFragment extends ListFragment
      * @see #setQuery
      */
     public void setItemLayout(int layoutId) {
+        if (mLayoutId > -1 && mLayoutId != layoutId)
+            mUpdateAdapter = true;
+        mLayoutId = layoutId;
         getListAdapter().setViewResource(layoutId);
     }
 
@@ -585,6 +590,11 @@ public class CursorListFragment extends ListFragment
         String[] from = getFrom(cursor);
         int[] to = getTo(from.length);
         adapter.changeCursorAndColumns(cursor, from, to);
+        if (mUpdateAdapter) {
+            ListView list = getListView();
+            list.setAdapter(list.getAdapter());
+            mUpdateAdapter = false;
+        }
         // Set fastScroll if we have an index column
         getListView().setFastScrollEnabled(
                 mUseFastScroll || (adapter.hasIndex() && adapter.hasIndexer()));
