@@ -81,8 +81,14 @@ public class SingingActivity extends SimpleTabActivity {
                         ((TextView) view.findViewById(R.id.songs)).setText(songs);
                         ((TextView) view.findViewById(R.id.leaders)).setText(leaders);
                         // Show a message if this is not a Denson book singing
-                        if (singing.isDenson.getString().equals("0"))
+                        if (singing.isDenson.getString().equals("0")) {
                             ((TextView) view.findViewById(android.R.id.empty)).setText(R.string.empty_singing);
+                            view.findViewById(R.id.songs).setVisibility(View.GONE);
+                            view.findViewById(R.id.leaders).setVisibility(View.GONE);
+                        } else {
+                            view.findViewById(R.id.songs).setVisibility(View.VISIBLE);
+                            view.findViewById(R.id.leaders).setVisibility(View.VISIBLE);
+                        }
                     }
                 }
             });
