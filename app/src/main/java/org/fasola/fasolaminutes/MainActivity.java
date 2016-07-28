@@ -172,60 +172,73 @@ public class MainActivity extends SimpleTabActivity {
 
         // Code common to onUpdateQuery and onUpdateSearch
         private SQL.Query setQueryOrder(SQL.Query query, boolean setSectionIndex) {
+            int layoutId = R.layout.list_item_song;
             switch(getSortId()) {
                 case R.id.menu_song_sort_title:
                     if (setSectionIndex) {
                         setAlphabetIndexer();
                         showHeaders(true);
-                        return query.sectionIndex(C.Song.title, "ASC");
+                        query.sectionIndex(C.Song.title, "ASC");
                     }
                     else
-                        return query.order(C.Song.title, "ASC");
+                        query.order(C.Song.title, "ASC");
+                    break;
                 case R.id.menu_song_sort_leads:
                     if (setSectionIndex) {
                         setBinCount(7);
                         showHeaders(false);
-                        return query.sectionIndex(C.SongStats.leadCount.sum(), "DESC");
+                        query.sectionIndex(C.SongStats.leadCount.sum(), "DESC");
                     }
                     else
-                        return query.order(C.SongStats.leadCount.sum(), "DESC");
+                        query.order(C.SongStats.leadCount.sum(), "DESC");
+                    break;
                 case R.id.menu_song_sort_key:
                     if (setSectionIndex) {
                         setStringIndexer();
                         showHeaders(true);
-                        return query.sectionIndex(C.Song.key, "ASC");
+                        query.sectionIndex(C.Song.key, "ASC");
+                    } else {
+                        layoutId = R.layout.list_item_song_two_line;
+                        query.select(C.Song.key).order(C.Song.key, "ASC");
                     }
-                    else
-                        return query.order(C.Song.key, "ASC");
+                    break;
                 case R.id.menu_song_sort_time:
                     if (setSectionIndex) {
                         setStringIndexer();
                         showHeaders(true);
-                        return query.sectionIndex(C.Song.time, "ASC");
+                        query.sectionIndex(C.Song.time, "ASC");
+                    } else {
+                        layoutId = R.layout.list_item_song_two_line;
+                        query.select(C.Song.time).order(C.Song.time, "ASC");
                     }
-                    else
-                        return query.order(C.Song.time, "ASC");
+                    break;
                 case R.id.menu_song_sort_meter:
                     if (setSectionIndex) {
                         setStringIndexer();
                         showHeaders(true);
-                        return query.sectionIndex(C.Song.meter)
+                        query.sectionIndex(C.Song.meter)
+                                    .orderAsc(C.Song.meter.cast("INT"))
+                                    .orderAsc(C.Song.meter);
+                    } else {
+                        layoutId = R.layout.list_item_song_two_line;
+                        query.select(C.Song.meter)
                                     .orderAsc(C.Song.meter.cast("INT"))
                                     .orderAsc(C.Song.meter);
                     }
-                    else
-                        return query.orderAsc(C.Song.meter.cast("INT"))
-                                    .orderAsc(C.Song.meter);
+                    break;
                 case R.id.menu_song_sort_page:
                 default:
                     if (setSectionIndex) {
                         setBins(0, 100, 200, 300, 400, 500);
                         showHeaders(false);
-                        return query.sectionIndex(C.Song.pageSort);
+                        query.sectionIndex(C.Song.pageSort);
                     }
                     else
-                        return query.order(C.Song.pageSort, "ASC");
+                        query.order(C.Song.pageSort, "ASC");
+                    break;
             }
+            setItemLayout(layoutId);
+            return query;
         }
 
         // Change query/index based on the selected sort column

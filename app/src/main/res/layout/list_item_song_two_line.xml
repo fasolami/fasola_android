@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:minHeight="?android:attr/listPreferredItemHeightSmall"
@@ -17,15 +18,34 @@
         android:layout_marginRight="8dp"
         android:layout_gravity="center_vertical" />
 
-
-    <TextView android:id="@android:id/text2"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceListItemSmall"
-        tools:text="New Britain"
-        android:layout_weight="5"
-        android:layout_gravity="center_vertical"
-        android:ellipsize="end" />
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center_vertical">
+
+
+        <TextView android:id="@android:id/text2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceListItemSmall"
+            tools:text="New Britain"
+            android:layout_gravity="center_vertical"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <TextView android:id="@+id/text4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/multiline_item_lineheight_offset"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            tools:text="C Major"
+            android:layout_gravity="center_vertical"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+    </LinearLayout>
 
     <TextView android:id="@+id/text3"
         android:layout_width="wrap_content"
@@ -34,4 +54,5 @@
         tools:text="100"
         android:fontFamily="sans-serif-light"
         android:layout_gravity="center_vertical" />
+
 </LinearLayout>
