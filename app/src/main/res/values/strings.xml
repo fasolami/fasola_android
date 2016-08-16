@@ -32,8 +32,8 @@
     <string name="play_recording_text">Play Recording</string>
 
     <plurals name="timesLed">
-        <item quantity="one">%d Time</item>
-        <item quantity="other">%d Times</item>
+        <item quantity="one">%d Lead</item>
+        <item quantity="other">%d Leads</item>
     </plurals>
     <plurals name="coleads">
         <item quantity="one">%d Co-lead</item>
