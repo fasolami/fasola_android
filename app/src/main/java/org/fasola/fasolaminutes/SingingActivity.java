@@ -1,17 +1,27 @@
 package org.fasola.fasolaminutes;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.text.SpannableString;
+import android.text.style.BackgroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 
@@ -267,6 +277,34 @@ public class SingingActivity extends SimpleTabActivity {
     }
 
     public static class FullTextFragment extends Fragment {
+        protected String mSearchTerm = "";
+        protected int mResultPosition = -1;
+        private static final int mPrimaryHighlight = Color.CYAN;
+        private static final int mSecondaryHighlight = Color.MAGENTA;
+        private static final String BUNDLE_SEARCH = "SEARCH_TERM";
+        private static final String BUNDLE_SEARCH_POSITION = "SEARCH_POSITION";
+
+        protected ListView mList = null;
+        protected ArrayAdapter<SpannableString> mAdapter = null;
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            if (savedInstanceState != null) {
+                mSearchTerm = savedInstanceState.getString(BUNDLE_SEARCH, mSearchTerm);
+                mResultPosition = savedInstanceState.getInt(BUNDLE_SEARCH_POSITION, mResultPosition);
+            }
+            setHasOptionsMenu(true);
+        }
+
+        @Override
+        public void onSaveInstanceState(final Bundle saveInstanceState) {
+            super.onSaveInstanceState(saveInstanceState);
+            saveInstanceState.putSerializable(BUNDLE_SEARCH, mSearchTerm);
+            saveInstanceState.putSerializable(BUNDLE_SEARCH_POSITION, mResultPosition);
+        }
+
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
@@ -276,6 +314,17 @@ public class SingingActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
+            mList = (ListView) view.findViewById(R.id.full_text);
+            // Hide keyboard when touched
+            final InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            mList.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    return false;
+                }
+            });
+            // Get the text
             long id = getActivity().getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
             SQL.Query query = C.Singing.select(C.Singing.fullText).whereEq(C.Singing.id);
             getLoaderManager().initLoader(1, null, new MinutesLoader(query, String.valueOf(id)) {
@@ -286,18 +335,194 @@ public class SingingActivity extends SimpleTabActivity {
                         String text = singing.fullText.getString()
                                 .replaceAll(
                                         "[\\[{<]" +
-                                            "(?:\\d+[tb]?//)?(\\d+[tb]?)" +
-                                        "[\\]}>]",
-                                    "$1");
+                                                "(?:\\d+[tb]?//)?(\\d+[tb]?)" +
+                                                "[\\]}>]",
+                                        "$1");
+                        // Create SpannableString paragraphs for the adapter
+                        String[] paragraphs = text.split("\n");
+                        SpannableString[] spannableParagraphs = new SpannableString[paragraphs.length];
+                        for (int i = 0; i < paragraphs.length; ++i)
+                            spannableParagraphs[i] = new SpannableString(paragraphs[i]);
                         // TextView chokes on very long text (e.g. full text for camp)
                         // Fake it with a ListView of smaller TextViews for better performance
-                        ListView list = (ListView) view.findViewById(R.id.full_text);
-                        list.setAdapter(new ArrayAdapter<>(getActivity(),
+                        mAdapter = new ArrayAdapter<>(getActivity(),
                                 R.layout.list_item_long_text,
-                                text.split("\n")));
+                                spannableParagraphs);
+                        mList.setAdapter(mAdapter);
+                        setSearch(mSearchTerm);
                     }
                 }
             });
+        }
+
+        public void setSearch(String searchTerm) {
+            mSearchTerm = searchTerm;
+            if (mAdapter == null)
+                return;
+            boolean keepMatch = false; // Does the existing match still match?
+            int currentPosition = 0;   // The first character of the current list item
+            int firstMatch = -1;       // The first position with a match
+            String lcSearch = mSearchTerm.toLowerCase();
+            for (int i = 0; i < mAdapter.getCount(); ++i) {
+                SpannableString styledText = mAdapter.getItem(i);
+                // Clear highlights
+                for (BackgroundColorSpan span : styledText.getSpans(0, styledText.length(), BackgroundColorSpan.class))
+                    styledText.removeSpan(span);
+                // Add highlights
+                if (mSearchTerm.isEmpty())
+                    continue;
+                String text = styledText.toString().toLowerCase();
+                int pos = -1;
+                while (true) {
+                    pos = text.indexOf(lcSearch, pos + 1);
+                    if (pos == -1)
+                        break;
+                    styledText.setSpan(new BackgroundColorSpan(mSecondaryHighlight), pos, pos + searchTerm.length(), 0);
+                    // Track match variables
+                    if (firstMatch == -1)
+                        firstMatch = currentPosition + pos;
+                    if (! keepMatch)
+                        keepMatch = (mResultPosition == currentPosition + pos);
+                }
+                currentPosition += text.length();
+            }
+            // Update the match
+            if (! keepMatch)
+                mResultPosition = firstMatch;
+            updateHighlight();
+            mAdapter.notifyDataSetChanged();
+        }
+
+        /** Update highlight colors */
+        void updateHighlight() {
+            if (mResultPosition == -1)
+                return;
+            int position = 0;
+            // Update background color of all spans
+            for (int i = 0; i < mAdapter.getCount(); ++i) {
+                SpannableString styledText = mAdapter.getItem(i);
+                BackgroundColorSpan[] spans = styledText.getSpans(0, styledText.length(), BackgroundColorSpan.class);
+                for (int j = spans.length - 1; j >= 0; --j) {
+                    BackgroundColorSpan span = spans[j];
+                    int start = styledText.getSpanStart(span);
+                    int bgColor = (mResultPosition == position + start) ? mPrimaryHighlight : mSecondaryHighlight;
+                    if (span.getBackgroundColor() != bgColor) {
+                        styledText.removeSpan(span);
+                        styledText.setSpan(new BackgroundColorSpan(bgColor), start, start + mSearchTerm.length(), 0);
+                    }
+                }
+                position += styledText.length();
+            }
+        }
+
+        /** Change the highlight position */
+        void moveHighlight(int direction) {
+            if (mResultPosition == -1)
+                return;
+            int previousPosition = -1;
+            int firstMatch = -1;
+            int position = 0;
+            for (int i = 0; i < mAdapter.getCount(); ++i) {
+                SpannableString styledText = mAdapter.getItem(i);
+                for (BackgroundColorSpan span : styledText.getSpans(0, styledText.length(), BackgroundColorSpan.class)) {
+                    int pos = position + styledText.getSpanStart(span);
+                    if (firstMatch == -1)
+                        firstMatch = pos;
+                    // Check for position match
+                    if (pos >= mResultPosition) {
+                        if (direction > 0) {
+                            // Wait til the next iteration
+                            direction = 0;
+                        } else if (direction == 0) {
+                            mResultPosition = pos;
+                            return;
+                        } else { // direction == -1
+                            mResultPosition = previousPosition;
+                            return;
+                        }
+                    }
+                    previousPosition = pos;
+                }
+                position += styledText.length();
+            }
+            // Check for wrap-around
+            if (direction == -1)
+                mResultPosition = previousPosition; // This is the last match
+            else
+                mResultPosition = firstMatch;
+        }
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+            inflater.inflate(R.menu.menu_singing_text_fragment, menu);
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            if (item.getItemId() == R.id.menu_next_result) {
+                moveHighlight(1);
+                updateHighlight();
+                mAdapter.notifyDataSetChanged();
+                return true;
+            } else if (item.getItemId() == R.id.menu_prev_result) {
+                moveHighlight(-1);
+                updateHighlight();
+                mAdapter.notifyDataSetChanged();
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+
+        // Search boilerplate
+        @Override
+        public void onPrepareOptionsMenu(final Menu menu) {
+            super.onPrepareOptionsMenu(menu);
+            // Get the SearchView
+            final MenuItem searchItem = menu.findItem(R.id.menu_search);
+            if (searchItem == null)
+                return;
+            // Show/hide arrows with search
+            searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+                @Override
+                public boolean onMenuItemActionExpand(MenuItem item) {
+                    menu.findItem(R.id.menu_next_result).setVisible(true);
+                    menu.findItem(R.id.menu_prev_result).setVisible(true);
+                    return true;
+                }
+
+                @Override
+                public boolean onMenuItemActionCollapse(MenuItem item) {
+                    menu.findItem(R.id.menu_next_result).setVisible(false);
+                    menu.findItem(R.id.menu_prev_result).setVisible(false);
+                    return true;
+                }
+            });
+            // Expand/collapse before setting callbacks, because both expanding and collapsing
+            // reset search text to blank
+            final SearchView searchView = (SearchView) searchItem.getActionView();
+            searchView.setIconifiedByDefault(true);
+            if (mSearchTerm != null && ! mSearchTerm.isEmpty())
+                searchItem.expandActionView();
+            else
+                searchItem.collapseActionView();
+            // Update search results as you type
+            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    searchView.clearFocus(); // Hide the keyboard
+                    onQueryTextChange(query);
+                    return true;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String query) {
+                    // db uses curly apostrophes
+                    setSearch(query.replace('\'', '\u2019'));
+                    return true;
+                }
+            });
+            // Set cached search text
+            searchView.setQuery(mSearchTerm, false);
         }
     }
 }
