@@ -94,5 +94,8 @@
     <string name="search_leads">Search Songs and Singings</string>
     <string name="leader_chart_title">Singings per year</string>
     <string name="song_chart_title">Leads per year</string>
+    <string name="search_full_text">Search Full Text</string>
+    <string name="next_result">Next</string>
+    <string name="prev_result">Previous</string>
 
 </resources>
