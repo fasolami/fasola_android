@@ -170,100 +170,103 @@ public class MainActivity extends SimpleTabActivity {
                                      C.SongStats.leadCount.sum());
         }
 
-        // Code common to onUpdateQuery and onUpdateSearch
-        private SQL.Query setQueryOrder(SQL.Query query, boolean setSectionIndex) {
-            int layoutId = R.layout.list_item_song;
-            switch(getSortId()) {
-                case R.id.menu_song_sort_title:
-                    if (setSectionIndex) {
-                        setAlphabetIndexer();
-                        showHeaders(true);
-                        query.sectionIndex(C.Song.title, "ASC");
-                    }
-                    else
-                        query.order(C.Song.title, "ASC");
-                    break;
-                case R.id.menu_song_sort_leads:
-                    if (setSectionIndex) {
-                        setBinCount(7);
-                        showHeaders(false);
-                        query.sectionIndex(C.SongStats.leadCount.sum(), "DESC");
-                    }
-                    else
-                        query.order(C.SongStats.leadCount.sum(), "DESC");
-                    break;
-                case R.id.menu_song_sort_key:
-                    if (setSectionIndex) {
-                        setStringIndexer();
-                        showHeaders(true);
-                        query.sectionIndex(C.Song.key, "ASC");
-                    } else {
-                        layoutId = R.layout.list_item_song_two_line;
-                        query.select(C.Song.key).order(C.Song.key, "ASC");
-                    }
-                    break;
-                case R.id.menu_song_sort_time:
-                    if (setSectionIndex) {
-                        setStringIndexer();
-                        showHeaders(true);
-                        query.sectionIndex(C.Song.time, "ASC");
-                    } else {
-                        layoutId = R.layout.list_item_song_two_line;
-                        query.select(C.Song.time).order(C.Song.time, "ASC");
-                    }
-                    break;
-                case R.id.menu_song_sort_meter:
-                    if (setSectionIndex) {
-                        setStringIndexer();
-                        showHeaders(true);
-                        query.sectionIndex(C.Song.meter)
-                                    .orderAsc(C.Song.meter.cast("INT"))
-                                    .orderAsc(C.Song.meter);
-                    } else {
-                        layoutId = R.layout.list_item_song_two_line;
-                        query.select(C.Song.meter)
-                                    .orderAsc(C.Song.meter.cast("INT"))
-                                    .orderAsc(C.Song.meter);
-                    }
-                    break;
-                case R.id.menu_song_sort_page:
-                default:
-                    if (setSectionIndex) {
-                        setBins(0, 100, 200, 300, 400, 500);
-                        showHeaders(false);
-                        query.sectionIndex(C.Song.pageSort);
-                    }
-                    else
-                        query.order(C.Song.pageSort, "ASC");
-                    break;
-            }
-            setItemLayout(layoutId);
-            return query;
+        /** Get the column for the search query **/
+        private SQL.Column searchColumn(String searchTerm, Object val1, Object val2, Object val3, Object val4) {
+            return new SQL.QueryColumn(
+                "CASE ",
+                    C.Song.fullName.format("WHEN {column} LIKE %s THEN %s ", searchTerm, searchColumn_fixValue(val1)),
+                    C.Song.composer.format("WHEN {column} LIKE %s THEN %s ", searchTerm, searchColumn_fixValue(val2)),
+                    C.Song.poet.format("WHEN {column} LIKE %s THEN %s ", searchTerm, searchColumn_fixValue(val3)),
+                    C.Song.lyrics.format("WHEN {column} LIKE %s THEN %s ", searchTerm, searchColumn_fixValue(val4)),
+                "END"
+            );
+        }
+
+        // Add quotes around unquoted strings
+        private String searchColumn_fixValue(Object value) {
+            String strVal = value.toString();
+            if (value instanceof CharSequence && !strVal.contains("'"))
+                return "'" + strVal + "'";
+            else
+                return strVal;
         }
 
         // Change query/index based on the selected sort column
         public SQL.Query onUpdateQuery() {
-            return setQueryOrder(songQuery(), true);
+            SQL.Query query = songQuery();
+            switch(getSortId()) {
+                default:
+                case R.id.menu_song_sort_page:
+                    setBins(0, 100, 200, 300, 400, 500);
+                    showHeaders(false);
+                    return query.sectionIndex(C.Song.pageSort);
+                case R.id.menu_song_sort_title:
+                    setAlphabetIndexer();
+                    showHeaders(true);
+                    return query.sectionIndex(C.Song.title, "ASC");
+                case R.id.menu_song_sort_leads:
+                    setBinCount(7);
+                    showHeaders(false);
+                    return query.sectionIndex(C.SongStats.leadCount.sum(), "DESC");
+                case R.id.menu_song_sort_key:
+                    setStringIndexer();
+                    showHeaders(true);
+                    return query.sectionIndex(C.Song.key, "ASC");
+                case R.id.menu_song_sort_time:
+                    setStringIndexer();
+                    showHeaders(true);
+                    return query.sectionIndex(C.Song.time, "ASC");
+                case R.id.menu_song_sort_meter:
+                    setStringIndexer();
+                    showHeaders(true);
+                    return query.sectionIndex(C.Song.meter)
+                                .orderAsc(C.Song.meter.cast("INT"))
+                                .orderAsc(C.Song.meter);
+
+            }
         }
 
         @Override
         public SQL.Query onUpdateSearch(SQL.Query query, String searchTerm) {
             searchTerm = DatabaseUtils.sqlEscapeString("%" + searchTerm + "%");
+            // Start with standard query ordered by search sections
+            query = songQuery().orderAsc(searchColumn(searchTerm, 0, 1, 2, 3));
             showHeaders(true);
-            setAlphabet("0123");
-            setSectionLabels("Title", "Composer", "Poet", "Words");
-            query = songQuery().sectionIndex(
-                    new SQL.QueryColumn(
-                            "CASE ",
-                            C.Song.fullName.format("WHEN {column} LIKE %s THEN 0 ", searchTerm),
-                            C.Song.composer.format("WHEN {column} LIKE %s THEN 1 ", searchTerm),
-                            C.Song.poet.format("WHEN {column} LIKE %s THEN 2  ", searchTerm),
-                            C.Song.lyrics.format("WHEN {column} LIKE %s THEN 3 ", searchTerm),
-                            "END"
-                    ), "ASC")
-                .where(SQL.INDEX_COLUMN, "IS NOT", "NULL");
-            // Add the additional order clause
-            return setQueryOrder(query, false);
+            setStringIndexer();
+            // Add custom sorting options
+            switch(getSortId()) {
+                default:
+                case R.id.menu_song_sort_page:
+                    query.order(C.Song.pageSort, "ASC");
+                    break;
+                case R.id.menu_song_sort_title:
+                    query.order(C.Song.title, "ASC");
+                    break;
+                case R.id.menu_song_sort_leads:
+                    query.order(C.SongStats.leadCount.sum(), "DESC");
+                    break;
+                case R.id.menu_song_sort_key:
+                    query.order(C.Song.key, "ASC")
+                         .sectionIndex(searchColumn(searchTerm, C.Song.key, "Composer", "Poet", "Words"));
+                    break;
+                case R.id.menu_song_sort_time:
+                    query.order(C.Song.time, "ASC")
+                         .sectionIndex(searchColumn(searchTerm, C.Song.time, "Composer", "Poet", "Words"));
+                    break;
+                case R.id.menu_song_sort_meter:
+                    setStringIndexer();
+                    query.orderAsc(C.Song.meter.cast("INT"))
+                         .orderAsc(C.Song.meter)
+                         .sectionIndex(searchColumn(searchTerm, C.Song.meter, "Composer", "Poet", "Words"));
+                    break;
+            }
+            // Add the standard search index if none has been added
+            if (!query.hasSectionIndex())
+                query.sectionIndex(searchColumn(searchTerm, "Title", "Composer", "Poet", "Words"));
+            // Last sort should always be by page
+            query.orderAsc(C.Song.pageSort);
+            // CASE WHEN can exclude rows, and NULL will make indexer break
+            return query.where(SQL.INDEX_COLUMN, "IS NOT", "NULL");
         }
     }
 
