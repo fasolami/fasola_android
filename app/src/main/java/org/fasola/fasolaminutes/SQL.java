@@ -581,6 +581,15 @@ public class SQL {
             return sectionIndex(col).order(col, ascDesc);
         }
 
+        // Does this query already have a section index column?
+        public boolean hasSectionIndex() {
+            for (Pair<Object, String> col : selectColumns) {
+                if (col.second.equals(INDEX_COLUMN))
+                    return true;
+            }
+            return false;
+        }
+
         // FROM
         // ----
         public Query from(BaseTable table) {
