@@ -80,18 +80,46 @@ public class BaseActivity extends FragmentActivity implements DrawerLayout.Drawe
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         boolean ret = super.onPrepareOptionsMenu(menu);
-        // Don't save the search view if it belongs to the Activity
-        if (mHasActivitySearchView) {
-            mSearchView = null;
-            return ret;
-        }
         MenuItem searchItem = menu.findItem(R.id.menu_search);
         if (searchItem == null)
+            return ret;
+        // Setup expand/collapse listeners for search items
+        if (searchItem.getGroupId() == R.id.group_search_items) {
+            final Menu theMenu = menu;
+            searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+                @Override
+                public boolean onMenuItemActionExpand(MenuItem item) {
+                    updateMenuVisibility(true, theMenu);
+                    return true;
+                }
+
+                @Override
+                public boolean onMenuItemActionCollapse(MenuItem item) {
+                    updateMenuVisibility(false, theMenu);
+                    return true;
+                }
+            });
+            updateMenuVisibility(searchItem.isActionViewExpanded(), theMenu);
+        }
+
+        // Don't save the search view if it belongs to the Activity
+        if (mHasActivitySearchView)
             mSearchView = null;
         else
             mSearchView = (SearchView)searchItem.getActionView();
         return ret;
     }
+
+    // Toggle visibility of all items that are not in id/menu_search_items
+    private void updateMenuVisibility(boolean search, Menu menu) {
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            if (item.getGroupId() != R.id.group_search_items)
+                item.setVisible(!search);
+        }
+    }
+
+
 
     // Remove SearchView listeners because the SearchView will be collapsed and
     // cleared when the menu is invalidated.
