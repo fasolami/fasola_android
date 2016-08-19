@@ -1,7 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_search"
-          android:title="@string/search_singings"
-          android:icon="@drawable/ic_action_search"
-          android:showAsAction="ifRoom|collapseActionView"
-          android:actionViewClass="android.widget.SearchView" />
+
+    <group android:id="@+id/group_search_items">
+        <item android:id="@+id/menu_search"
+              android:title="@string/search_singings"
+              android:icon="@drawable/ic_action_search"
+              android:showAsAction="ifRoom|collapseActionView"
+              android:actionViewClass="android.widget.SearchView" />
+    </group>
 </menu>

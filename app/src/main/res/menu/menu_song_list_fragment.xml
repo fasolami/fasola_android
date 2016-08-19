@@ -2,47 +2,51 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="org.fasola.fasolaminutes.MainActivity">
 
-    <item android:id="@+id/menu_search"
-          android:title="@string/search_songs"
-          android:icon="@drawable/ic_action_search"
-          android:showAsAction="ifRoom|collapseActionView"
-          android:actionViewClass="android.widget.SearchView" />
+    <group android:id="@+id/group_search_items">
 
-    <item android:id="@+id/menu_sort"
-        android:title="@string/menu_sort"
-        android:icon="@drawable/ic_action_sort_by_size"
-        android:showAsAction="always">
+        <item android:id="@+id/menu_search"
+              android:title="@string/search_songs"
+              android:icon="@drawable/ic_action_search"
+              android:showAsAction="ifRoom|collapseActionView"
+              android:actionViewClass="android.widget.SearchView" />
 
-        <menu>
-        <group android:id="@+id/menu_group_sort"
-            android:checkableBehavior="single">
+        <item android:id="@+id/menu_sort"
+            android:title="@string/menu_sort"
+            android:icon="@drawable/ic_action_sort_by_size"
+            android:showAsAction="always">
 
-            <item android:id="@+id/menu_song_sort_page"
-                android:title="@string/menu_song_sort_page"
-                android:showAsAction="never" />
+            <menu>
+            <group android:id="@+id/menu_group_sort"
+                android:checkableBehavior="single">
 
-            <item android:id="@+id/menu_song_sort_title"
-                android:title="@string/menu_song_sort_title"
-                android:showAsAction="never" />
+                <item android:id="@+id/menu_song_sort_page"
+                    android:title="@string/menu_song_sort_page"
+                    android:showAsAction="never" />
 
-            <item android:id="@+id/menu_song_sort_leads"
-                android:title="@string/menu_song_sort_leads"
-                android:showAsAction="never" />
+                <item android:id="@+id/menu_song_sort_title"
+                    android:title="@string/menu_song_sort_title"
+                    android:showAsAction="never" />
 
-            <item android:id="@+id/menu_song_sort_key"
-                android:title="@string/menu_song_sort_key"
-                android:showAsAction="never" />
+                <item android:id="@+id/menu_song_sort_leads"
+                    android:title="@string/menu_song_sort_leads"
+                    android:showAsAction="never" />
 
-            <item android:id="@+id/menu_song_sort_time"
-                android:title="@string/menu_song_sort_time"
-                android:showAsAction="never" />
+                <item android:id="@+id/menu_song_sort_key"
+                    android:title="@string/menu_song_sort_key"
+                    android:showAsAction="never" />
 
-            <item android:id="@+id/menu_song_sort_meter"
-                android:title="@string/menu_song_sort_meter"
-                android:showAsAction="never" />
+                <item android:id="@+id/menu_song_sort_time"
+                    android:title="@string/menu_song_sort_time"
+                    android:showAsAction="never" />
 
-        </group>
-        </menu>
+                <item android:id="@+id/menu_song_sort_meter"
+                    android:title="@string/menu_song_sort_meter"
+                    android:showAsAction="never" />
 
-    </item>
+            </group>
+            </menu>
+
+        </item>
+
+    </group>
 </menu>

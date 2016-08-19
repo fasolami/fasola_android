@@ -3,32 +3,36 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="org.fasola.fasolaminutes.MainActivity">
 
-    <item android:id="@+id/menu_search"
-          android:title="@string/search_singings"
-          android:icon="@drawable/ic_action_search"
-          android:showAsAction="ifRoom|collapseActionView"
-          android:actionViewClass="android.widget.SearchView" />
+    <group android:id="@+id/group_search_items">
+
+        <item android:id="@+id/menu_search"
+              android:title="@string/search_singings"
+              android:icon="@drawable/ic_action_search"
+              android:showAsAction="ifRoom|collapseActionView"
+              android:actionViewClass="android.widget.SearchView" />
 
 
-    <item android:id="@+id/menu_sort"
-        android:title="@string/menu_sort"
-        android:icon="@drawable/ic_action_sort_by_size"
-        android:showAsAction="always">
+        <item android:id="@+id/menu_sort"
+            android:title="@string/menu_sort"
+            android:icon="@drawable/ic_action_sort_by_size"
+            android:showAsAction="always">
 
-        <menu>
-        <group android:id="@+id/menu_group_sort"
-            android:checkableBehavior="single">
+            <menu>
+            <group android:id="@+id/menu_group_sort"
+                android:checkableBehavior="single">
 
-            <item android:id="@+id/menu_singing_sort_year"
-                android:title="@string/menu_singing_sort_year"
-                app:showAsAction="never" />
+                <item android:id="@+id/menu_singing_sort_year"
+                    android:title="@string/menu_singing_sort_year"
+                    app:showAsAction="never" />
 
-            <item android:id="@+id/menu_singing_sort_recordings"
-                android:title="@string/menu_singing_sort_recordings"
-                app:showAsAction="never" />
+                <item android:id="@+id/menu_singing_sort_recordings"
+                    android:title="@string/menu_singing_sort_recordings"
+                    app:showAsAction="never" />
 
-        </group>
-        </menu>
+            </group>
+            </menu>
 
-    </item>
+        </item>
+
+    </group>
 </menu>
