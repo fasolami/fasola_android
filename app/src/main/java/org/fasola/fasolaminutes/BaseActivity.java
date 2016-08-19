@@ -1,6 +1,8 @@
 package org.fasola.fasolaminutes;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,6 +10,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Gravity;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +38,9 @@ public class BaseActivity extends FragmentActivity implements DrawerLayout.Drawe
     // deactivate any lingering handlers in invalidateOptionsMenu.
     SearchView mSearchView = null;
     boolean mHasActivitySearchView = false;
+
+    // Help text
+    int mHelpResourceId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,11 +74,18 @@ public class BaseActivity extends FragmentActivity implements DrawerLayout.Drawe
             ConnectionStatus.promptStreaming(this);
     }
 
+    public void setHelpResource(int id) {
+        mHelpResourceId = id;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         boolean ret = super.onCreateOptionsMenu(menu);
-        Debug.createOptionsMenu(getMenuInflater(), menu);
+        MenuInflater inflater = getMenuInflater();
+        Debug.createOptionsMenu(inflater, menu);
         mHasActivitySearchView = menu.findItem(R.id.menu_search) != null;
+        if (mHelpResourceId != -1)
+            inflater.inflate(R.menu.menu_help, menu);
         return ret;
     }
 
@@ -140,6 +153,17 @@ public class BaseActivity extends FragmentActivity implements DrawerLayout.Drawe
         }
         else if (Debug.onOptionsItemSelected(this, item)) {
             return true;
+        } else if (mHelpResourceId != -1 && item.getItemId() == R.id.menu_help) {
+            AlertDialog alertDialog = new AlertDialog.Builder(BaseActivity.this).create();
+            alertDialog.setTitle("Help");
+            alertDialog.setMessage(getResources().getString(mHelpResourceId));
+            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+            alertDialog.show();
         }
         return super.onOptionsItemSelected(item);
     }
