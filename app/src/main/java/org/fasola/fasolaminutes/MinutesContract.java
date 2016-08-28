@@ -148,7 +148,7 @@ public class MinutesContract {
                 Song.rawKey.format(
                     "CASE " +
                         // Key changes = 0.5
-                        "WHEN {} LIKE ',' THEN 0.5 " +
+                        "WHEN {} LIKE '%%,%%' THEN 0.5 " +
                         // Minor = 0
                         "WHEN {} LIKE '%%min' THEN 0 " +
                         // Major = 1
