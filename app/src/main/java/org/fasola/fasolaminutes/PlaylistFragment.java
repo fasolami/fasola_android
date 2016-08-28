@@ -52,6 +52,13 @@ public class PlaylistFragment extends ListFragment
         mList.setFastScrollEnabled(true);
         // Setup MediaController
         mPlayer = new PlaybackService.Control(getActivity());
+        // Setup recording help link
+        view.findViewById(R.id.empty_playlist_link).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                HelpActivity.start(getActivity(), R.string.help_recordings);
+            }
+        });
     }
 
     @Override

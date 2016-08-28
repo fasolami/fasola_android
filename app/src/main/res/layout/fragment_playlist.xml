@@ -15,14 +15,30 @@
         dslv:drag_handle_id="@id/drag_handle"
         dslv:drag_enabled="true" />
 
-    <TextView
+    <LinearLayout
         android:id="@android:id/empty"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        android:gravity="center"
-        android:visibility="gone"
-        android:textAppearance="@android:style/TextAppearance.Medium"
-        android:text="@string/empty_playlist" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/activity_horizontal_margin">
+<!--        android:visibility="gone"> -->
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:text="@string/empty_playlist" />
+
+        <TextView
+            android:id="@+id/empty_playlist_link"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="@android:style/TextAppearance.Medium"
+            android:textColor="@color/fasola_foreground"
+            android:text="@string/empty_playlist_link"
+            android:clickable="true"/>
+    </LinearLayout>
 </FrameLayout>
