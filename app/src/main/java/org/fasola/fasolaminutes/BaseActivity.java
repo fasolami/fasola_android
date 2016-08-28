@@ -19,7 +19,7 @@ import android.widget.SearchView;
 import java.util.List;
 
 /**
- *  The base class for this app's Activities.
+ * The base class for this app's Activities.
  *
  * <p>Changes Up button to work as Back button.
  *
@@ -133,7 +133,6 @@ public class BaseActivity extends FragmentActivity implements DrawerLayout.Drawe
     }
 
 
-
     // Remove SearchView listeners because the SearchView will be collapsed and
     // cleared when the menu is invalidated.
     @Override
@@ -148,7 +147,7 @@ public class BaseActivity extends FragmentActivity implements DrawerLayout.Drawe
         if (item.getItemId() == android.R.id.home && getActionBar() != null &&
                 (getActionBar().getDisplayOptions() & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
             // Use up button as back button
-            onBackPressed();
+            onUpPressed();
             return true;
         }
         else if (Debug.onOptionsItemSelected(this, item)) {
@@ -166,6 +165,10 @@ public class BaseActivity extends FragmentActivity implements DrawerLayout.Drawe
             alertDialog.show();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void onUpPressed() {
+        onBackPressed();
     }
 
     @Override
