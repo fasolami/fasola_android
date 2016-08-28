@@ -107,6 +107,7 @@ public class MainActivity extends SimpleTabActivity {
             setDefaultSortId(R.id.menu_leader_sort_name);
             setIntentActivity(LeaderActivity.class);
             setItemLayout(R.layout.list_item_leader);
+            ((SimpleTabActivity)getActivity()).setHelpResource(this, R.string.help_leader_list);
             updateQuery();
         }
 
@@ -158,6 +159,7 @@ public class MainActivity extends SimpleTabActivity {
             setDefaultSortId(R.id.menu_song_sort_page);
             setIntentActivity(SongActivity.class);
             setItemLayout(R.layout.list_item_song);
+            ((SimpleTabActivity)getActivity()).setHelpResource(this, R.string.help_song_list);
             updateQuery();
         }
 
@@ -278,6 +280,7 @@ public class MainActivity extends SimpleTabActivity {
             setDefaultSortId(R.id.menu_singing_sort_year);
             setIntentActivity(SingingActivity.class);
             setItemLayout(R.layout.list_item_singing);
+            ((SimpleTabActivity)getActivity()).setHelpResource(this, R.string.help_singing_list);
             updateQuery();
         }
 

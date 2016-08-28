@@ -23,6 +23,7 @@ public class SingingActivity extends SimpleTabActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_singing);
+        setHelpResource(R.string.help_singing_activity);
         // Query
         long id = getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
         SQL.Query query = C.Singing.select(C.Singing.name).whereEq(C.Singing.id);

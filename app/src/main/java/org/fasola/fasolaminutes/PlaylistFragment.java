@@ -99,6 +99,8 @@ public class PlaylistFragment extends ListFragment
         inflater.inflate(R.menu.menu_playlist_fragment, menu);
         if (getActivity() instanceof NowPlayingActivity)
             menu.findItem(R.id.menu_now_playing).setVisible(false);
+        if (menu.findItem(R.id.menu_help) == null)
+            inflater.inflate(R.menu.menu_help, menu);
     }
 
     @Override
@@ -110,6 +112,8 @@ public class PlaylistFragment extends ListFragment
         else if (item.getItemId() == R.id.menu_clear_playlist) {
             mPlaylist.clear();
             return true;
+        } else if (item.getItemId() == R.id.menu_help) {
+            return HelpActivity.start(getActivity(), R.string.help_playlist);
         }
         return super.onOptionsItemSelected(item);
     }

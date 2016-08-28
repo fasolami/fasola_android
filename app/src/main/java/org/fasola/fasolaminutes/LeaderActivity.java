@@ -21,6 +21,7 @@ public class LeaderActivity extends SimpleTabActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_leader);
+        setHelpResource(R.string.help_leader_activity);
         // Query for main data
         long id = getIntent().getLongExtra(CursorListFragment.EXTRA_ID, -1);
         SQL.Query query = SQL.select(C.Leader.fullName).whereEq(C.Leader.id);

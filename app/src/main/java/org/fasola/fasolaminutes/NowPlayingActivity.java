@@ -30,6 +30,7 @@ public class NowPlayingActivity extends SimpleTabActivity {
         mController = (MediaController)findViewById(R.id.media_controller);
         mPlayer = new PlaybackService.Control(this);
         mController.setMediaPlayer(mPlayer);
+        setHelpResource(R.string.help_now_playing_activity);
     }
 
     @Override
