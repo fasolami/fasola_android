@@ -95,5 +95,5 @@
     <string name="leader_chart_title">Singings per year</string>
     <string name="song_chart_title">Leads per year</string>
     <string name="menu_help">Help</string>
-
+    <string name="menu_about">About</string>
 </resources>

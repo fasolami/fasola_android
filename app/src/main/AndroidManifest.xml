@@ -60,6 +60,9 @@
             android:label="@string/title_activity_playlist"
             android:launchMode="singleTop">
         </activity>
+
+        <activity android:name=".HelpActivity">
+        </activity>
     </application>
 
 </manifest>
