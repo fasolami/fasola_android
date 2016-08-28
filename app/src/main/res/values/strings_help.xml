@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created automatically by md2xml.py -->
+<resources>
+    <string name="help_about" formatted="false">
+<![CDATA[
+<h1>About</h1>
+<p>FaSoLa Minutes is an app for Android and iOS that that offers new ways to view and search the minutes of Sacred Harp singings from <i>The Sacred Harp: 1991 Edition</i> since 1995. You can use the app to identify the song that\'s been stuck in your head all morning, learn more about the favorite songs of your singing friends, read up on a singing you hope to attend, decide on a song to lead when the one you were planning on singing has already been used, and much more.</p>
+<p>All proceeds benefit the <a href="http://fasola.org/shmha/">Sacred Harp Musical Heritage Association</a>, a 501(c)(3) non-profit organization whose purpose is the preservation and perpetuation of Sacred Harp singing and its traditions.</p>
+<h3>Credits</h3>
+<ul>
+<li>Mike Richards, Android developer</li>
+<li>Mark Godfrey, iOS developer</li>
+<li>Lauren Bock, designer</li>
+<li>Jesse P. Karlsberg, project manager</li>
+</ul>
+<p>Special thanks to the Sacred Harp Musical Heritage Association for allowing minutes data to be used in the “FaSoLa Minutes” app, and to Judy Caudle and Chris Thorman for their work making the Minutes of Sacred Harp Singings available. Thanks to beta-testers John Bealle, Lauren Bock, Gideon Dresdner, Vale Cofer-Shabica, Brian Harris, John Plunkett, and Jordan Lewis.</p>
+<p>Finally, thanks to you for using the app!</p>
+<h3>Licenses</h3>
+<p>FaSoLa Minutes includes the following open source libraries, licensed under the <a href="license_apache">Apache License, Version 2.0</a>.</p>
+<ul>
+<li>DragSortListView, Copyright 2012 Carl Bauer</li>
+<li>MPAndroidChart, Copyright 2016 Philipp Jahoda</li>
+<li>PagerSlidingTabStrip, Copyright 2013 Andreas Stuetz</li>
+<li>SQLiteAssetHelper, Copyright 2011 readyState Software Ltd</li>
+<li>StickyListHeaders, Copyright 2014 Emil Sjölander</li>
+</ul>
+]]>
+    </string>
+    <string name="help_also_led" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; Also led</b>
+<h1>Also led</h1>
+<p>The <b>Also led</b> list was added as a way to harness the power of the minutes data to provide song recommendations for singers.  Songs on this list are similar only in that they are often led by the same singers.  They do not necessarily have other similarities such as compositional structure or lyrical theme.</p>
+<h3>Learn more</h3>
+<p>See the Wikipedia article on <b><a href="https://en.wikipedia.org/wiki/Mutual_information">Mutual information</a></b>, which was used to create the Also led list.</p>
+]]>
+    </string>
+    <string name="help_entropy" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; Entropy</b>
+<h1>Entropy</h1>
+<p>The entropy score that appears on the <a href="leader_list">leader list</a> and <a href="leader_activity">details</a> screens measures the unpredictability of a leader\'s song selection.  A score near 0 means that a leader is very predictable, while a score near 1 means that a leader is very unpredictable.</p>
+<h3>Learn more</h3>
+<p>See David Brodeur and David Smead\'s article <b><a href="http://originalsacredharp.com/2016/08/22/entropy-unpacked-the-entropy-number-from-fasola-minutes/">Entropy Unpacked: The Entropy Number from "FaSoLa Minutes"</a></b> in the August 2016 edition of <i>The Sacred Harp Publishing Company Newsletter</i> (vol. 5, no. 1).</p>
+<p>See the Wikipedia article on <b><a href="https://en.wikipedia.org/wiki/Entropy_(information_theory)">Entropy (information theory)</a></b>.  The FaSoLa entropy score is essentially normalized Shannon entropy.</p>
+]]>
+    </string>
+    <string name="help_home" formatted="false">
+<![CDATA[
+<h1>FaSoLa Minutes Help</h1>
+<h3>How to use</h3>
+<p><a href="overview">Overview</a></p>
+<p><a href="leader_list">Find a leader</a></p>
+<p><a href="song_list">Find a song</a></p>
+<p><a href="singing_list">Find a singing</a></p>
+<p><a href="playlist">Organize a playlist</a></p>
+<p><a href="recordings">Listen to recordings</a></p>
+<h3>Screens in detail</h3>
+<p><a href="leader_activity">Leader screen</a></p>
+<p><a href="song_activity">Song screen</a></p>
+<p><a href="singing_activity">Singing screen</a></p>
+<p><a href="now_playing_activity">Now playing screen</a></p>
+<h3>Statistics</h3>
+<p><a href="entropy">Entropy</a></p>
+<p><a href="major_percent">Major/minor percent</a></p>
+<p><a href="also_led">Also led</a></p>
+]]>
+    </string>
+    <string name="help_leader_activity" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; <a href="leader_list">Leader list</a> &gt; Leader details</b>
+<h1>Leader details</h1>
+<h3>Stats</h3>
+<p>See leading statistics and a graph of singings attended per year.</p>
+<p>Learn more about the <a href="entropy">entropy</a> and <a href="major_percent">major/minor percent</a>
+statistics.</p>
+<h3>Songs</h3>
+<p>See a list of songs this leader has led.</p>
+<p>Tap a <a href="song_activity">song</a> to see details and leading statistics.</p>
+<h3>Singings</h3>
+<p>See a list of singings attended since 1995.</p>
+<p>Tap a <a href="singing_activity">singing</a> to see details and full minutes text.</p>
+<h3>All leads</h3>
+<p>See a list of all leads since 1995.</p>
+<p>Tap a lead to see it on the <a href="singing_activity">singing</a> screen.
+The song that was selected will be highlighted.</p>
+<p>A play icon <img src="ic_action_play_over_video"> is shown next to leads with recordings.  Tap to play the recording.</p>
+<p>Learn more about <a href="recordings">recordings</a>.</p>
+]]>
+    </string>
+    <string name="help_leader_list" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; Leader list</b>
+<h1>Leader list</h1>
+<p>Tap <b>Leaders</b> <img src="ic_fa"> to see a list of singers who have led songs since 1995.</p>
+<p>Tap a <a href="leader_activity">leader</a> to see details and leading statistics.</p>
+<h3>Searching</h3>
+<p>Tap <b>search</b> <img src="ic_action_search"> to search by first or last name.</p>
+<h3>Sorting</h3>
+<p>Tap <b>sort</b> <img src="ic_action_sort_by_size"> to sort by</p>
+<ul>
+<li>last name</li>
+<li>first name</li>
+<li>lead count</li>
+<li>entropy score (Learn more about <a href="entropy">entropy</a>)</li>
+</ul>
+]]>
+    </string>
+    <string name="help_license_apache" formatted="false">
+<![CDATA[
+<h1>Apache License</h1>
+<p><i>Version 2.0, January 2004</i><br>
+<i>&lt;<a href="http://www.apache.org/licenses/">http://www.apache.org/licenses/</a>&gt;</i></p>
+<h3>Terms and Conditions for use, reproduction, and distribution</h3>
+<h4>1. Definitions</h4>
+<p>“License” shall mean the terms and conditions for use, reproduction, and
+distribution as defined by Sections 1 through 9 of this document.</p>
+<p>“Licensor” shall mean the copyright owner or entity authorized by the copyright
+owner that is granting the License.</p>
+<p>“Legal Entity” shall mean the union of the acting entity and all other entities
+that control, are controlled by, or are under common control with that entity.
+For the purposes of this definition, “control” means <b>(i)</b> the power, direct or
+indirect, to cause the direction or management of such entity, whether by
+contract or otherwise, or <b>(ii)</b> ownership of fifty percent (50%) or more of the
+outstanding shares, or <b>(iii)</b> beneficial ownership of such entity.</p>
+<p>“You” (or “Your”) shall mean an individual or Legal Entity exercising
+permissions granted by this License.</p>
+<p>“Source” form shall mean the preferred form for making modifications, including
+but not limited to software source code, documentation source, and configuration
+files.</p>
+<p>“Object” form shall mean any form resulting from mechanical transformation or
+translation of a Source form, including but not limited to compiled object code,
+generated documentation, and conversions to other media types.</p>
+<p>“Work” shall mean the work of authorship, whether in Source or Object form, made
+available under the License, as indicated by a copyright notice that is included
+in or attached to the work (an example is provided in the Appendix below).</p>
+<p>“Derivative Works” shall mean any work, whether in Source or Object form, that
+is based on (or derived from) the Work and for which the editorial revisions,
+annotations, elaborations, or other modifications represent, as a whole, an
+original work of authorship. For the purposes of this License, Derivative Works
+shall not include works that remain separable from, or merely link (or bind by
+name) to the interfaces of, the Work and Derivative Works thereof.</p>
+<p>“Contribution” shall mean any work of authorship, including the original version
+of the Work and any modifications or additions to that Work or Derivative Works
+thereof, that is intentionally submitted to Licensor for inclusion in the Work
+by the copyright owner or by an individual or Legal Entity authorized to submit
+on behalf of the copyright owner. For the purposes of this definition,
+“submitted” means any form of electronic, verbal, or written communication sent
+to the Licensor or its representatives, including but not limited to
+communication on electronic mailing lists, source code control systems, and
+issue tracking systems that are managed by, or on behalf of, the Licensor for
+the purpose of discussing and improving the Work, but excluding communication
+that is conspicuously marked or otherwise designated in writing by the copyright
+owner as “Not a Contribution.”</p>
+<p>“Contributor” shall mean Licensor and any individual or Legal Entity on behalf
+of whom a Contribution has been received by Licensor and subsequently
+incorporated within the Work.</p>
+<h4>2. Grant of Copyright License</h4>
+<p>Subject to the terms and conditions of this License, each Contributor hereby
+grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free,
+irrevocable copyright license to reproduce, prepare Derivative Works of,
+publicly display, publicly perform, sublicense, and distribute the Work and such
+Derivative Works in Source or Object form.</p>
+<h4>3. Grant of Patent License</h4>
+<p>Subject to the terms and conditions of this License, each Contributor hereby
+grants to You a perpetual, worldwide, non-exclusive, no-charge, royalty-free,
+irrevocable (except as stated in this section) patent license to make, have
+made, use, offer to sell, sell, import, and otherwise transfer the Work, where
+such license applies only to those patent claims licensable by such Contributor
+that are necessarily infringed by their Contribution(s) alone or by combination
+of their Contribution(s) with the Work to which such Contribution(s) was
+submitted. If You institute patent litigation against any entity (including a
+cross-claim or counterclaim in a lawsuit) alleging that the Work or a
+Contribution incorporated within the Work constitutes direct or contributory
+patent infringement, then any patent licenses granted to You under this License
+for that Work shall terminate as of the date such litigation is filed.</p>
+<h4>4. Redistribution</h4>
+<p>You may reproduce and distribute copies of the Work or Derivative Works thereof
+in any medium, with or without modifications, and in Source or Object form,
+provided that You meet the following conditions:</p>
+<ul>
+<li><b>(a)</b> You must give any other recipients of the Work or Derivative Works a copy of
+this License; and</li>
+<li><b>(b)</b> You must cause any modified files to carry prominent notices stating that You
+changed the files; and</li>
+<li><b>(c)</b> You must retain, in the Source form of any Derivative Works that You distribute,
+all copyright, patent, trademark, and attribution notices from the Source form
+of the Work, excluding those notices that do not pertain to any part of the
+Derivative Works; and</li>
+<li><b>(d)</b> If the Work includes a “NOTICE” text file as part of its distribution, then any
+Derivative Works that You distribute must include a readable copy of the
+attribution notices contained within such NOTICE file, excluding those notices
+that do not pertain to any part of the Derivative Works, in at least one of the
+following places: within a NOTICE text file distributed as part of the
+Derivative Works; within the Source form or documentation, if provided along
+with the Derivative Works; or, within a display generated by the Derivative
+Works, if and wherever such third-party notices normally appear. The contents of
+the NOTICE file are for informational purposes only and do not modify the
+License. You may add Your own attribution notices within Derivative Works that
+You distribute, alongside or as an addendum to the NOTICE text from the Work,
+provided that such additional attribution notices cannot be construed as
+modifying the License.</li>
+</ul>
+<p>You may add Your own copyright statement to Your modifications and may provide
+additional or different license terms and conditions for use, reproduction, or
+distribution of Your modifications, or for any such Derivative Works as a whole,
+provided Your use, reproduction, and distribution of the Work otherwise complies
+with the conditions stated in this License.</p>
+<h4>5. Submission of Contributions</h4>
+<p>Unless You explicitly state otherwise, any Contribution intentionally submitted
+for inclusion in the Work by You to the Licensor shall be under the terms and
+conditions of this License, without any additional terms or conditions.
+Notwithstanding the above, nothing herein shall supersede or modify the terms of
+any separate license agreement you may have executed with Licensor regarding
+such Contributions.</p>
+<h4>6. Trademarks</h4>
+<p>This License does not grant permission to use the trade names, trademarks,
+service marks, or product names of the Licensor, except as required for
+reasonable and customary use in describing the origin of the Work and
+reproducing the content of the NOTICE file.</p>
+<h4>7. Disclaimer of Warranty</h4>
+<p>Unless required by applicable law or agreed to in writing, Licensor provides the
+Work (and each Contributor provides its Contributions) on an “AS IS” BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied,
+including, without limitation, any warranties or conditions of TITLE,
+NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A PARTICULAR PURPOSE. You are
+solely responsible for determining the appropriateness of using or
+redistributing the Work and assume any risks associated with Your exercise of
+permissions under this License.</p>
+<h4>8. Limitation of Liability</h4>
+<p>In no event and under no legal theory, whether in tort (including negligence),
+contract, or otherwise, unless required by applicable law (such as deliberate
+and grossly negligent acts) or agreed to in writing, shall any Contributor be
+liable to You for damages, including any direct, indirect, special, incidental,
+or consequential damages of any character arising as a result of this License or
+out of the use or inability to use the Work (including but not limited to
+damages for loss of goodwill, work stoppage, computer failure or malfunction, or
+any and all other commercial damages or losses), even if such Contributor has
+been advised of the possibility of such damages.</p>
+<h4>9. Accepting Warranty or Additional Liability</h4>
+<p>While redistributing the Work or Derivative Works thereof, You may choose to
+offer, and charge a fee for, acceptance of support, warranty, indemnity, or
+other liability obligations and/or rights consistent with this License. However,
+in accepting such obligations, You may act only on Your own behalf and on Your
+sole responsibility, not on behalf of any other Contributor, and only if You
+agree to indemnify, defend, and hold each Contributor harmless for any liability
+incurred by, or claims asserted against, such Contributor by reason of your
+accepting any such warranty or additional liability.</p>
+<p><i>END OF TERMS AND CONDITIONS</i></p>
+]]>
+    </string>
+    <string name="help_major_percent" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; Major/minor percent</b>
+<h1>Major/minor percent</h1>
+<p>The <a href="leader_activity">leader detail</a> screen lists a the percent of leads that are major or minor.  When interpreting this figure, it is important to know that <i>The Sacred Harp, 1991 Edition</i> contains 72% major tunes (or 28% minor).</p>
+<p>A leader who leads 70% major tunes is selecting proportionately from the book\'s major and minor tunes.  A leader who leads 50% major shows a preference for minor tunes (compared to a random sample of the book).</p>
+]]>
+    </string>
+    <string name="help_now_playing_activity" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; <a href="recordings">Recordings</a> &gt; Now playing</b>
+<h1>Now playing</h1>
+<p>When a recording is playing, this screen shows information about the current
+song.  Tap on a songing, song, or leader to see details.</p>
+<h3>Lead info</h3>
+<p>See details about the current song</p>
+<ul>
+<li>
+<p><a href="singing_activity">Singing</a> title, location, and date</p>
+</li>
+<li>
+<p><a href="song_activity">Song</a> title</p>
+</li>
+<li>
+<p>List of <a href="leader_activity">leaders</a></p>
+</li>
+</ul>
+<h3>Words</h3>
+<p>See words, attributions, key signature, time signature, and meter.</p>
+<h3>Playlist</h3>
+<p>Organize the current <a href="playlist">playlist</a>.</p>
+]]>
+    </string>
+    <string name="help_overview" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; Overview</b>
+<h1>Overview</h1>
+<h3>FaSoLa buttons</h3>
+<p>The bar at the bottom of most screens has links to the main app screens:</p>
+<p><img src="ic_fa"> <a href="leader_list">Leaders</a></p>
+<p><img src="ic_sol"> <a href="song_list">Songs</a></p>
+<p><img src="ic_la"> <a href="singing_list">Singings</a></p>
+<p><img src="ic_mi"> <a href="playlist">Playlist</a></p>
+<h3>Searching</h3>
+<p>Tap <b>search</b> <img src="ic_action_search"> to search by
+leader name, song name and page number, or singing name and location.
+Some screens have more search options.  For instance, the <a href="song_list">song list</a>
+also allows you to search by composer, poet, and lyrics.</p>
+<p>See help on individual screens for more detail.</p>
+<h3>Sorting</h3>
+<p>Tap <b>sort</b> <img src="ic_action_sort_by_size"> to see a list of sorting options.
+Some options (such as key signature) group data under headings.
+Where headings are shown, the number of items in that group is displayed to
+the right of the heading.  For instance, when sorting songs by key signature, you
+can see that there are 57 songs in A Major and 35 songs in A Minor.</p>
+<p>See help on individual screens for more detail.</p>
+]]>
+    </string>
+    <string name="help_playlist" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; <a href="recordings">Recordings</a> &gt; Playlist</b>
+<h1>Playlist</h1>
+<p>Tap <b>Playlist</b> <img src="ic_mi"> to see the current playlist.</p>
+<h3>Adding recordings</h3>
+<p>Initially the playlist is empty.  Recordings can be found on the
+<a href="singing_list">singings list</a>, <a href="song_activity">song screen</a>, 
+or <a href="leader_activity">leader screen</a>.</p>
+<p>Learn more about <a href="recordings">recordings</a>.</p>
+<h3>Play a song</h3>
+<p>Tap a song to start playing.</p>
+<p>Tap <b><a href="now_playing_activity">Now playing</a></b> to see details about the current song.</p>
+<h3>Arrange the playlist</h3>
+<p>Drag <img src="ic_drag_handle|150%"> to change the order of songs.</p>
+<p>Tap <img src="ic_clear_grey600_24dp"> to remove a song.</p>
+]]>
+    </string>
+    <string name="help_recordings" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; Recordings</b>
+<h1>Recordings</h1>
+<h3>How do I listen to recordings?</h3>
+<p>A play icon <img src="ic_action_play_over_video"> is shown next to songs and singings with recordings.</p>
+<p>Tap the icon to play the recording.</p>
+<p>Tap the icon and hold to add the recording to the end of the <a href="playlist">playlist</a>.</p>
+<h3>Where can I find recordings?</h3>
+<p>On the <a href="singing_list">singings list</a></p>
+<p>On the <a href="song_activity">song screen</a> under <b>Recordings</b>.</p>
+<p>On the <a href="leader_activity">leader screen</a> under <b>All leads</b>.</p>
+<h3>Sources</h3>
+<p>Recordings are provided by</p>
+<ul>
+<li>
+<p><a href="http://www.bostonsing.org/index">www.bostonsing.org</a></p>
+</li>
+<li>
+<p><a href="http://www.shapenotecds.com">www.shapenotecds.com</a></p>
+</li>
+</ul>
+]]>
+    </string>
+    <string name="help_singing_activity" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; <a href="singing_list">Singing list</a> &gt; Singing details</b>
+<h1>Singing details</h1>
+<h3>Songs</h3>
+<p>See a list of songs and leaders from this singing.</p>
+<p>Tap a lead to see it on the <a href="leader_activity">leader</a> screen under <b>All leads</b>.
+The song that was selected will be highlighted.</p>
+<p>Tap a lead and hold to select either the the <a href="song_activity">song</a> or the <a href="leader_activity">leader</a>.</p>
+<p>A play icon <img src="ic_action_play_over_video"> is shown next to leads with recordings.  Tap to play the recording.</p>
+<p>Learn more about <a href="recordings">recordings</a>.</p>
+<h3>Full text</h3>
+<p>See full minutes text for this singing.</p>
+]]>
+    </string>
+    <string name="help_singing_list" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; Singing list</b>
+<h1>Singing list</h1>
+<p>Tap <b>Singings</b> <img src="ic_la"> to see a list of singings since 1995.</p>
+<p>Tap a <a href="singing_activity">singing</a> to see details and full minutes text.</p>
+<h3>Searching</h3>
+<p>Tap <b>search</b> <img src="ic_action_search"> to search by singing title or location.</p>
+<h3>Sorting</h3>
+<p>Tap <b>sort</b> <img src="ic_action_sort_by_size"> to sort by</p>
+<ul>
+<li>date</li>
+<li>recording count</li>
+</ul>
+<h3>Recordings</h3>
+<p>A play icon <img src="ic_action_play_over_video"> is shown next to singings with recordings.  Tap to play all recordings in the singing.</p>
+<p>Learn more about <a href="recordings">recordings</a></p>
+]]>
+    </string>
+    <string name="help_song_activity" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; <a href="song_list">Song list</a> &gt; Song details</b>
+<h1>Song details</h1>
+<h3>Stats</h3>
+<p>See leading statistics and a graph of leads per year.</p>
+<h3>Words</h3>
+<p>See words, attributions, key signature, time signature, and meter.</p>
+<h3>Top leaders</h3>
+<p>See a list of the top 20 leaders of this song.</p>
+<p>Tap a <a href="leader_activity">leader</a> to see details and leading statistics.</p>
+<h3>Recordings</h3>
+<p>See a list of recordings of this song.</p>
+<p>Tap <img src="ic_action_play_over_video"> to play the recording.</p>
+<p>Learn more about <a href="recordings">recordings</a>.</p>
+<h3>Also led</h3>
+<p>See a list of songs that are also led by singers who led this song.</p>
+<p>Learn more about the <a href="also_led">also led</a> statistic.</p>
+]]>
+    </string>
+    <string name="help_song_list" formatted="false">
+<![CDATA[
+<b><a href="home">Home</a> &gt; Song list</b>
+<h1>Song list</h1>
+<p>Tap <b>Songs</b> <img src="ic_sol"> to see a list of songs.</p>
+<p>Tap a <a href="song_activity">song</a> to see details and leading statistics.</p>
+<h3>Searching</h3>
+<p>Tap <b>search</b> <img src="ic_action_search"> to search by page number, title, composer, poet, or words.</p>
+<h3>Sorting</h3>
+<p>Tap <b>sort</b> <img src="ic_action_sort_by_size"> to sort by</p>
+<ul>
+<li>page number</li>
+<li>title</li>
+<li>lead count</li>
+<li>key signature</li>
+<li>time signature</li>
+<li>meter</li>
+</ul>
+]]>
+    </string>
+</resources>
