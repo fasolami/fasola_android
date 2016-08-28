@@ -11,13 +11,18 @@ import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.InflateException;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewStub;
 
 import com.astuetz.PagerSlidingTabStrip;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *  A base class for an activity with tabs.
@@ -223,4 +228,35 @@ public abstract class SimpleTabActivity extends BaseActivity {
         return super.onCreateView(name, context, attrs);
     }
 
+    // Help
+    // TODO:adding the help menu item in the activity instead of the fragment is
+    // pretty dumb  -- if one fragment wants a help item but another doesn't, the help
+    // item will exist across the whole activity.  Could fix this by creating a FragmentDelegate
+    // or something (since FragmentMixin isn't possible) so this is shared between subclasses?
+    Map<Class<? extends Fragment>, Integer> mFragmentHelpResources = new HashMap<>();
+
+    public void setHelpResource(Fragment fragment, int id) {
+        mFragmentHelpResources.put(fragment.getClass(), id);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean ret = super.onCreateOptionsMenu(menu);
+        // Don't add an extra help menu if we already have one
+        if (mHelpResourceId == -1 && !mFragmentHelpResources.isEmpty()) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.menu_help, menu);
+        }
+        return ret;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_help && getVisibleDrawer() == null) {
+            Integer id = mFragmentHelpResources.get(getCurrentFragment().getClass());
+            if (id != null)
+                return HelpActivity.start(this, id);
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

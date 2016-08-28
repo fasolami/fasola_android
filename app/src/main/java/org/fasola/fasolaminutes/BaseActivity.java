@@ -1,8 +1,6 @@
 package org.fasola.fasolaminutes;
 
 import android.app.ActionBar;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -149,22 +147,21 @@ public class BaseActivity extends FragmentActivity implements DrawerLayout.Drawe
             // Use up button as back button
             onUpPressed();
             return true;
-        }
-        else if (Debug.onOptionsItemSelected(this, item)) {
+        } else if (Debug.onOptionsItemSelected(this, item)) {
             return true;
-        } else if (mHelpResourceId != -1 && item.getItemId() == R.id.menu_help) {
-            AlertDialog alertDialog = new AlertDialog.Builder(BaseActivity.this).create();
-            alertDialog.setTitle("Help");
-            alertDialog.setMessage(getResources().getString(mHelpResourceId));
-            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-            alertDialog.show();
+        } else if (item.getItemId() == R.id.menu_help) {
+            if (onDrawerOptionsItemSelected(item))
+                return true;
+            return HelpActivity.start(this, mHelpResourceId);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    protected boolean onDrawerOptionsItemSelected(MenuItem item) {
+        Fragment drawer = getVisibleDrawer();
+        if (drawer != null)
+            return drawer.onOptionsItemSelected(item);
+        return false;
     }
 
     public void onUpPressed() {
@@ -240,6 +237,17 @@ public class BaseActivity extends FragmentActivity implements DrawerLayout.Drawe
         else if (fragment == mRightFragment)
             return mDrawerLayout.isDrawerOpen(Gravity.RIGHT);
         return false;
+    }
+
+    // Is this fragment a visible drawer?
+    public Fragment getVisibleDrawer() {
+        if (mDrawerLayout == null)
+            return null;
+        if (mLeftFragment != null && mDrawerLayout.isDrawerOpen(Gravity.LEFT))
+            return mLeftFragment;
+        else if (mRightFragment != null && mDrawerLayout.isDrawerOpen(Gravity.RIGHT))
+            return mRightFragment;
+        return null;
     }
 
     // region DrawerLayout listeners
