@@ -28,6 +28,12 @@ body {
     vertical-align: middle
 }
 
+#title-bar #about {
+    float: right;
+    color: white;
+    font-size: .75em;
+}
+
 #page {
     background-color: #f4eedd;
     overflow: auto;

@@ -68,6 +68,15 @@ $(function() {
         });
     }
 
+    // About link
+    $('a#about').click(function(e) {
+        var href = $(this).attr("href");
+        e.preventDefault();
+        history.pushState({id:href}, '', '?page=' + href);
+        navigateTo(href);
+        return false;
+    });
+
     navigateTo(history.state);
 
     window.onpopstate = function(event) {
