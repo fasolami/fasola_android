@@ -1,3 +1,8 @@
+<!--
+  ~ This file is part of FaSoLa Minutes for Android.
+  ~ Copyright (c) 2016 Mike Richards. All rights reserved.
+  -->
+
 <android.support.v4.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"

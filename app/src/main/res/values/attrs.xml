@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ This file is part of FaSoLa Minutes for Android.
+  ~ Copyright (c) 2016 Mike Richards. All rights reserved.
+  -->
+
 <resources>
     <declare-styleable name="WrapperLayout">
         <attr name="wrapper_layout" format="integer"/>

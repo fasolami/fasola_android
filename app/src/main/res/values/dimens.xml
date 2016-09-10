@@ -1,3 +1,8 @@
+<!--
+  ~ This file is part of FaSoLa Minutes for Android.
+  ~ Copyright (c) 2016 Mike Richards. All rights reserved.
+  -->
+
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>

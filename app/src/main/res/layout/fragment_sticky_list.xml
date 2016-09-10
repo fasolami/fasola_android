@@ -1,3 +1,8 @@
+<!--
+  ~ This file is part of FaSoLa Minutes for Android.
+  ~ Copyright (c) 2016 Mike Richards. All rights reserved.
+  -->
+
 <se.emilsjolander.stickylistheaders.StickyListHeadersListView
         xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
