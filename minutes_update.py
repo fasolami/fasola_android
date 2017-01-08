@@ -28,6 +28,23 @@ def col_exists(db, table, col):
         return False
 
 # ----------------------------------------------------------------------------
+# Drop the tables we don't use (might use these later)
+# ----------------------------------------------------------------------------
+
+bad_tables = (
+    'locations',
+    'locations_old',
+    'minute_location_singing_joins',
+    'leader_name_invalid',
+    'singings',
+)
+
+print "Dropping tables we don't need"
+for t in bad_tables:
+    print "    %s" % t
+    db.execute("DROP TABLE IF EXISTS %s" % t)
+
+# ----------------------------------------------------------------------------
 # Fix code page problems
 # ----------------------------------------------------------------------------
 CODE_PAGE_FIXED = False
@@ -164,7 +181,7 @@ if not has_lead_id or FORCE_UPDATE:
         )
 
 # Add an index
-db.execute("CREATE INDEX lead_index ON song_leader_joins (lead_id)");
+db.execute("CREATE INDEX IF NOT EXISTS lead_index ON song_leader_joins (lead_id)");
 
 # ----------------------------------------------------------------------------
 # Fix song stats (distinct lead_id = one lead, instead of each leader_id)
@@ -215,6 +232,7 @@ for year in sorted(ranks.keys()):
         values.append((song_id, year, count, rank))
 # Clear and repopulate table
 db.execute("DELETE FROM song_stats")
+db.execute("DELETE FROM sqlite_sequence WHERE name='song_stats'")
 db.executemany("INSERT INTO song_stats (song_id, year, lead_count, rank) VALUES (?, ?, ?, ?)", values)
 
 
