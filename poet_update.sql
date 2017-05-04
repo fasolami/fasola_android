@@ -1,3 +1,4 @@
+-- Poet book, name, date fixes
 UPDATE Songs SET PoetBookTitle='Peak’s New Collection', Poet1Date='1793' WHERE PageNum='80t';
 UPDATE Songs SET PoetBookTitle='Battle’s Collection', Poet1Date='1814' WHERE PageNum='104';
 UPDATE Songs SET PoetBookTitle='The Baltimore Collection', Poet1Date='1801' WHERE PageNum='144';
