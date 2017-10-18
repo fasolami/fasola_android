@@ -1,6 +1,17 @@
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
-.DS_Store
+# JetBrains claims that some .idea files should be included, but they aren't strictly necessary
+/.idea
+*.iml
+
+# Build artifacts
 /build
+*.apk
+
+# Keystore
+*.jks
+
+# Gradle artifacts
+.gradle
+
+# Misc
+.DS_Store
+/local.properties
