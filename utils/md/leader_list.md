@@ -16,4 +16,4 @@ Tap **sort** ![](ic_action_sort_by_size) to sort by
 * last name
 * first name
 * lead count
-* entropy score (Learn more about [entropy](entropy))
+* entropy ([Learn more](entropy))

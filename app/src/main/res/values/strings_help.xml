@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ This file is part of FaSoLa Minutes for Android.
-  ~ Copyright (c) 2016 Mike Richards. All rights reserved.
+  ~ Copyright (c) 2018 Mike Richards. All rights reserved.
   -->
 
 <!-- Created automatically by md2xml.py -->
@@ -44,10 +44,10 @@
 <![CDATA[
 <b><a href="home">Home</a> &gt; Entropy</b>
 <h1>Entropy</h1>
-<p>The entropy score that appears on the <a href="leader_list">leader list</a> and <a href="leader_activity">details</a> screens measures the unpredictability of a leader\'s song selection.  A score near 0 means that a leader is very predictable, while a score near 1 means that a leader is very unpredictable.</p>
+<p>The entropy number that appears on the <a href="leader_list">leader list</a> and <a href="leader_activity">details</a> screens measures the unpredictability of a leader\'s song selection.  A number near 0 means that a leader is more predictable, while a number near 1 means that a leader is more unpredictable.</p>
 <h3>Learn more</h3>
 <p>See David Brodeur and David Smead\'s article <b><a href="http://originalsacredharp.com/2016/08/22/entropy-unpacked-the-entropy-number-from-fasola-minutes/">Entropy Unpacked: The Entropy Number from "FaSoLa Minutes"</a></b> in the August 2016 edition of <i>The Sacred Harp Publishing Company Newsletter</i> (vol. 5, no. 1).</p>
-<p>See the Wikipedia article on <b><a href="https://en.wikipedia.org/wiki/Entropy_(information_theory)">Entropy (information theory)</a></b>.  The FaSoLa entropy score is essentially normalized Shannon entropy.</p>
+<p>See the Wikipedia article on <b><a href="https://en.wikipedia.org/wiki/Entropy_(information_theory)">Entropy (information theory)</a></b>.  FaSoLa entropy is essentially normalized Shannon entropy.</p>
 ]]>
     </string>
     <string name="help_home" formatted="false">
@@ -107,7 +107,7 @@ The song that was selected will be highlighted.</p>
 <li>last name</li>
 <li>first name</li>
 <li>lead count</li>
-<li>entropy score (Learn more about <a href="entropy">entropy</a>)</li>
+<li>entropy (<a href="entropy">Learn more</a>)</li>
 </ul>
 ]]>
     </string>

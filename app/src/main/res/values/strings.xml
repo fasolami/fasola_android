@@ -11,7 +11,7 @@
     <string name="menu_sort">Sort</string>
     <string name="menu_leader_sort_name">By last name</string>
     <string name="menu_leader_sort_count">By lead count</string>
-    <string name="menu_leader_sort_entropy">By entropy score</string>
+    <string name="menu_leader_sort_entropy">By entropy</string>
 
     <string name="tab_leaders">Leaders</string>
     <string name="tab_songs">Songs</string>
