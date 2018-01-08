@@ -1,5 +1,6 @@
 # Convert files in the md directory into strings_help.xml
 
+from datetime import date
 import os
 import glob
 import markdown
@@ -8,7 +9,13 @@ import re
 out_file = '../app/src/main/res/values/strings_help.xml'
 print "Writing strings to", out_file
 with open(out_file, 'wb') as out:
-    out.write('<?xml version="1.0" encoding="utf-8"?>\n')
+    out.write('''<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ This file is part of FaSoLa Minutes for Android.
+  ~ Copyright (c) %d Mike Richards. All rights reserved.
+  -->
+
+''' % date.today().year)
     out.write('<!-- Created automatically by md2xml.py -->\n')
     out.write('<resources>\n')
 
