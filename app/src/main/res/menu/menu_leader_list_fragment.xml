@@ -45,4 +45,9 @@
 
         </item>
     </group>
+
+    <item android:id="@+id/menu_leader_correction"
+        android:title="@string/menu_leader_corrections"
+        app:showAsAction="never" />
+
 </menu>

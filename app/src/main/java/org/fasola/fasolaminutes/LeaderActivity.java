@@ -7,9 +7,13 @@ package org.fasola.fasolaminutes;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -22,6 +26,8 @@ import com.github.mikephil.charting.data.BarEntry;
 import java.util.ArrayList;
 
 public class LeaderActivity extends SimpleTabActivity {
+    final static String CORRECTIONS_URL = "https://docs.google.com/forms/d/e/1FAIpQLSf7T5YL1VjbRtnJPCkAGWPr_BDwxTmw0gGVuVWOn-NnBPcwNg/viewform";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +50,23 @@ public class LeaderActivity extends SimpleTabActivity {
             int position = mPagerAdapter.getFragmentIndex(LeaderLeadsFragment.class);
             mViewPager.setCurrentItem(position);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean ret = super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_leader_activity, menu);
+        return ret;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_leader_correction) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(CORRECTIONS_URL)));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     // Common interface for leader fragments

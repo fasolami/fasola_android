@@ -102,4 +102,5 @@
     <string name="song_chart_title">Leads per year</string>
     <string name="menu_help">Help</string>
     <string name="menu_about">About</string>
+    <string name="menu_leader_corrections">Submit a correction</string>
 </resources>

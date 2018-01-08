@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 public class MainActivity extends SimpleTabActivity {
@@ -114,6 +115,16 @@ public class MainActivity extends SimpleTabActivity {
             setItemLayout(R.layout.list_item_leader);
             ((SimpleTabActivity)getActivity()).setHelpResource(this, R.string.help_leader_list);
             updateQuery();
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            if (item.getItemId() == R.id.menu_leader_correction) {
+                startActivity(
+                    new Intent(Intent.ACTION_VIEW, Uri.parse(LeaderActivity.CORRECTIONS_URL)));
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
         }
 
         @Override
