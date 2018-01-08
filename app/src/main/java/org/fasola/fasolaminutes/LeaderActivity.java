@@ -63,7 +63,11 @@ public class LeaderActivity extends SimpleTabActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.menu_leader_correction) {
-            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(CORRECTIONS_URL)));
+            // Add the current leader's name to the url (name is always the activity title)
+            Uri correctionUrl = Uri.parse(CORRECTIONS_URL).buildUpon()
+                .appendQueryParameter("entry.134476651", getTitle().toString())
+                .build();
+            startActivity(new Intent(Intent.ACTION_VIEW, correctionUrl));
             return true;
         }
         return super.onOptionsItemSelected(item);
