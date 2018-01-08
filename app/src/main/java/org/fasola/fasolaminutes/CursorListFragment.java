@@ -300,7 +300,7 @@ public class CursorListFragment extends ListFragment
         else if (mSortId != -1)
             Log.w("CursorListFragment", "Invalid sortId specified");
         // Recording count
-        if (mRecordingCount > 0) {
+        if (mHasRecordingMenu || mRecordingCount > 0) {
             mHasRecordingMenu = true;
             String playTitle = getResources().getQuantityString(R.plurals.play_songs, mRecordingCount, mRecordingCount);
             menu.add(Menu.NONE, R.id.play_songs, Menu.NONE, playTitle);
