@@ -36,6 +36,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:22.1.1'
     compile 'com.readystatesoftware.sqliteasset:sqliteassethelper:2.0.1'
     compile 'com.github.PhilJay:MPAndroidChart:v2.2.3'
-    compile 'se.emilsjolander:stickylistheaders:2.5.2'
+    compile 'com.github.mtotschnig:StickyListHeaders:2.7.1'
     compile 'com.astuetz:pagerslidingtabstrip:1.0.1'
 }
