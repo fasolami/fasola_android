@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Script to update schema from the iOS database"""
 import sqlite3
 import os, sys, re
@@ -97,7 +98,7 @@ class CodePage(Action):
     desc = "Fixing code page problems (try UTF-8, fallback on Mac Roman)"
 
     def run(self):
-        count = 0
+        self.count = 0
 
         # codepage fixing function
         def parse_text(text):
@@ -107,7 +108,7 @@ class CodePage(Action):
             try:
                 return text.decode('utf-8')
             except UnicodeDecodeError:
-                count += 1
+                self.count += 1
                 return text.decode('mac-roman')
 
         sqlite3.register_converter("TEXT", parse_text)
@@ -140,7 +141,7 @@ class CodePage(Action):
                 stmt = "UPDATE %s SET %s WHERE %s = ?" % (table, set_stmt, idfield)
                 db.execute(stmt, values)
 
-            print 'converted %d strings to utf-8' % count
+            print 'converted %d strings to utf-8' % self.count
 
 # ----------------------------------------------------------------------------
 # Fix literal "\n" text in minutes
@@ -199,16 +200,21 @@ class MinutesVT(Action):
 # ----------------------------------------------------------------------------
 # Add leader columns
 # ----------------------------------------------------------------------------
+import unicodedata
 class LastName(Action):
     desc = "Adding 'last_name' column to 'leaders' table"
-    column = 'ALTER TABLE leaders ADD COLUMN last_name TEXT DEFAULT NOT NULL'
+    column = "ALTER TABLE leaders ADD COLUMN last_name TEXT DEFAULT '' NOT NULL"
+
+    def normalize_name(self, name):
+        return unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').lower()
 
     def run(self):
         count = 0
         for (id, name) in db.execute("SELECT id, name FROM leaders"):
+            last_name = name.rsplit(None, 1)[-1]
             db.execute(
                 "UPDATE leaders SET last_name = ? WHERE id = ?",
-                (name.rsplit(None, 1)[-1], id)
+                (self.normalize_name(last_name), id)
             )
             count += 1
         return count
@@ -456,7 +462,7 @@ class DropTables(Action):
         'minute_location_singing_joins',
         'leader_name_invalid',
         'singings',
-        'leader_name_aliases',
+        #'leader_name_aliases',
     )
 
     def run(self):
