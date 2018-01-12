@@ -15,9 +15,9 @@ public class MinutesContract {
     protected MinutesContract() {
     }
 
-    public static final int DB_VERSION = 12;
+    public static final int DB_VERSION = 13;
     public static final int MIN_YEAR = 1995;
-    public static final int MAX_YEAR = 2016;
+    public static final int MAX_YEAR = 2017;
     public static final String DB_NAME = "minutes.db";
 
     // Contract classes (see below for definitions
