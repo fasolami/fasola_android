@@ -4,11 +4,14 @@ android {
     compileSdkVersion 22
     buildToolsVersion "28.0.3"
 
+    flavorDimensions "paid"
     productFlavors {
         free {
+            dimension "paid"
             applicationId "org.fasola.fasolaminutes"
         }
         paid {
+            dimension "paid"
             applicationId "org.fasola.minutes"
         }
     }
