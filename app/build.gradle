@@ -40,5 +40,8 @@ dependencies {
     implementation 'com.readystatesoftware.sqliteasset:sqliteassethelper:2.0.1'
     implementation 'com.github.PhilJay:MPAndroidChart:v2.2.3'
     implementation 'com.github.mtotschnig:StickyListHeaders:2.7.1'
-    implementation 'com.astuetz:pagerslidingtabstrip:1.0.1'
+    // PagerSlidingTabStrip uses old build tools that aren't compatible with new gradle.
+    // This replacement is the same code, but with updated build tools
+    // implementation 'com.astuetz:pagerslidingtabstrip:1.0.1'
+    implementation 'com.github.ChristophKaser:PagerSlidingTabStrip:d924189a70'
 }
