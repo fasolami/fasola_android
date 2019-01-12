@@ -18,6 +18,7 @@ import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.TaskStackBuilder;
@@ -486,12 +487,17 @@ public class PlaybackService extends Service
                 this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
         );
         // Build Notification
-        return new Notification.Builder(getApplicationContext())
+        Notification.Builder builder = new Notification.Builder(getApplicationContext())
             .setSmallIcon(R.drawable.ic_stat_fasola)
             .setContent(remote)
             .setOngoing(true)
-            .setContentIntent(pendingIntent)
-            .getNotification(); // build() was added in API 16
+            .setContentIntent(pendingIntent);
+        // Allow the notification to appear on the lockscreen, even if
+        // "hide sensitive notifications" is set
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+            builder.setVisibility(Notification.VISIBILITY_PUBLIC);
+        // build() was added in API 16
+        return builder.getNotification();
     }
 
     boolean mHasMainTask = true;
