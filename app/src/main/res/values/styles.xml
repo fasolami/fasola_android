@@ -32,6 +32,13 @@
         <item name="pstsTabPaddingLeftRight">10dp</item>
         <item name="pstsIndicatorHeight">4dp</item>
         <item name="pstsUnderlineHeight">1dp</item>
+
+        <!-- ActionBar overrides -->
+        <item name="android:actionButtonStyle">@style/ActionButtonStyle</item>
+    </style>
+
+    <style name="ActionButtonStyle" parent="@android:style/Widget.Holo.Light.ActionButton">
+        <item name="android:minWidth">48dip</item>
     </style>
 
 </resources>
