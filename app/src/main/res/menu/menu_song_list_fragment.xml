@@ -12,7 +12,7 @@
         <item android:id="@+id/menu_search"
               android:title="@string/search_songs"
               android:icon="@drawable/ic_action_search"
-              android:showAsAction="ifRoom|collapseActionView"
+              android:showAsAction="always|collapseActionView"
               android:actionViewClass="android.widget.SearchView" />
 
         <item android:id="@+id/menu_sort"
@@ -52,6 +52,11 @@
             </menu>
 
         </item>
+
+        <item android:id="@+id/menu_filter"
+            android:title="@string/menu_filter"
+            android:icon="@drawable/ic_filter"
+            android:showAsAction="always" />
 
     </group>
 </menu>
