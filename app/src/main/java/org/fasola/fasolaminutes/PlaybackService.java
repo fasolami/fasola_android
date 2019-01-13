@@ -138,6 +138,8 @@ public class PlaybackService extends Service
         mMediaSession = new MediaSessionCompat(this, "PlaybackService", receiver, null);
         mMediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        // Handle media buttons
+        mMediaSession.setCallback(new MediaSessionCallback(mControl));
     }
 
     @Override
@@ -876,6 +878,38 @@ public class PlaybackService extends Service
         @Override
         public int getAudioSessionId() {
             return isRunning() ? getInstance().getAudioSessionId() : 0;
+        }
+    }
+
+    /**
+     * A MediaSessionCompat.Callback implementation that that uses Control
+     */
+    public static class MediaSessionCallback extends MediaSessionCompat.Callback {
+        Control mControl;
+
+        public MediaSessionCallback(Control control) {
+            super();
+            mControl = control;
+        }
+
+        @Override
+        public void onPlay() {
+            mControl.start();
+        }
+
+        @Override
+        public void onPause() {
+            mControl.pause();
+        }
+
+        @Override
+        public void onSkipToNext() {
+            mControl.next();
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            mControl.previous();
         }
     }
 
