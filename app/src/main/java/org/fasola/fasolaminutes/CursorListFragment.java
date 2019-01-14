@@ -80,7 +80,9 @@ public class CursorListFragment extends ListFragment
 
     private static final String BUNDLE_SEARCH = "SEARCH_TERM";
     private static final String BUNDLE_SORT = "SORT_ID";
+    private static final String FILTER_STATE = "FILTER_STATE";
     private static final String LIST_STATE = "LIST_STATE";
+    private Bundle mFilterState;
     private Parcelable mListState;
 
     @Override
@@ -89,6 +91,7 @@ public class CursorListFragment extends ListFragment
         if (savedInstanceState != null) {
             mSearchTerm = savedInstanceState.getString(BUNDLE_SEARCH, mSearchTerm);
             mSortId = savedInstanceState.getInt(BUNDLE_SORT, mSortId);
+            mFilterState = savedInstanceState.getBundle(FILTER_STATE);
             mListState = savedInstanceState.getParcelable(LIST_STATE);
         }
         // Setup the cursor loader
@@ -155,6 +158,7 @@ public class CursorListFragment extends ListFragment
         super.onSaveInstanceState(saveInstanceState);
         saveInstanceState.putSerializable(BUNDLE_SEARCH, mSearchTerm);
         saveInstanceState.putSerializable(BUNDLE_SORT, mSortId);
+        saveInstanceState.putParcelable(FILTER_STATE, mFilterState);
         if (getView() != null) // Prevent IllegalStateException "Content view not yet created"
             saveInstanceState.putParcelable(LIST_STATE, getListView().onSaveInstanceState());
     }
@@ -237,6 +241,16 @@ public class CursorListFragment extends ListFragment
      */
     public SQL.Query onUpdateSearch(SQL.Query query, String searchTerm) {
         return query;
+    }
+
+    /** Gets the filter state (if any) */
+    public Bundle getFilterState() {
+        return mFilterState;
+    }
+
+    /** Sets the filter state */
+    public void setFilterState(Bundle filterState) {
+        mFilterState = filterState;
     }
 
     /**
