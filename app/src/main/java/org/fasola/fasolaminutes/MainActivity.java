@@ -290,10 +290,19 @@ public class MainActivity extends SimpleTabActivity {
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             if (item.getItemId() == R.id.menu_filter) {
-                startActivity(new Intent(getActivity(), SongFilterActivity.class));
+                Intent intent = new Intent(getActivity(), SongFilterActivity.class);
+                intent.putExtra(SongFilterActivity.EXTRA_FILTER_PARCEL, getFilterState());
+                startActivityForResult(intent, 1);
                 return true;
             }
             return super.onOptionsItemSelected(item);
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            if (resultCode == RESULT_OK) {
+                setFilterState(data.getBundleExtra(SongFilterActivity.EXTRA_FILTER_PARCEL));
+            }
         }
     }
 
