@@ -63,6 +63,12 @@
 
         <activity android:name=".HelpActivity">
         </activity>
+
+        <activity
+            android:name=".SongFilterActivity"
+            android:label="@string/title_activity_song_filter"
+            android:windowSoftInputMode="adjustPan">
+        </activity>
     </application>
 
 </manifest>

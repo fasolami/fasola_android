@@ -41,4 +41,13 @@
         <item name="android:minWidth">48dip</item>
     </style>
 
+    <!-- Flat Toggle Buttons -->
+    <style name="FasolaToggleLayout">
+        <item name="android:background">@drawable/toggle_outline</item>
+    </style>
+    <style name="FasolaToggle" parent="@android:style/Widget.Holo.Light.Button.Toggle">
+        <item name="android:background">@drawable/toggle_background</item>
+        <item name="android:textColor">@color/toggle_text</item>
+        <item name="android:button">@null</item> <!-- hide the actual check box -->
+    </style>
 </resources>

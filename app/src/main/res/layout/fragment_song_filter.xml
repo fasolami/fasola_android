@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Key"
+            android:textAppearance="@android:style/TextAppearance.Holo.Medium" />
+
+        <TableLayout
+            android:id="@+id/key_layout"
+            style="@style/FasolaToggleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
+
+            <TableRow>
+
+                <CheckBox
+                    android:id="@+id/key_a"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="A" />
+
+                <CheckBox
+                    android:id="@+id/key_b_flat"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="A#/Bb" />
+
+                <CheckBox
+                    android:id="@+id/key_b"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="B" />
+
+                <CheckBox
+                    android:id="@+id/key_c"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="C" />
+
+                <CheckBox
+                    android:id="@+id/key_d_flat"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="C#/Db" />
+
+                <CheckBox
+                    android:id="@+id/key_d"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="D" />
+
+            </TableRow>
+
+            <TableRow>
+
+                <CheckBox
+                    android:id="@+id/key_e_flat"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="D#/Eb" />
+
+                <CheckBox
+                    android:id="@+id/key_e"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="E" />
+
+                <CheckBox
+                    android:id="@+id/key_f"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="F" />
+
+                <CheckBox
+                    android:id="@+id/key_f_sharp"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="F#/Gb" />
+
+                <CheckBox
+                    android:id="@+id/key_g"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="G" />
+
+                <CheckBox
+                    android:id="@+id/key_a_flat"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="G#/Ab" />
+
+            </TableRow>
+        </TableLayout>
+
+
+        <LinearLayout
+            android:id="@+id/major_minor_layout"
+            style="@style/FasolaToggleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/key_major"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Major" />
+
+            <CheckBox
+                android:id="@+id/key_minor"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Minor" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Time Signature"
+            android:textAppearance="@android:style/TextAppearance.Holo.Medium" />
+
+        <LinearLayout
+            android:id="@+id/time_layout"
+            style="@style/FasolaToggleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/time_2_2"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="2/2" />
+
+            <CheckBox
+                android:id="@+id/time_4_4"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="4/4" />
+
+
+            <CheckBox
+                android:id="@+id/time_2_4"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="2/4" />
+
+
+            <CheckBox
+                android:id="@+id/time_3_2"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="3/2" />
+
+            <CheckBox
+                android:id="@+id/time_3_4"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="3/4" />
+
+            <CheckBox
+                android:id="@+id/time_6_4"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="6/4" />
+
+            <CheckBox
+                android:id="@+id/time_6_8"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="6/8" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Page Orientation"
+            android:textAppearance="@android:style/TextAppearance.Holo.Medium" />
+
+        <LinearLayout
+            android:id="@+id/page_orientation_layout"
+            style="@style/FasolaToggleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/page_full"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Full" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <CheckBox
+                    android:id="@+id/page_top"
+                    style="@style/FasolaToggle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Top" />
+
+                <CheckBox
+                    android:id="@+id/page_bottom"
+                    style="@style/FasolaToggle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Bottom" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/page_left_right_layout"
+            style="@style/FasolaToggleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/page_left"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Left" />
+
+            <CheckBox
+                android:id="@+id/page_right"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Right" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>

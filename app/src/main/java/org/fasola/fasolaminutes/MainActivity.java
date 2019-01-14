@@ -286,6 +286,15 @@ public class MainActivity extends SimpleTabActivity {
             // CASE WHEN can exclude rows, and NULL will make indexer break
             return query.where(SQL.INDEX_COLUMN, "IS NOT", "NULL");
         }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            if (item.getItemId() == R.id.menu_filter) {
+                startActivity(new Intent(getActivity(), SongFilterActivity.class));
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     public static class SingingListFragment extends CursorStickyListFragment {
