@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- annoyingly, this has to be an array, even if it's just one color -->
+    <string-array name="rangeBarColors">
+        <item>#ff411c24</item>
+    </string-array>
+</resources>

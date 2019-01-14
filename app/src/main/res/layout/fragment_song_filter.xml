@@ -300,5 +300,41 @@
 
         </LinearLayout>
 
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Page Number"
+            android:textAppearance="@android:style/TextAppearance.Holo.Medium" />
+
+        <com.appyvet.materialrangebar.RangeBar
+            android:id="@+id/page_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+
+            app:mrb_pinColor="@color/fasola_foreground"
+            app:mrb_pinMaxFont="14sp"
+            app:mrb_pinMinFont="14sp"
+            app:mrb_pinRadius="16dp"
+
+            app:mrb_pinTextColor="@color/fasola_background"
+            app:mrb_rangeBar="true"
+            app:mrb_rangeBarColor="@color/fasola_foreground"
+
+            app:mrb_rangeBarPaddingBottom="20dp"
+            app:mrb_rangeBar_rounded="true"
+            app:mrb_selectorBoundaryColor="@color/fasola_foreground"
+            app:mrb_selectorBoundarySize="2dp"
+            app:mrb_connectingLineColors="@array/rangeBarColors"
+            app:mrb_selectorColor="@color/fasola_foreground"
+            app:mrb_selectorSize="6dp"
+
+            app:mrb_temporaryPins="false"
+            app:mrb_tickEnd="573"
+
+            app:mrb_tickInterval="1"
+            app:mrb_tickStart="26" />
+
     </LinearLayout>
 </ScrollView>
