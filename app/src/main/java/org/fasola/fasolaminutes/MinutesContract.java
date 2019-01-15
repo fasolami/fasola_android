@@ -75,6 +75,7 @@ public class MinutesContract {
             poet = column("poet");
             time = column("Times");
             meter = column("MeterName");
+            orientation = column("Orientation");
             // Format keys (which are in the db as "D" or "A min")
             // 1. Some keys have extraneous spaces at the end, hence trim()
             // 2. Minor keys are written "min"; major keys are blank; key changes list "min" first
@@ -114,7 +115,7 @@ public class MinutesContract {
             fullName = concat(number, "' '", fullTitle);
         }
 
-        public SQL.Column title, titleOrdinal, number, composer, poet, lyrics, rawKey, key, time, meter;
+        public SQL.Column title, titleOrdinal, number, composer, poet, lyrics, rawKey, key, time, meter, orientation;
         public SQL.Column fullTitle, fullName, leaderCount, leadCount, coleadCount, pageSort;
     }
 
