@@ -16,6 +16,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class MainActivity extends SimpleTabActivity {
     public final static String ACTIVITY_POSITION = "org.fasola.fasolaminutes.POSITION";
 
@@ -180,12 +185,85 @@ public class MainActivity extends SimpleTabActivity {
         }
 
         /**
-         * Get the default query for filtering or sorting
-         * @return {SQL.Query} Default song query
+         * Get the base query with filters applied
+         * @return {SQL.Query} Base song query
          */
         private SQL.Query songQuery() {
-            return C.Song.selectList(C.Song.number, C.Song.fullTitle,
-                                     C.SongStats.leadCount.sum());
+            SQL.Query query = C.Song.selectList(
+                C.Song.number, C.Song.fullTitle, C.SongStats.leadCount.sum());
+            Bundle filters = getFilterState();
+            if (filters == null) return query;
+            // Bool filters (checkboxes)
+            List<Integer> checkboxIds = filters.getIntegerArrayList(SongFilterActivity.CHECKBOXES);
+            if (checkboxIds != null && !checkboxIds.isEmpty()) {
+                Set<Integer> checkboxes = new HashSet<>(checkboxIds);
+                // Orientation
+                List<String> orientations = new ArrayList<>();
+                if (checkboxes.contains(R.id.page_full)) orientations.add("full");
+                if (checkboxes.contains(R.id.page_top)) orientations.add("top");
+                if (checkboxes.contains(R.id.page_bottom)) orientations.add("bottom");
+                if (!orientations.isEmpty())
+                    query.where(C.Song.orientation, "IN", orientations.toArray());
+                // Left/right
+                boolean leftPage = checkboxes.contains(R.id.page_left);
+                boolean rightPage = checkboxes.contains(R.id.page_right);
+                if (leftPage ^ rightPage) { // XOR: no filter needed if they're both true
+                    query.where(C.Song.number.cast("INT").format("{column} %% 2"),
+                        leftPage ? "=" : "<>", 0);
+                }
+                // Time signature
+                List<String> times = new ArrayList<>();
+                if (checkboxes.contains(R.id.time_2_2)) times.add("%2/2%");
+                if (checkboxes.contains(R.id.time_4_4)) times.add("%4/4%");
+                if (checkboxes.contains(R.id.time_2_4)) times.add("%2/4%");
+                if (checkboxes.contains(R.id.time_3_2)) times.add("%3/2%");
+                if (checkboxes.contains(R.id.time_3_4)) times.add("%3/4%");
+                if (checkboxes.contains(R.id.time_6_4)) times.add("%6/4%");
+                if (checkboxes.contains(R.id.time_6_8)) times.add("%6/8%");
+                if (!times.isEmpty()) {
+                    query.where(C.Song.time, "LIKE", times.get(0));
+                    times.remove(0);
+                    for (String t : times) query.or(C.Song.time, "LIKE", t);
+                }
+                // Key signature
+                List<String> keys = new ArrayList<>();
+                if (checkboxes.contains(R.id.key_a)) keys.add("A");
+                if (checkboxes.contains(R.id.key_b_flat)) { keys.add("A#"); keys.add("Bb"); }
+                if (checkboxes.contains(R.id.key_b)) keys.add("B");
+                if (checkboxes.contains(R.id.key_c)) keys.add("C");
+                if (checkboxes.contains(R.id.key_d_flat)) { keys.add("C#"); keys.add("Db"); }
+                if (checkboxes.contains(R.id.key_d)) keys.add("D");
+                if (checkboxes.contains(R.id.key_e_flat)) { keys.add("D#"); keys.add("Eb"); }
+                if (checkboxes.contains(R.id.key_e)) keys.add("E");
+                if (checkboxes.contains(R.id.key_f)) keys.add("F");
+                if (checkboxes.contains(R.id.key_f_sharp)) { keys.add("F#"); keys.add("Gb"); }
+                if (checkboxes.contains(R.id.key_g)) keys.add("G");
+                if (checkboxes.contains(R.id.key_a_flat)) { keys.add("G#"); keys.add("Ab"); }
+                if (!keys.isEmpty()) {
+                    query.where(C.Song.rawKey.format("' ' || {column} || ' '"),
+                        "LIKE", String.format("%% %s %%", keys.get(0)));
+                    keys.remove(0);
+                    for (String k : keys)
+                        query.or(C.Song.rawKey.format("' ' || {column} || ' '"),
+                            "LIKE", String.format("%% %s %%", k));
+                }
+                // Major/minor
+                boolean major = checkboxes.contains(R.id.key_major);
+                boolean minor = checkboxes.contains(R.id.key_minor);
+                if (major ^ minor) { // XOR: no filter needed if they're both true
+                    query.where(C.Song.rawKey, major ? "NOT LIKE" : "LIKE", "%min%");
+                    // The only 2 songs with key changes go between major and minor of the same
+                    // key, so this works for now
+                    query.or(C.Song.rawKey, "LIKE", "%,%");
+                }
+            }
+            // Page range
+            int [] pageRange = filters.getIntArray(SongFilterActivity.PAGE_RANGE);
+            if (pageRange != null && pageRange.length == 2) {
+                query.where(C.Song.number.cast("INT"), ">=", pageRange[0])
+                    .and(C.Song.number.cast("INT"), "<=", pageRange[1]);
+            }
+            return query;
         }
 
         /** Get the column for the search query **/
@@ -302,6 +380,7 @@ public class MainActivity extends SimpleTabActivity {
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
             if (resultCode == RESULT_OK) {
                 setFilterState(data.getBundleExtra(SongFilterActivity.EXTRA_FILTER_PARCEL));
+                updateQuery();
             }
         }
     }
