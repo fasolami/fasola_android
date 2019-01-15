@@ -3,6 +3,9 @@ package org.fasola.fasolaminutes;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.CheckBox;
 
 import com.appyvet.materialrangebar.RangeBar;
@@ -61,8 +64,32 @@ public class SongFilterActivity extends BaseActivity {
             getIntent().getBundleExtra(EXTRA_FILTER_PARCEL));
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean ret = super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_song_filter_activity, menu);
+        return ret;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.menu_clear) {
+            clear();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void clear() {
+        for (int id : CHECKBOX_IDS)
+            ((CheckBox) findViewById(id)).setChecked(false);
+        RangeBar pageRange = ((RangeBar) findViewById(R.id.page_number));
+        pageRange.setRangePinsByIndices(0, pageRange.getTickCount() - 1);
+    }
 
     private void loadBundle(Bundle state) {
+        clear();
         if (state != null) {
             // restore checkboxes
             ArrayList<Integer> checkboxes = state.getIntegerArrayList(CHECKBOXES);

@@ -105,4 +105,5 @@
     <string name="menu_leader_corrections">Submit a correction</string>
     <string name="menu_filter">Filter</string>
     <string name="title_activity_song_filter">Song Filter</string>
+    <string name="menu_clear">Clear</string>
 </resources>
