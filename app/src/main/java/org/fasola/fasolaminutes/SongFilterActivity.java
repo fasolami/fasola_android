@@ -92,11 +92,13 @@ public class SongFilterActivity extends BaseActivity {
         state.putIntegerArrayList(CHECKBOXES, checkboxes);
         // page range
         RangeBar pageRange = ((RangeBar) findViewById(R.id.page_number));
-        int offset = (int)pageRange.getTickStart();
-        state.putIntArray(PAGE_RANGE, new int[] {
-            offset + pageRange.getLeftIndex(),
-            offset + pageRange.getRightIndex()
-        });
+        if (pageRange.getLeftIndex() != 0 || pageRange.getRightIndex() != pageRange.getTickCount() - 1) {
+            int offset = (int) pageRange.getTickStart();
+            state.putIntArray(PAGE_RANGE, new int[]{
+                offset + pageRange.getLeftIndex(),
+                offset + pageRange.getRightIndex()
+            });
+        }
         return state;
     }
 
