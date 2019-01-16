@@ -131,30 +131,64 @@
             </TableRow>
         </TableLayout>
 
-
         <LinearLayout
-            android:id="@+id/major_minor_layout"
-            style="@style/FasolaToggleLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
             android:orientation="horizontal">
 
-            <CheckBox
-                android:id="@+id/key_major"
-                style="@style/FasolaToggle"
+            <LinearLayout
+                android:id="@+id/major_minor_layout"
+                style="@style/FasolaToggleLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Major" />
+                android:layout_margin="5dp"
+                android:orientation="horizontal">
 
-            <CheckBox
-                android:id="@+id/key_minor"
-                style="@style/FasolaToggle"
+                <CheckBox
+                    android:id="@+id/key_major"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Major" />
+
+                <CheckBox
+                    android:id="@+id/key_minor"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Minor" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/multiple_key_layout"
+                style="@style/FasolaToggleLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Minor" />
+                android:layout_margin="5dp"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/key_single"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Single" />
+
+                <CheckBox
+                    android:id="@+id/key_multiple"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Multiple" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -229,6 +263,32 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="6/8" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/multiple_time_layout"
+            style="@style/FasolaToggleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/time_single"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Single" />
+
+            <CheckBox
+                android:id="@+id/time_multiple"
+                style="@style/FasolaToggle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Multiple" />
 
         </LinearLayout>
 

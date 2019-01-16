@@ -31,6 +31,8 @@ public class SongFilterActivity extends BaseActivity {
         R.id.key_g,
         R.id.key_major,
         R.id.key_minor,
+        R.id.key_single,
+        R.id.key_multiple,
         R.id.time_2_2,
         R.id.time_2_4,
         R.id.time_3_2,
@@ -38,6 +40,8 @@ public class SongFilterActivity extends BaseActivity {
         R.id.time_4_4,
         R.id.time_6_4,
         R.id.time_6_8,
+        R.id.time_single,
+        R.id.time_multiple,
         R.id.page_bottom,
         R.id.page_full,
         R.id.page_left,
@@ -54,7 +58,9 @@ public class SongFilterActivity extends BaseActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             findViewById(R.id.key_layout).setClipToOutline(true);
             findViewById(R.id.major_minor_layout).setClipToOutline(true);
+            findViewById(R.id.multiple_key_layout).setClipToOutline(true);
             findViewById(R.id.time_layout).setClipToOutline(true);
+            findViewById(R.id.multiple_time_layout).setClipToOutline(true);
             findViewById(R.id.page_orientation_layout).setClipToOutline(true);
             findViewById(R.id.page_left_right_layout).setClipToOutline(true);
         }

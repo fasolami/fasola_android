@@ -225,6 +225,12 @@ public class MainActivity extends SimpleTabActivity {
                     times.remove(0);
                     for (String t : times) query.or(C.Song.time, "LIKE", t);
                 }
+                // Time changes
+                boolean singleTime = checkboxes.contains(R.id.time_single);
+                boolean multipleTimes = checkboxes.contains(R.id.time_multiple);
+                if (singleTime ^ multipleTimes) {
+                    query.where(C.Song.time, singleTime ? "NOT LIKE" : "LIKE", "%,%");
+                }
                 // Key signature
                 List<String> keys = new ArrayList<>();
                 if (checkboxes.contains(R.id.key_a)) keys.add("A");
@@ -247,10 +253,16 @@ public class MainActivity extends SimpleTabActivity {
                         query.or(C.Song.rawKey.format("' ' || {column} || ' '"),
                             "LIKE", String.format("%% %s %%", k));
                 }
+                // Key changes
+                boolean singleKey = checkboxes.contains(R.id.key_single);
+                boolean multipleKeys = checkboxes.contains(R.id.key_multiple);
+                if (singleKey ^ multipleKeys) {
+                    query.where(C.Song.rawKey, singleKey ? "NOT LIKE" : "LIKE", "%,%");
+                }
                 // Major/minor
                 boolean major = checkboxes.contains(R.id.key_major);
                 boolean minor = checkboxes.contains(R.id.key_minor);
-                if (major ^ minor) { // XOR: no filter needed if they're both true
+                if (major ^ minor) {
                     query.where(C.Song.rawKey, major ? "NOT LIKE" : "LIKE", "%min%");
                     // The only 2 songs with key changes go between major and minor of the same
                     // key, so this works for now
