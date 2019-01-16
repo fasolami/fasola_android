@@ -7,20 +7,23 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Key"
-            android:textAppearance="@android:style/TextAppearance.Holo.Medium" />
+            android:text="Key"/>
 
         <TableLayout
             android:id="@+id/key_layout"
             style="@style/FasolaToggleLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_margin="5dp"
             android:orientation="horizontal">
 
             <TableRow>
@@ -134,7 +137,7 @@
             style="@style/FasolaToggleLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_margin="5dp"
             android:orientation="horizontal">
 
             <CheckBox
@@ -158,15 +161,15 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Time Signature"
-            android:textAppearance="@android:style/TextAppearance.Holo.Medium" />
+            android:layout_marginTop="10dp"
+            android:text="Time Signature" />
 
         <LinearLayout
             android:id="@+id/time_layout"
             style="@style/FasolaToggleLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_margin="5dp"
             android:orientation="horizontal">
 
             <CheckBox
@@ -232,101 +235,107 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Page Orientation"
-            android:textAppearance="@android:style/TextAppearance.Holo.Medium" />
+            android:layout_marginTop="10dp"
+            android:text="Page Orientation" />
 
         <LinearLayout
-            android:id="@+id/page_orientation_layout"
-            style="@style/FasolaToggleLayout"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="horizontal">
-
-            <CheckBox
-                android:id="@+id/page_full"
-                style="@style/FasolaToggle"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="Full" />
+            android:layout_height="wrap_content">
 
             <LinearLayout
+                android:id="@+id/page_orientation_layout"
+                style="@style/FasolaToggleLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:layout_weight="3"
+                android:layout_margin="5dp"
+                android:orientation="horizontal">
+
+                <CheckBox
+                    android:id="@+id/page_full"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Full" />
 
                 <CheckBox
                     android:id="@+id/page_top"
                     style="@style/FasolaToggle"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Top" />
 
                 <CheckBox
                     android:id="@+id/page_bottom"
                     style="@style/FasolaToggle"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Bottom" />
 
             </LinearLayout>
-        </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/page_left_right_layout"
-            style="@style/FasolaToggleLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="horizontal">
-
-            <CheckBox
-                android:id="@+id/page_left"
-                style="@style/FasolaToggle"
+            <LinearLayout
+                android:id="@+id/page_left_right_layout"
+                style="@style/FasolaToggleLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Left" />
+                android:layout_weight="2"
+                android:layout_margin="5dp"
+                android:orientation="horizontal">
 
-            <CheckBox
-                android:id="@+id/page_right"
-                style="@style/FasolaToggle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Right" />
+                <CheckBox
+                    android:id="@+id/page_left"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Left" />
+
+                <CheckBox
+                    android:id="@+id/page_right"
+                    style="@style/FasolaToggle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Right" />
+
+            </LinearLayout>
 
         </LinearLayout>
-
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Page Number"
-            android:textAppearance="@android:style/TextAppearance.Holo.Medium" />
+            android:layout_marginTop="10dp"
+            android:text="Page Number" />
 
         <com.appyvet.materialrangebar.RangeBar
             android:id="@+id/page_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="25dp"
+            android:layout_marginTop="5dp"
 
+            app:mrb_connectingLineColors="@array/rangeBarColors"
             app:mrb_pinColor="@color/fasola_foreground"
             app:mrb_pinMaxFont="14sp"
             app:mrb_pinMinFont="14sp"
-            app:mrb_pinRadius="16dp"
 
+            app:mrb_pinRadius="16dp"
             app:mrb_pinTextColor="@color/fasola_background"
             app:mrb_rangeBar="true"
-            app:mrb_rangeBarColor="@color/fasola_foreground"
 
+            app:mrb_rangeBarColor="@color/fasola_foreground"
             app:mrb_rangeBarPaddingBottom="20dp"
             app:mrb_rangeBar_rounded="true"
             app:mrb_selectorBoundaryColor="@color/fasola_foreground"
             app:mrb_selectorBoundarySize="2dp"
-            app:mrb_connectingLineColors="@array/rangeBarColors"
             app:mrb_selectorColor="@color/fasola_foreground"
             app:mrb_selectorSize="6dp"
 

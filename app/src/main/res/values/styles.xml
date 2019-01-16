@@ -49,5 +49,7 @@
         <item name="android:background">@drawable/toggle_background</item>
         <item name="android:textColor">@color/toggle_text</item>
         <item name="android:button">@null</item> <!-- hide the actual check box -->
+        <item name="android:minWidth">42dp</item>
+        <item name="android:minHeight">42dp</item>
     </style>
 </resources>
