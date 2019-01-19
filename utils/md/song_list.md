@@ -20,3 +20,12 @@ Tap **sort** ![](ic_action_sort_by_size) to sort by
 * key signature
 * time signature
 * meter
+
+### Filtering
+
+Tap **filter** ![](ic_filter) to filter by
+
+* key
+* time signature
+* page orientation (left, right, top, bottom)
+* page range

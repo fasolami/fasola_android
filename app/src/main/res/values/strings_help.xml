@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ This file is part of FaSoLa Minutes for Android.
-  ~ Copyright (c) 2018 Mike Richards. All rights reserved.
+  ~ Copyright (c) 2019 Mike Richards. All rights reserved.
   -->
 
 <!-- Created automatically by md2xml.py -->
@@ -435,6 +435,14 @@ The song that was selected will be highlighted.</p>
 <li>key signature</li>
 <li>time signature</li>
 <li>meter</li>
+</ul>
+<h3>Filtering</h3>
+<p>Tap <b>filter</b> <img src="ic_filter"> to filter by</p>
+<ul>
+<li>key</li>
+<li>time signature</li>
+<li>page orientation (left, right, top, bottom)</li>
+<li>page range</li>
 </ul>
 ]]>
     </string>
