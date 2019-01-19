@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.BarLineChartBase;
@@ -74,6 +75,14 @@ public class MinutesApplication extends Application
                 return String.format("%d", (long) value);
             }
         });
+        // Font sizes
+        // sp -> dp
+        DisplayMetrics metrics = chart.getResources().getDisplayMetrics();
+        float fontSizeDp = 12 * metrics.scaledDensity / metrics.density;
+        chart.getData().setValueTextSize(fontSizeDp);
+        chart.getXAxis().setTextSize(fontSizeDp);
+        chart.getAxisRight().setTextSize(fontSizeDp);
+        chart.getAxisLeft().setTextSize(fontSizeDp);
         // Datasets
         float maxLeft = 0;
         float maxRight = 0;
