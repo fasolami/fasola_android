@@ -18,7 +18,6 @@ import android.text.Html;
 import android.text.Layout;
 import android.text.Spannable;
 import android.text.method.LinkMovementMethod;
-import android.text.style.BulletSpan;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.URLSpan;
 import android.util.Pair;
@@ -171,33 +170,36 @@ public class HelpActivity extends BaseActivity {
     };
 
     private Html.TagHandler mTagHandler = new Html.TagHandler() {
-        int mBulletGap = 10;
-        int mListItemIndent = 30;
-        Stack<BulletSpan> mBullets = new Stack<>();
+        int mListItemIndentSp = 15;
+        int mBulletIndentSp = 10;
+        Stack<LeadingMarginSpan> mListIndents = new Stack<>();
 
         @Override
         public void handleTag(boolean opening, String tag, Editable output, XMLReader xmlReader) {
             if (tag.equalsIgnoreCase("li")) {
                 if (opening) {
                     handleNewline(output);
-                    int len = output.length();
-                    BulletSpan bullet = new BulletSpan(BulletSpan.STANDARD_GAP_WIDTH);
-                    mBullets.push(bullet);
-                    output.setSpan(bullet, len, len, Spannable.SPAN_MARK_MARK);
+                    int pos = output.length();
+                    output.append("\u2022 ");
+                    int first = sp2px((mListIndents.size() + 1) * mListItemIndentSp);
+                    int rest = first + sp2px(mBulletIndentSp);
+                    LeadingMarginSpan indent = new LeadingMarginSpan.Standard(first, rest);
+                    mListIndents.push(indent);
+                    output.setSpan(indent, pos, pos, Spannable.SPAN_MARK_MARK);
                 } else {
                     handleNewline(output);
-                    BulletSpan bullet = mBullets.pop();
-                    int len = output.length();
-                    int start = output.getSpanStart(bullet);
-                    output.removeSpan(bullet);
-                    if (start != len) {
-                        Object marginSpan = new LeadingMarginSpan.Standard((mBullets.size() + 1) * mListItemIndent);
-                        Object bulletSpan = new BulletSpan(getBulletGap());
-                        output.setSpan(marginSpan, start, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        output.setSpan(bulletSpan, start, len, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                    }
+                    LeadingMarginSpan indent = mListIndents.pop();
+                    int end = output.length();
+                    int start = output.getSpanStart(indent);
+                    output.removeSpan(indent);
+                    if (start != end)
+                        output.setSpan(indent, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 }
             }
+        }
+
+        private int sp2px(int sp) {
+            return (int)(sp * getResources().getDisplayMetrics().scaledDensity);
         }
 
         // Make sure there is a newline at the end of the text
@@ -205,25 +207,6 @@ public class HelpActivity extends BaseActivity {
             int len = text.length();
             if (len >= 1 && text.charAt(len - 1) != '\n')
                 text.append('\n');
-        }
-
-        /**
-         * Voodoo to calculate the bullet gap
-         *
-         * Android adds text indent to nested bullets, but we're adding a LeadingMarginSpan
-         * separately, so we need to remove the bullet indent.
-         */
-        private int getBulletGap() {
-            int bulletCount = mBullets.size();
-            int BULLET_RADIUS = 3; // From BulletSpan
-            int gap = mBulletGap;
-            if (bulletCount > 0) {
-                gap -= mBulletGap + 2 * BULLET_RADIUS;
-                if (bulletCount > 1) {
-                    gap -= (bulletCount - 1) * mListItemIndent;
-                }
-            }
-            return gap;
         }
     };
 
