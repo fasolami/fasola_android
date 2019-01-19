@@ -34,6 +34,9 @@ import java.util.Stack;
 
 public class HelpActivity extends BaseActivity {
     public final static String EXTRA_HELP_ID = "org.fasola.fasolaminutes.EXTRA_HELP_ID";
+    public final static String EXTRA_HELP_SCROLL = "org.fasola.fasolaminutes.EXTRA_HELP_SCROLL";
+    public final static String HELP_STACK = "org.fasola.fasolaminutes.HELP_STACK";
+
     TextView mText;
     ScrollView mScroller;
     Stack<Pair<Integer, Integer>> mLinkStack = new Stack<>(); // help id, scroll position
@@ -61,9 +64,33 @@ public class HelpActivity extends BaseActivity {
         mScroller = (ScrollView)findViewById(R.id.scroller);
         mText.setMovementMethod(mLinkHandler);
         mLineHeight = mText.getLineHeight();
-        int id = getIntent().getIntExtra(EXTRA_HELP_ID, -1);
+        loadBundle(savedInstanceState != null ? savedInstanceState : getIntent().getExtras());
+    }
+
+    public void loadBundle(final Bundle bundle) {
+        // populate the link stack
+        mLinkStack.clear();
+        int[] stack = bundle.getIntArray(HELP_STACK);
+        if (stack != null)
+            for (int i = 0; i + 1 < stack.length; i += 2)
+                mLinkStack.push(Pair.create(stack[i], stack[i + 1]));
+        // navigate to the current page
+        int id = bundle.getInt(EXTRA_HELP_ID, -1);
+        int scroll = bundle.getInt(EXTRA_HELP_SCROLL, 0);
         if (id != -1)
-            navigateTo(id);
+            navigateTo(id, scroll);
+    }
+
+    public void onSaveInstanceState(final Bundle saveInstanceState) {
+        super.onSaveInstanceState(saveInstanceState);
+        saveInstanceState.putInt(EXTRA_HELP_ID, mCurrentid);
+        saveInstanceState.putInt(EXTRA_HELP_SCROLL, mScroller.getScrollY());
+        int[] stack = new int[mLinkStack.size() * 2];
+        for (int i = 0; i < mLinkStack.size(); ++i) {
+            stack[2 * i] = mLinkStack.get(i).first;
+            stack[2 * i + 1] = mLinkStack.get(i).second;
+        }
+        saveInstanceState.putIntArray(HELP_STACK, stack);
     }
 
     private void navigateTo(int id, final int scrollPos) {
