@@ -10,15 +10,16 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.BarLineChartBase;
+import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.formatter.ValueFormatter;
-import com.github.mikephil.charting.utils.ViewPortHandler;
+import com.github.mikephil.charting.highlight.Highlight;
 
 /**
  * Application Override
@@ -46,7 +47,7 @@ public class MinutesApplication extends Application
     public final static int MIN_Y_AXIS = 4;
     public final static int MIN_X_AXIS_RANGE = 2; // must be even
 
-    public static void applyDefaultChartStyle(BarLineChartBase chart) {
+    public static void applyDefaultChartStyle(final BarLineChartBase chart) {
         chart.getLegend().setEnabled(false);
         chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
         chart.getXAxis().setDrawGridLines(false);
@@ -62,19 +63,13 @@ public class MinutesApplication extends Application
         chart.setDrawGridBackground(false);
         if (chart instanceof BarChart)
             ((BarChart) chart).setDrawBarShadow(false);
-        // Fix label count
+        // Fix Y-axis label count
         int labelCount = (int)(chart.getYChartMax() - chart.getYChartMin());
         if (labelCount < chart.getAxisLeft().getLabelCount())
             chart.getAxisLeft().setLabelCount(labelCount, true);
         if (labelCount < chart.getAxisRight().getLabelCount())
             chart.getAxisRight().setLabelCount(labelCount, true);
-        // Avoid decimals
-        chart.getData().setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value, Entry entry, int dataSetIndex, ViewPortHandler viewPortHandler) {
-                return String.format("%d", (long) value);
-            }
-        });
+
         // Font sizes
         // sp -> dp
         DisplayMetrics metrics = chart.getResources().getDisplayMetrics();
@@ -105,6 +100,29 @@ public class MinutesApplication extends Application
             chart.getAxisRight().setAxisMaxValue(MIN_Y_AXIS);
         chart.getAxisRight().setAxisMinValue(0);
         chart.getAxisLeft().setAxisMinValue(0);
+
+        // Show highlighted values with a custom view
+        // More or less copied from https://github.com/PhilJay/MPAndroidChart/wiki/MarkerView
+        chart.getData().setDrawValues(false);
+        chart.setMarkerView(new MarkerView(chart.getContext(), R.layout.chart_marker) {
+            private TextView mText;
+
+            @Override
+            public void refreshContent(Entry e, Highlight highlight) {
+                if (mText == null) mText = (TextView)findViewById(R.id.chart_marker_text);
+                mText.setText(String.format("%d", (long)e.getVal()));
+            }
+
+            @Override
+            public int getXOffset(float xpos) {
+                return -(getWidth() / 2);
+            }
+
+            @Override
+            public int getYOffset(float ypos) {
+                return -getHeight();
+            }
+        });
         // No zoom
         chart.setScaleEnabled(false);
         // Recalculate everything since we've changed min/max, etc.
