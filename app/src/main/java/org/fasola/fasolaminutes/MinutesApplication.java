@@ -63,6 +63,33 @@ public class MinutesApplication extends Application
         chart.setDrawGridBackground(false);
         if (chart instanceof BarChart)
             ((BarChart) chart).setDrawBarShadow(false);
+
+        // Data colors
+        if (chart.getData().getDataSetCount() > 0)
+            ((DataSet)chart.getData().getDataSetByIndex(0)).setColor(
+                getContext().getResources().getColor(R.color.fasola_foreground));
+        if (chart.getData().getDataSetCount() > 1)
+            ((DataSet)chart.getData().getDataSetByIndex(1)).setColor(
+                getContext().getResources().getColor(R.color.tab_background));
+
+        // Data range
+        float maxLeft = 0;
+        float maxRight = 0;
+        for (int i = 0; i < chart.getData().getDataSetCount(); ++i) {
+            DataSet data = (DataSet)chart.getData().getDataSetByIndex(i);
+            if (data.getAxisDependency() == YAxis.AxisDependency.LEFT)
+                maxLeft = Math.max(maxLeft, data.getYMax());
+            else
+                maxRight = Math.max(maxRight, data.getYMax());
+        }
+        // Set max y axis value
+        if (maxLeft > 0 && maxLeft < MIN_Y_AXIS)
+            chart.getAxisLeft().setAxisMaxValue(MIN_Y_AXIS);
+        if (maxRight > 0 && maxRight < MIN_Y_AXIS)
+            chart.getAxisRight().setAxisMaxValue(MIN_Y_AXIS);
+        chart.getAxisRight().setAxisMinValue(0);
+        chart.getAxisLeft().setAxisMinValue(0);
+
         // Fix Y-axis label count
         int labelCount = (int)(chart.getYChartMax() - chart.getYChartMin());
         if (labelCount < chart.getAxisLeft().getLabelCount())
@@ -78,28 +105,6 @@ public class MinutesApplication extends Application
         chart.getXAxis().setTextSize(fontSizeDp);
         chart.getAxisRight().setTextSize(fontSizeDp);
         chart.getAxisLeft().setTextSize(fontSizeDp);
-        // Datasets
-        float maxLeft = 0;
-        float maxRight = 0;
-        for (int i = 0; i < chart.getData().getDataSetCount(); ++i) {
-            DataSet data = (DataSet)chart.getData().getDataSetByIndex(i);
-            // Data color
-            if (i == 0)
-                data.setColor(getContext().getResources().getColor(R.color.fasola_foreground));
-            else if (i == 1)
-                data.setColor(getContext().getResources().getColor(R.color.tab_background));
-            if (data.getAxisDependency() == YAxis.AxisDependency.LEFT)
-                maxLeft = Math.max(maxLeft, data.getYMax());
-            else
-                maxRight = Math.max(maxRight, data.getYMax());
-        }
-        // Set max y axis value
-        if (maxLeft > 0 && maxLeft < MIN_Y_AXIS)
-            chart.getAxisLeft().setAxisMaxValue(MIN_Y_AXIS);
-        if (maxRight > 0 && maxRight < MIN_Y_AXIS)
-            chart.getAxisRight().setAxisMaxValue(MIN_Y_AXIS);
-        chart.getAxisRight().setAxisMinValue(0);
-        chart.getAxisLeft().setAxisMinValue(0);
 
         // Show highlighted values with a custom view
         // More or less copied from https://github.com/PhilJay/MPAndroidChart/wiki/MarkerView
