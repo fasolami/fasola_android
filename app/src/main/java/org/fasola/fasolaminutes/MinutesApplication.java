@@ -72,11 +72,19 @@ public class MinutesApplication extends Application
             ((DataSet)chart.getData().getDataSetByIndex(1)).setColor(
                 getContext().getResources().getColor(R.color.tab_background));
 
-        // Data range
+        // Data range and type
         float maxLeft = 0;
         float maxRight = 0;
+        boolean hasFloatData = false;
         for (int i = 0; i < chart.getData().getDataSetCount(); ++i) {
             DataSet data = (DataSet)chart.getData().getDataSetByIndex(i);
+            // Do we have any floats?
+            if (! hasFloatData)
+                for (int j = 0; j < data.getEntryCount(); ++j)
+                    if (data.getEntryForIndex(j).getVal() % 1 != 0) {
+                        hasFloatData = true;
+                        break;
+                    }
             if (data.getAxisDependency() == YAxis.AxisDependency.LEFT)
                 maxLeft = Math.max(maxLeft, data.getYMax());
             else
