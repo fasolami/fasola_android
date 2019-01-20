@@ -90,20 +90,29 @@ public class MinutesApplication extends Application
             else
                 maxRight = Math.max(maxRight, data.getYMax());
         }
-        // Set max y axis value
-        if (maxLeft > 0 && maxLeft < MIN_Y_AXIS)
-            chart.getAxisLeft().setAxisMaxValue(MIN_Y_AXIS);
-        if (maxRight > 0 && maxRight < MIN_Y_AXIS)
-            chart.getAxisRight().setAxisMaxValue(MIN_Y_AXIS);
+        if (! hasFloatData) {
+            if (maxLeft > 0 && maxLeft < MIN_Y_AXIS)
+                chart.getAxisLeft().setAxisMaxValue(MIN_Y_AXIS);
+            if (maxRight > 0 && maxRight < MIN_Y_AXIS)
+                chart.getAxisRight().setAxisMaxValue(MIN_Y_AXIS);
+        }
         chart.getAxisRight().setAxisMinValue(0);
         chart.getAxisLeft().setAxisMinValue(0);
 
-        // Fix Y-axis label count
-        int labelCount = (int)(chart.getYChartMax() - chart.getYChartMin());
-        if (labelCount < chart.getAxisLeft().getLabelCount())
-            chart.getAxisLeft().setLabelCount(labelCount, true);
-        if (labelCount < chart.getAxisRight().getLabelCount())
-            chart.getAxisRight().setLabelCount(labelCount, true);
+        // Y-axis labels/ticks
+        // set to defaults
+        chart.getAxisLeft().setLabelCount(6, false);
+        chart.getAxisRight().setLabelCount(6, false);
+        if (! hasFloatData) {
+            // If this is an integer graph and we have more tick marks than y-axis range, some of
+            // the ticks will be fractions. We can avoid this by setting the number of labels equal
+            // to the y-axis range.
+            int labelCount = (int) (chart.getYChartMax() - chart.getYChartMin());
+            if (labelCount < chart.getAxisLeft().getLabelCount())
+                chart.getAxisLeft().setLabelCount(labelCount, false);
+            if (labelCount < chart.getAxisRight().getLabelCount())
+                chart.getAxisRight().setLabelCount(labelCount, false);
+        }
 
         // Font sizes
         // sp -> dp
