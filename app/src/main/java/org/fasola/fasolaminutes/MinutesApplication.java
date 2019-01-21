@@ -154,7 +154,7 @@ public class MinutesApplication extends Application
                 if (mText == null) mText = (TextView)findViewById(R.id.chart_marker_text);
                 float value = e.getVal();
                 if (precision > 0)
-                    mText.setText(String.format("%." + String.valueOf(precision) + "f", value));
+                    mText.setText(String.format("%." + String.valueOf(precision + 1) + "f", value));
                 else
                     mText.setText(String.format("%d", (long)value));
             }
