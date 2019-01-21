@@ -6,6 +6,12 @@
 
 See leading statistics and a graph of leads per year.
 
+Tap **graph settings** ![](ic_tune) to change the graph to view
+
+* leads per year
+* rank by year, out of 554 total songs
+* leads per year as a percent of all songs led
+
 ### Words
 
 See words, attributions, key signature, time signature, and meter.

@@ -407,6 +407,12 @@ The song that was selected will be highlighted.</p>
 <h1>Song details</h1>
 <h3>Stats</h3>
 <p>See leading statistics and a graph of leads per year.</p>
+<p>Tap <b>graph settings</b> <img src="ic_tune"> to change the graph to view</p>
+<ul>
+<li>leads per year</li>
+<li>rank by year, out of 554 total songs</li>
+<li>leads per year as a percent of all songs led</li>
+</ul>
 <h3>Words</h3>
 <p>See words, attributions, key signature, time signature, and meter.</p>
 <h3>Top leaders</h3>
