@@ -125,10 +125,19 @@ public class MinutesApplication extends Application
         chart.getAxisLeft().setTextSize(fontSizeDp);
 
         // Value format
+        final int precision =
+            !hasFloatData ? 0 :
+            maxLeft > 1 ? 1 :
+            maxLeft > 0.1 ? 2 :
+            maxLeft > 0.01 ? 3 :
+            4; // else
         YAxisValueFormatter formatter = new YAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, YAxis yAxis) {
-                return String.format("%d", (long)value);
+                if (precision > 0)
+                    return String.format("%." + String.valueOf(precision) + "f", value);
+                else
+                    return String.format("%d", (long)value);
             }
         };
         chart.getAxisLeft().setValueFormatter(formatter);
@@ -143,7 +152,11 @@ public class MinutesApplication extends Application
             @Override
             public void refreshContent(Entry e, Highlight highlight) {
                 if (mText == null) mText = (TextView)findViewById(R.id.chart_marker_text);
-                mText.setText(String.format("%d", (long)e.getVal()));
+                float value = e.getVal();
+                if (precision > 0)
+                    mText.setText(String.format("%." + String.valueOf(precision) + "f", value));
+                else
+                    mText.setText(String.format("%d", (long)value));
             }
 
             @Override
@@ -156,6 +169,7 @@ public class MinutesApplication extends Application
                 return -getHeight();
             }
         });
+
         // No zoom
         chart.setScaleEnabled(false);
         // Recalculate everything since we've changed min/max, etc.
