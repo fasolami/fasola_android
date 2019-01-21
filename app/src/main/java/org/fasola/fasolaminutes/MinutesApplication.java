@@ -19,6 +19,7 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.formatter.YAxisValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 
 /**
@@ -122,6 +123,16 @@ public class MinutesApplication extends Application
         chart.getXAxis().setTextSize(fontSizeDp);
         chart.getAxisRight().setTextSize(fontSizeDp);
         chart.getAxisLeft().setTextSize(fontSizeDp);
+
+        // Value format
+        YAxisValueFormatter formatter = new YAxisValueFormatter() {
+            @Override
+            public String getFormattedValue(float value, YAxis yAxis) {
+                return String.format("%d", (long)value);
+            }
+        };
+        chart.getAxisLeft().setValueFormatter(formatter);
+        chart.getAxisRight().setValueFormatter(formatter);
 
         // Show highlighted values with a custom view
         // More or less copied from https://github.com/PhilJay/MPAndroidChart/wiki/MarkerView
