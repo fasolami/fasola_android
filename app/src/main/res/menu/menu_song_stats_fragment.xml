@@ -18,6 +18,10 @@
                 android:title="@string/menu_graph_leads_per_year"
                 app:showAsAction="never" />
 
+            <item android:id="@+id/menu_graph_song_rank"
+                android:title="@string/menu_graph_song_rank"
+                app:showAsAction="never" />
+
         </group>
         </menu>
 

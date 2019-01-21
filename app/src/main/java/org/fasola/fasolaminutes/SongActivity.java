@@ -28,6 +28,8 @@ import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.CombinedData;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 
 import java.util.ArrayList;
 
@@ -188,6 +190,10 @@ public class SongActivity extends SimpleTabActivity {
 
         private SQL.Query getChartQuery() {
             switch (mGraphSettingId) {
+                case R.id.menu_graph_song_rank:
+                    return C.SongStats.select(C.SongStats.year, C.SongStats.rank)
+                        .whereEq(C.SongStats.songId)
+                        .order(C.SongStats.year, "ASC");
                 case R.id.menu_graph_leads_per_year:
                 default:
                     return C.SongStats.select(C.SongStats.year, C.SongStats.leadCount)
@@ -214,6 +220,12 @@ public class SongActivity extends SimpleTabActivity {
                     CombinedData data = new CombinedData(xVals);
                     // by graph
                     switch (mGraphSettingId) {
+                        case R.id.menu_graph_song_rank:
+                            LineDataSet lineDataSet = new LineDataSet(entries, "");
+                            lineDataSet.setDrawCircles(false);
+                            lineDataSet.setLineWidth(2);
+                            data.setData(new LineData(xVals, lineDataSet));
+                            return data;
                         case R.id.menu_graph_leads_per_year:
                         default:
                             // Bar graphs need a BarEntry array
@@ -230,6 +242,14 @@ public class SongActivity extends SimpleTabActivity {
                     chart.getAxisLeft().resetAxisMaxValue();
                     chart.getAxisLeft().resetAxisMinValue();
                     chart.getAxisLeft().setInverted(false);
+                    // Graph-specific styles
+                    switch (mGraphSettingId) {
+                        case R.id.menu_graph_song_rank:
+                            chart.getAxisLeft().setAxisMaxValue(C.SONG_COUNT);
+                            chart.getAxisLeft().setAxisMinValue(1);
+                            chart.getAxisLeft().setInverted(true);
+                            break;
+                    }
                     // Global styles
                     MinutesApplication.applyDefaultChartStyle(chart);
                 }
