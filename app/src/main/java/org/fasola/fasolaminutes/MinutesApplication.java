@@ -57,10 +57,10 @@ public class MinutesApplication extends Application
         chart.getAxisRight().setDrawAxisLine(false);
         chart.getAxisRight().setDrawLabels(false);
         chart.getAxisRight().setDrawZeroLine(false);
-        chart.getAxisLeft().setDrawGridLines(false);
-        chart.getAxisLeft().setDrawAxisLine(false);
-        chart.getAxisLeft().setDrawLabels(false);
-        chart.getAxisLeft().setDrawZeroLine(false);
+        chart.getAxisLeft().setDrawGridLines(true);
+        chart.getAxisLeft().setDrawAxisLine(true);
+        chart.getAxisLeft().setDrawLabels(true);
+        chart.getAxisLeft().setDrawZeroLine(true);
         chart.setDrawGridBackground(false);
         if (chart instanceof BarChart)
             ((BarChart) chart).setDrawBarShadow(false);
