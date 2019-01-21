@@ -22,10 +22,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.CombinedChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.CombinedData;
 
 import java.util.ArrayList;
 
@@ -196,7 +197,7 @@ public class SongActivity extends SimpleTabActivity {
 
         private void updateChart() {
             long id = getSongId();
-            final BarChart chart = (BarChart)getView().findViewById(R.id.chart);
+            final CombinedChart chart = (CombinedChart)getView().findViewById(R.id.chart);
             chart.setNoDataText("");
             chart.setDescription("");
             getLoaderManager().initLoader(mGraphSettingId, null, new MinutesLoader(getChartQuery(), String.valueOf(id)) {
@@ -204,15 +205,16 @@ public class SongActivity extends SimpleTabActivity {
                 public void onLoadFinished(Cursor cursor) {
                     // Get data
                     ArrayList<String> xVals = new ArrayList<>();
-                    ArrayList<BarEntry> countVals = new ArrayList<>();
+                    ArrayList<BarEntry> barVals = new ArrayList<>();
                     while (cursor.moveToNext()) {
-                        C.SongStatsDAO stats = C.SongStats.fromCursor(cursor);
-                        countVals.add(new BarEntry(stats.leadCount.getInt(), xVals.size()));
-                        xVals.add(stats.year.getString());
+                        barVals.add(new BarEntry(cursor.getFloat(1), xVals.size()));
+                        xVals.add(cursor.getString(0));
                     }
                     // Set chart data
-                    BarDataSet countSet = new BarDataSet(countVals, "Times Led");
-                    BarData data = new BarData(xVals, countSet);
+                    CombinedData data = new CombinedData(xVals);
+                    BarDataSet countSet = new BarDataSet(barVals, "Times Led");
+                    BarData barData = new BarData(xVals, countSet);
+                    data.setData(barData);
                     chart.setData(data);
                     // Style chart
                     MinutesApplication.applyDefaultChartStyle(chart);
