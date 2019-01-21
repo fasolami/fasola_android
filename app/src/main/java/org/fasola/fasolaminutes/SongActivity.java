@@ -135,7 +135,7 @@ public class SongActivity extends SimpleTabActivity {
         @Override
         public void onViewCreated(final View view, Bundle savedInstanceState) {
             super.onViewCreated(view, savedInstanceState);
-            long id = getArguments().getLong(CursorListFragment.EXTRA_ID, -1);
+            long id = getSongId();
             // Stats summary
             SQL.Query query = C.Song.select(C.Song.leaderCount, C.Song.leadCount, C.Song.coleadCount)
                                     .whereEq(C.Song.id);
@@ -155,13 +155,26 @@ public class SongActivity extends SimpleTabActivity {
                     }
                 }
             });
-            // Chart data
-            final BarChart chart = (BarChart)view.findViewById(R.id.chart);
+            // Chart
+            updateChart();
+        }
+
+        private long getSongId() {
+            return getArguments().getLong(CursorListFragment.EXTRA_ID, -1);
+        }
+
+        private SQL.Query getChartQuery() {
+            return C.SongStats.select(C.SongStats.year, C.SongStats.leadCount)
+                .whereEq(C.SongStats.songId)
+                .order(C.SongStats.year, "ASC");
+        }
+
+        private void updateChart() {
+            long id = getSongId();
+            final BarChart chart = (BarChart)getView().findViewById(R.id.chart);
             chart.setNoDataText("");
-            query = C.SongStats.select(C.SongStats.year, C.SongStats.leadCount)
-                                           .whereEq(C.SongStats.songId)
-                                           .order(C.SongStats.year, "ASC");
-            getLoaderManager().initLoader(2, null, new MinutesLoader(query, String.valueOf(id)) {
+            chart.setDescription("");
+            getLoaderManager().initLoader(2, null, new MinutesLoader(getChartQuery(), String.valueOf(id)) {
                 @Override
                 public void onLoadFinished(Cursor cursor) {
                     // Get data
@@ -175,7 +188,6 @@ public class SongActivity extends SimpleTabActivity {
                     // Set chart data
                     BarDataSet countSet = new BarDataSet(countVals, "Times Led");
                     BarData data = new BarData(xVals, countSet);
-                    chart.setDescription("");
                     chart.setData(data);
                     // Style chart
                     MinutesApplication.applyDefaultChartStyle(chart);
