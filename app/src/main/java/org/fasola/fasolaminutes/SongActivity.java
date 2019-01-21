@@ -15,6 +15,9 @@ import android.text.style.LeadingMarginSpan;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -126,9 +129,27 @@ public class SongActivity extends SimpleTabActivity {
     }
 
     public static class SongStatsFragment extends Fragment {
+        private static final String BUNDLE_GRAPH_SETTING = "GRAPH_SETTING";
+        int mGraphSettingId = -1;
+
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            // load saved data
+            if (savedInstanceState != null) {
+                mGraphSettingId = savedInstanceState.getInt(BUNDLE_GRAPH_SETTING);
+            }
+        }
+
+        @Override
+        public void onSaveInstanceState(Bundle outState) {
+            super.onSaveInstanceState(outState);
+            outState.putInt(BUNDLE_GRAPH_SETTING, mGraphSettingId);
+        }
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+            setHasOptionsMenu(true);
             return inflater.inflate(R.layout.fragment_song_stats, container, false);
         }
 
@@ -164,9 +185,13 @@ public class SongActivity extends SimpleTabActivity {
         }
 
         private SQL.Query getChartQuery() {
-            return C.SongStats.select(C.SongStats.year, C.SongStats.leadCount)
-                .whereEq(C.SongStats.songId)
-                .order(C.SongStats.year, "ASC");
+            switch (mGraphSettingId) {
+                case R.id.menu_graph_leads_per_year:
+                default:
+                    return C.SongStats.select(C.SongStats.year, C.SongStats.leadCount)
+                        .whereEq(C.SongStats.songId)
+                        .order(C.SongStats.year, "ASC");
+            }
         }
 
         private void updateChart() {
@@ -174,7 +199,7 @@ public class SongActivity extends SimpleTabActivity {
             final BarChart chart = (BarChart)getView().findViewById(R.id.chart);
             chart.setNoDataText("");
             chart.setDescription("");
-            getLoaderManager().initLoader(2, null, new MinutesLoader(getChartQuery(), String.valueOf(id)) {
+            getLoaderManager().initLoader(mGraphSettingId, null, new MinutesLoader(getChartQuery(), String.valueOf(id)) {
                 @Override
                 public void onLoadFinished(Cursor cursor) {
                     // Get data
@@ -197,6 +222,28 @@ public class SongActivity extends SimpleTabActivity {
                 }
             });
         }
+
+        @Override
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+            inflater.inflate(R.menu.menu_song_stats_fragment, menu);
+            // Initial graph setting
+            MenuItem item = menu.findItem(
+                mGraphSettingId != -1 ? mGraphSettingId : R.id.menu_graph_leads_per_year);
+            if (item != null)
+                item.setChecked(true);
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+            if (item.getGroupId() == R.id.menu_group_graph_settings) {
+                item.setChecked(true);
+                mGraphSettingId = item.getItemId();
+                updateChart();
+                return true;
+            }
+            return super.onOptionsItemSelected(item);
+        }
+
     }
 
     public static class SongNeighborsFragment extends CursorListFragment {

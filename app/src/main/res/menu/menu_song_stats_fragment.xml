@@ -1,0 +1,25 @@
+<!--
+  ~ This file is part of FaSoLa Minutes for Android.
+  ~ Copyright (c) 2016 Mike Richards. All rights reserved.
+  -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:id="@+id/menu_graph_settings"
+        android:title="@string/graph_settings"
+        android:icon="@drawable/ic_tune"
+        android:showAsAction="ifRoom">
+
+        <menu>
+        <group android:id="@+id/menu_group_graph_settings"
+            android:checkableBehavior="single">
+
+            <item android:id="@+id/menu_graph_leads_per_year"
+                android:title="@string/menu_graph_leads_per_year"
+                app:showAsAction="never" />
+
+        </group>
+        </menu>
+
+    </item>
+</menu>
