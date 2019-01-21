@@ -18,8 +18,10 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarLineScatterCandleBubbleDataSet;
 import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.YAxisValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
@@ -50,14 +52,19 @@ public class MinutesApplication extends Application
     public final static int MIN_Y_AXIS = 4;
     public final static int MIN_X_AXIS_RANGE = 2; // must be even
 
+    public static void setDataSetColor(DataSet dataSet, int colorResource) {
+        int color = getContext().getResources().getColor(colorResource);
+        dataSet.setColor(color);
+        if (dataSet instanceof LineDataSet)
+            ((BarLineScatterCandleBubbleDataSet) dataSet).setHighLightColor(color);
+    }
+
     public static void applyDefaultChartStyle(final BarLineChartBase chart) {
         // Data colors
         if (chart.getData().getDataSetCount() > 0)
-            ((DataSet)chart.getData().getDataSetByIndex(0)).setColor(
-                getContext().getResources().getColor(R.color.fasola_foreground));
+            setDataSetColor((DataSet) chart.getData().getDataSetByIndex(0), R.color.fasola_foreground);
         if (chart.getData().getDataSetCount() > 1)
-            ((DataSet)chart.getData().getDataSetByIndex(1)).setColor(
-                getContext().getResources().getColor(R.color.tab_background));
+            setDataSetColor((DataSet) chart.getData().getDataSetByIndex(1), R.color.tab_background);
 
         // Data range and type
         float maxLeft = 0;
