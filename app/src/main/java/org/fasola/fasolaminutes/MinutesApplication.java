@@ -14,11 +14,13 @@ import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.BarLineChartBase;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.MarkerView;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.DataSet;
 import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.YAxisValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 
@@ -77,6 +79,7 @@ public class MinutesApplication extends Application
         float maxLeft = 0;
         float maxRight = 0;
         boolean hasFloatData = false;
+        boolean hasLineData = (chart instanceof LineChart);
         for (int i = 0; i < chart.getData().getDataSetCount(); ++i) {
             DataSet data = (DataSet)chart.getData().getDataSetByIndex(i);
             // Do we have any floats?
@@ -86,6 +89,7 @@ public class MinutesApplication extends Application
                         hasFloatData = true;
                         break;
                     }
+            hasLineData = hasLineData || (data instanceof LineDataSet);
             if (data.getAxisDependency() == YAxis.AxisDependency.LEFT)
                 maxLeft = Math.max(maxLeft, data.getYMax());
             else
