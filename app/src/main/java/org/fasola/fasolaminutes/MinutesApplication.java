@@ -51,22 +51,6 @@ public class MinutesApplication extends Application
     public final static int MIN_X_AXIS_RANGE = 2; // must be even
 
     public static void applyDefaultChartStyle(final BarLineChartBase chart) {
-        chart.getLegend().setEnabled(false);
-        chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-        chart.getXAxis().setDrawGridLines(false);
-        chart.getXAxis().setDrawAxisLine(false);
-        chart.getAxisRight().setDrawGridLines(false);
-        chart.getAxisRight().setDrawAxisLine(false);
-        chart.getAxisRight().setDrawLabels(false);
-        chart.getAxisRight().setDrawZeroLine(false);
-        chart.getAxisLeft().setDrawGridLines(true);
-        chart.getAxisLeft().setDrawAxisLine(true);
-        chart.getAxisLeft().setDrawLabels(true);
-        chart.getAxisLeft().setDrawZeroLine(true);
-        chart.setDrawGridBackground(false);
-        if (chart instanceof BarChart)
-            ((BarChart) chart).setDrawBarShadow(false);
-
         // Data colors
         if (chart.getData().getDataSetCount() > 0)
             ((DataSet)chart.getData().getDataSetByIndex(0)).setColor(
@@ -118,6 +102,24 @@ public class MinutesApplication extends Application
             if (labelCount < chart.getAxisRight().getLabelCount())
                 chart.getAxisRight().setLabelCount(labelCount, false);
         }
+
+        // Grid and legend
+        chart.getLegend().setEnabled(false);
+        chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        chart.getXAxis().setDrawGridLines(hasLineData);
+        chart.getXAxis().setDrawAxisLine(hasLineData);
+        chart.getXAxis().setAvoidFirstLastClipping(true);
+        chart.getAxisRight().setDrawGridLines(false);
+        chart.getAxisRight().setDrawAxisLine(hasLineData);
+        chart.getAxisRight().setDrawLabels(false);
+        chart.getAxisRight().setDrawZeroLine(false);
+        chart.getAxisLeft().setDrawGridLines(hasLineData);
+        chart.getAxisLeft().setDrawAxisLine(false);
+        chart.getAxisLeft().setDrawLabels(true);
+        chart.getAxisLeft().setDrawZeroLine(hasLineData);
+        chart.setDrawGridBackground(false);
+        if (chart instanceof BarChart)
+            ((BarChart) chart).setDrawBarShadow(false);
 
         // Font sizes
         // sp -> dp
