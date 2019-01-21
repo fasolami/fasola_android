@@ -27,6 +27,7 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.data.CombinedData;
+import com.github.mikephil.charting.data.Entry;
 
 import java.util.ArrayList;
 
@@ -201,26 +202,43 @@ public class SongActivity extends SimpleTabActivity {
             chart.setNoDataText("");
             chart.setDescription("");
             getLoaderManager().initLoader(mGraphSettingId, null, new MinutesLoader(getChartQuery(), String.valueOf(id)) {
-                @Override
-                public void onLoadFinished(Cursor cursor) {
-                    // Get data
+
+                private CombinedData getChartData(Cursor cursor) {
+                    // Common
                     ArrayList<String> xVals = new ArrayList<>();
-                    ArrayList<BarEntry> barVals = new ArrayList<>();
+                    ArrayList<Entry> entries = new ArrayList<>();
                     while (cursor.moveToNext()) {
-                        barVals.add(new BarEntry(cursor.getFloat(1), xVals.size()));
+                        entries.add(new Entry(cursor.getFloat(1), cursor.getPosition()));
                         xVals.add(cursor.getString(0));
                     }
-                    // Set chart data
                     CombinedData data = new CombinedData(xVals);
-                    BarDataSet countSet = new BarDataSet(barVals, "Times Led");
-                    BarData barData = new BarData(xVals, countSet);
-                    data.setData(barData);
-                    chart.setData(data);
-                    // Style chart
+                    // by graph
+                    switch (mGraphSettingId) {
+                        case R.id.menu_graph_leads_per_year:
+                        default:
+                            // Bar graphs need a BarEntry array
+                            ArrayList<BarEntry> barEntries = new ArrayList<>();
+                            for (Entry entry : entries)
+                                barEntries.add(new BarEntry(entry.getVal(), entry.getXIndex()));
+                            data.setData(new BarData(xVals, new BarDataSet(barEntries, "")));
+                            return data;
+                    }
+                }
+
+                private void styleChart() {
+                    // Reset
+                    chart.getAxisLeft().resetAxisMaxValue();
+                    chart.getAxisLeft().resetAxisMinValue();
+                    chart.getAxisLeft().setInverted(false);
+                    // Global styles
                     MinutesApplication.applyDefaultChartStyle(chart);
-                    // Update -- if the query took a little while, sometimes the chart doesn't
-                    // want to redraw, so we force it here.
-                    chart.invalidate();
+                }
+
+                @Override
+                public void onLoadFinished(Cursor cursor) {
+                    chart.setData(getChartData(cursor));
+                    styleChart();
+                    chart.invalidate(); // redraw
                 }
             });
         }
