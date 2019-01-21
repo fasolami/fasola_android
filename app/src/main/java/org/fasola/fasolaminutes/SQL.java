@@ -326,7 +326,7 @@ public class SQL {
         static final Pattern keyPat = Pattern.compile("\\W+");
         public void setName(String name) {
             this.name = name;
-            key = keyPat.matcher(name).replaceAll("_");
+            key = "col_" + keyPat.matcher(name).replaceAll("_");
         }
 
         public String getKey() {

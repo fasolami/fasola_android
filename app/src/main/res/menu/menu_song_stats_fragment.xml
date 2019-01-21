@@ -22,6 +22,10 @@
                 android:title="@string/menu_graph_song_rank"
                 app:showAsAction="never" />
 
+            <item android:id="@+id/menu_graph_percent_leads"
+                android:title="@string/menu_graph_percent_leads"
+                app:showAsAction="never" />
+
         </group>
         </menu>
 

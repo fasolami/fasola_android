@@ -109,4 +109,5 @@
     <string name="graph_settings">Graph settings</string>
     <string name="menu_graph_leads_per_year">Leads per year</string>
     <string name="menu_graph_song_rank">Rank by year</string>
+    <string name="menu_graph_percent_leads">Leads per year (percent)</string>
 </resources>

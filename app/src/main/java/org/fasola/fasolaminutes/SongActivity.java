@@ -194,6 +194,10 @@ public class SongActivity extends SimpleTabActivity {
 
         private SQL.Query getChartQuery() {
             switch (mGraphSettingId) {
+                case R.id.menu_graph_percent_leads:
+                    return C.SongStats.select(C.SongStats.year, C.SongStats.leadPercent)
+                        .whereEq(C.SongStats.songId)
+                        .order(C.SongStats.year, "ASC");
                 case R.id.menu_graph_song_rank:
                     return C.SongStats.select(C.SongStats.year, C.SongStats.rank)
                         .whereEq(C.SongStats.songId)
@@ -231,6 +235,7 @@ public class SongActivity extends SimpleTabActivity {
                             lineDataSet.setLineWidth(2);
                             data.setData(new LineData(xVals, lineDataSet));
                             return data;
+                        case R.id.menu_graph_percent_leads:
                         case R.id.menu_graph_leads_per_year:
                         default:
                             // Bar graphs need a BarEntry array

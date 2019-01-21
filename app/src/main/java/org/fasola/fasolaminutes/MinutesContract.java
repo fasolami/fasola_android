@@ -130,7 +130,16 @@ public class MinutesContract {
             songId = column("song_id");
         }
 
-        public SQL.Column songId, year, leadCount, rank;
+        @Override
+        protected void onCreate() {
+            leadPercent = leadCount.cast("FLOAT").format(
+                "100. * {column} / (%s)",
+                "SELECT SUM(song_stats_total.lead_count) " +
+                "FROM song_stats song_stats_total " +
+                "WHERE song_stats_total.year = song_stats.year");
+        }
+
+        public SQL.Column songId, year, leadCount, rank, leadPercent;
     }
 
     /* Leader table */
