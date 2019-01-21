@@ -134,13 +134,16 @@ public class SongActivity extends SimpleTabActivity {
 
     public static class SongStatsFragment extends Fragment {
         private static final String BUNDLE_GRAPH_SETTING = "GRAPH_SETTING";
+        private static final String BUNDLE_GRAPH_TITLE = "GRAPH_TITLE";
         int mGraphSettingId = -1;
+        String mGraphTitle = "";
 
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             // load saved data
             if (savedInstanceState != null) {
                 mGraphSettingId = savedInstanceState.getInt(BUNDLE_GRAPH_SETTING);
+                mGraphTitle = savedInstanceState.getString(BUNDLE_GRAPH_TITLE);
             }
         }
 
@@ -148,6 +151,7 @@ public class SongActivity extends SimpleTabActivity {
         public void onSaveInstanceState(Bundle outState) {
             super.onSaveInstanceState(outState);
             outState.putInt(BUNDLE_GRAPH_SETTING, mGraphSettingId);
+            outState.putString(BUNDLE_GRAPH_TITLE, mGraphTitle);
         }
 
         @Override
@@ -207,6 +211,7 @@ public class SongActivity extends SimpleTabActivity {
             final CombinedChart chart = (CombinedChart)getView().findViewById(R.id.chart);
             chart.setNoDataText("");
             chart.setDescription("");
+            final TextView chartTitle = (TextView)getView().findViewById(R.id.song_chart_title);
             getLoaderManager().initLoader(mGraphSettingId, null, new MinutesLoader(getChartQuery(), String.valueOf(id)) {
 
                 private CombinedData getChartData(Cursor cursor) {
@@ -259,6 +264,8 @@ public class SongActivity extends SimpleTabActivity {
                     chart.setData(getChartData(cursor));
                     styleChart();
                     chart.invalidate(); // redraw
+                    // Update chart title
+                    chartTitle.setText(mGraphTitle);
                 }
             });
         }
@@ -269,14 +276,17 @@ public class SongActivity extends SimpleTabActivity {
             // Initial graph setting
             MenuItem item = menu.findItem(
                 mGraphSettingId != -1 ? mGraphSettingId : R.id.menu_graph_leads_per_year);
-            if (item != null)
+            if (item != null) {
                 item.setChecked(true);
+                mGraphTitle = item.getTitle().toString();
+            }
         }
 
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
             if (item.getGroupId() == R.id.menu_group_graph_settings) {
                 item.setChecked(true);
+                mGraphTitle = item.getTitle().toString();
                 mGraphSettingId = item.getItemId();
                 updateChart();
                 return true;
