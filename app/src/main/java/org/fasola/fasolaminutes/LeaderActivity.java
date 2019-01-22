@@ -112,14 +112,14 @@ public class LeaderActivity extends SimpleTabActivity {
                         int nTimes = leader.leadCount.getInt();
                         int nSingings = leader.singingCount.getInt();
                         String songsLed = getResources().getQuantityString(R.plurals.songsLed, nSongs, nSongs);
-                        String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
+                        String leadCount = getResources().getQuantityString(R.plurals.leadCount, nTimes, nTimes);
                         String singings = getResources().getQuantityString(R.plurals.singingsAttended, nSingings, nSingings);
                         float major = leader.majorPercent.getFloat();
                         String majorText = major >= 0.5 ?
                                 Math.round(100 * major) + "% Major" :
                                 Math.round(100 * (1-major)) + "% Minor";
                         String entropy = "Entropy: " + leader.entropyDisplay.getString();
-                        ((TextView) view.findViewById(R.id.songs)).setText(songsLed + ", " + timesLed);
+                        ((TextView) view.findViewById(R.id.songs)).setText(songsLed + ", " + leadCount);
                         ((TextView) view.findViewById(R.id.singings)).setText(singings);
                         ((TextView) view.findViewById(R.id.major_pct)).setText(majorText);
                         ((TextView) view.findViewById(R.id.entropy)).setText(entropy);

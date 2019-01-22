@@ -36,9 +36,13 @@
     <string name="select_song_or_leader">Pick one to view</string>
     <string name="play_recording_text">Play Recording</string>
 
-    <plurals name="timesLed">
+    <plurals name="leadCount">
         <item quantity="one">%d Lead</item>
         <item quantity="other">%d Leads</item>
+    </plurals>
+    <plurals name="timesLed">
+        <item quantity="one">Led %d time</item>
+        <item quantity="other">Led %d timess</item>
     </plurals>
     <plurals name="coleads">
         <item quantity="one">%d Co-lead</item>

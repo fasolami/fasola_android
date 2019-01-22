@@ -180,7 +180,7 @@ public class SongActivity extends SimpleTabActivity {
                         String timesLed = getResources().getQuantityString(R.plurals.timesLed, nTimes, nTimes);
                         String coleads = getResources().getQuantityString(R.plurals.coleads, nColeads, nColeads);
                         ((TextView) view.findViewById(R.id.stats)).setText(
-                                "Led " + timesLed + ", by " + leaders + " (" + coleads + ")");
+                                timesLed + ", by " + leaders + " (" + coleads + ")");
                     }
                 }
             });
