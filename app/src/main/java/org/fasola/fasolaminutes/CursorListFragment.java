@@ -604,10 +604,15 @@ public class CursorListFragment extends ListFragment
             adapter.setIndexer(null);
         }
         // Setup the CursorAdapter
-        if (cursor.getColumnCount() == 0) {
-            adapter.changeCursor(null);
+        // According to the docs, the LoaderManager owns the cursors, and we shouldn't close them.
+        // changeCursor() closes the cursor, while swapCursor() doesn't . . . but the only way to
+        // set new to and from column mappings is to use changeCursorAndColumns(). To get around
+        // this limitation, we call swapCursor(null) to remove the old cursor without deleting it.
+        // This might be incorrect -- maybe we should be allocating a new CursorAdapter instead of
+        // trying to reuse the old one -- but it works for now.
+        adapter.swapCursor(null);
+        if (cursor.getColumnCount() == 0)
             return;
-        }
         String[] from = getFrom(cursor);
         int[] to = getTo(from.length);
         adapter.changeCursorAndColumns(cursor, from, to);
