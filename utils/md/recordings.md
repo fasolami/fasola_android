@@ -23,7 +23,5 @@ On the [leader screen](leader_activity) under **All leads**.
 Recordings are provided by
 
 * [bostonsing.org](http://www.bostonsing.org/index)
-
 * [shapenotecds.com](http://www.shapenotecds.com)
-
 * [phillysacredharp.org](http://phillysacredharp.org)
