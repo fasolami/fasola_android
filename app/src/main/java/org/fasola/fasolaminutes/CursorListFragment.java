@@ -123,7 +123,7 @@ public class CursorListFragment extends ListFragment
         });
         // Start loading the cursor in the background
         if (mMinutesLoader.hasQuery())
-            getLoaderManager().initLoader(-1, null, mMinutesLoader);
+            getLoaderManager().initLoader(mMinutesLoader.getQuery().toString().hashCode(), null, mMinutesLoader);
     }
 
     // Subclasses that want to override the default layout should provide a ViewStub with
@@ -208,7 +208,7 @@ public class CursorListFragment extends ListFragment
      */
     public void setQuery(SQL.Query query, String... queryArgs) {
         mMinutesLoader.setQuery(query, queryArgs);
-        getLoaderManager().restartLoader(-1, null, mMinutesLoader);
+        getLoaderManager().initLoader(mMinutesLoader.getQuery().toString().hashCode(), null, mMinutesLoader);
     }
 
     /**
