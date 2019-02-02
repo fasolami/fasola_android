@@ -41,7 +41,7 @@ public class LetterIndexer extends AlphabetIndexer {
 
     // mAlphabetArray is private in AlphabetIndexer, but we get get at it through getSections()
     protected void setSections(String[] sections) {
-        System.arraycopy(sections, 0, (String[]) getSections(), 0, sections.length);
+        System.arraycopy(sections, 0, getSections(), 0, sections.length);
     }
 
     /**

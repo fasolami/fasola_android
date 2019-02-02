@@ -72,28 +72,38 @@ public class MinutesLoader implements LoaderManager.LoaderCallbacks<Cursor>,
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (SQLiteDebugActivity.isDebug())
             SQLiteDebugActivity.addQuery(mQuery, mQueryArgs);
-        return new CursorLoader(MinutesApplication.getContext()) {
-            @Override
-            public Cursor loadInBackground() {
-                if (SQLiteDebugActivity.isDebug())
-                    return null;
-                Thread.currentThread().setName("MinutesLoader: " + mQuery.toString());
-                Cursor cursor = MinutesLoader.this.onLoadInBackground(MinutesDb.getInstance());
-                // The query isn't executed until data is accessed in some way.
-                // Since the whole point of using a cursor loader is to do the heavy lifting in
-                // the background, we force the query to execute here.
-                if (! DEBUG_QUERIES)
-                    cursor.getCount();
-                else {
-                    long start = nanoTime();
-                    Log.v("SQL", mQuery.toString());
-                    Log.v("SQL", "Query length: " + mQuery.toString().length());
-                    cursor.getCount();
-                    Log.v("SQL", "query time (secs): " + (nanoTime() - start)/1000000000.);
-                }
-                return cursor;
+        return new MinutesCursorLoader(this);
+    }
+
+    private static class MinutesCursorLoader extends CursorLoader {
+        MinutesLoader mLoader;
+
+        MinutesCursorLoader(MinutesLoader loader) {
+            super(MinutesApplication.getContext());
+            mLoader = loader;
+
+        }
+
+        @Override
+        public Cursor loadInBackground() {
+            if (SQLiteDebugActivity.isDebug())
+                return null;
+            Thread.currentThread().setName("MinutesLoader: " + mLoader.getQuery().toString());
+            Cursor cursor = mLoader.onLoadInBackground(MinutesDb.getInstance());
+            // The query isn't executed until data is accessed in some way.
+            // Since the whole point of using a cursor loader is to do the heavy lifting in
+            // the background, we force the query to execute here.
+            if (! DEBUG_QUERIES)
+                cursor.getCount();
+            else {
+                long start = nanoTime();
+                Log.v("SQL", mLoader.getQuery().toString());
+                Log.v("SQL", "Query length: " + mLoader.getQuery().toString().length());
+                cursor.getCount();
+                Log.v("SQL", "query time (secs): " + (nanoTime() - start)/1000000000.);
             }
-        };
+            return cursor;
+        }
     }
 
     /**

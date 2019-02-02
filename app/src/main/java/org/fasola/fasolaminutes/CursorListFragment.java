@@ -27,8 +27,6 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
 
-import junit.framework.Assert;
-
 import java.util.ArrayList;
 
 /**
@@ -790,7 +788,7 @@ public class CursorListFragment extends ListFragment
                     to[i] = R.id.text4;
                     break;
                 default:
-                    Assert.fail(String.format("ID: R.id.text%d is unsupported", i+1));
+                    throw new RuntimeException(String.format("ID: R.id.text%d is unsupported", i+1));
             }
         }
         return to;
