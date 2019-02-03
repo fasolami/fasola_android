@@ -7,6 +7,7 @@
 
     <color name="fasola_background">#ffedeae3</color>
     <color name="fasola_foreground">#ff411c24</color>
+    <color name="slider_background">#61411c24</color>
     <color name="tab_background">#44411c24</color>
     <color name="list_header_background">#b0666666</color>
 

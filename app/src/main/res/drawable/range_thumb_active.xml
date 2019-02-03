@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <size android:height="36dp" android:width="36dp" />
+            <solid android:color="@color/slider_background" />
+        </shape>
+    </item>
+    <item android:top="12dp" android:bottom="12dp" android:left="12dp" android:right="12dp">
+        <shape android:shape="oval">
+            <size android:height="12dp" android:width="12dp" />
+            <solid android:color="@color/fasola_foreground" />
+        </shape>
+    </item>
+</layer-list>

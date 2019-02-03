@@ -8,7 +8,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.CheckBox;
 
-import com.appyvet.materialrangebar.RangeBar;
+import org.florescu.android.rangeseekbar.RangeSeekBar;
 
 import java.util.ArrayList;
 
@@ -90,8 +90,8 @@ public class SongFilterActivity extends BaseActivity {
     private void clear() {
         for (int id : CHECKBOX_IDS)
             ((CheckBox) findViewById(id)).setChecked(false);
-        RangeBar pageRange = ((RangeBar) findViewById(R.id.page_number));
-        pageRange.setRangePinsByIndices(0, pageRange.getTickCount() - 1);
+        RangeSeekBar pageRange = (RangeSeekBar) findViewById(R.id.page_number);
+        pageRange.resetSelectedValues();
     }
 
     private void loadBundle(Bundle state) {
@@ -107,9 +107,9 @@ public class SongFilterActivity extends BaseActivity {
             // restore page range
             int [] pages = state.getIntArray(PAGE_RANGE);
             if (pages != null && pages.length == 2) {
-                RangeBar pageRange = ((RangeBar) findViewById(R.id.page_number));
-                int offset = (int)pageRange.getTickStart();
-                pageRange.setRangePinsByIndices(pages[0] - offset, pages[1] - offset);
+                RangeSeekBar pageRange = (RangeSeekBar) findViewById(R.id.page_number);
+                pageRange.setSelectedMinValue(pages[0]);
+                pageRange.setSelectedMaxValue(pages[1]);
             }
         }
     }
@@ -124,12 +124,12 @@ public class SongFilterActivity extends BaseActivity {
         }
         state.putIntegerArrayList(CHECKBOXES, checkboxes);
         // page range
-        RangeBar pageRange = ((RangeBar) findViewById(R.id.page_number));
-        if (pageRange.getLeftIndex() != 0 || pageRange.getRightIndex() != pageRange.getTickCount() - 1) {
-            int offset = (int) pageRange.getTickStart();
+        RangeSeekBar pageRange = (RangeSeekBar) findViewById(R.id.page_number);
+        if (! pageRange.getSelectedMinValue().equals(pageRange.getAbsoluteMinValue()) ||
+            ! pageRange.getSelectedMaxValue().equals(pageRange.getAbsoluteMaxValue())) {
             state.putIntArray(PAGE_RANGE, new int[]{
-                offset + pageRange.getLeftIndex(),
-                offset + pageRange.getRightIndex()
+                pageRange.getSelectedMinValue().intValue(),
+                pageRange.getSelectedMaxValue().intValue()
             });
         }
         return state;

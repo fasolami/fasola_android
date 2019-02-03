@@ -373,7 +373,7 @@
             android:layout_marginTop="10dp"
             android:text="Page Number" />
 
-        <com.appyvet.materialrangebar.RangeBar
+        <org.florescu.android.rangeseekbar.RangeSeekBar
             android:id="@+id/page_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -381,29 +381,20 @@
             android:layout_marginLeft="25dp"
             android:layout_marginRight="25dp"
             android:layout_marginTop="5dp"
+            app:absoluteMaxValue="573"
+            app:absoluteMinValue="26"
+            app:step="1"
 
-            app:mrb_connectingLineColors="@array/rangeBarColors"
-            app:mrb_pinColor="@color/fasola_foreground"
-            app:mrb_pinMaxFont="14sp"
-            app:mrb_pinMinFont="14sp"
-
-            app:mrb_pinRadius="16dp"
-            app:mrb_pinTextColor="@color/fasola_background"
-            app:mrb_rangeBar="true"
-
-            app:mrb_rangeBarColor="@color/fasola_foreground"
-            app:mrb_rangeBarPaddingBottom="20dp"
-            app:mrb_rangeBar_rounded="true"
-            app:mrb_selectorBoundaryColor="@color/fasola_foreground"
-            app:mrb_selectorBoundarySize="2dp"
-            app:mrb_selectorColor="@color/fasola_foreground"
-            app:mrb_selectorSize="6dp"
-
-            app:mrb_temporaryPins="false"
-            app:mrb_tickEnd="573"
-
-            app:mrb_tickInterval="1"
-            app:mrb_tickStart="26" />
+            app:showLabels="false"
+            app:alwaysActive="true"
+            app:activateOnDefaultValues="true"
+            app:textAboveThumbsColor="@color/fasola_foreground"
+            app:thumbPressed="@drawable/range_thumb_active"
+            app:thumbNormal="@drawable/range_thumb_normal"
+            app:thumbDisabled="@drawable/range_thumb_normal"
+            app:barHeight="2dp"
+            app:activeColor="@color/fasola_foreground"
+            app:defaultColor="@color/slider_background" />
 
     </LinearLayout>
 </ScrollView>

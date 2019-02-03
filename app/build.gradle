@@ -45,5 +45,5 @@ dependencies {
     // This replacement is the same code, but with updated build tools
     // implementation 'com.astuetz:pagerslidingtabstrip:1.0.1'
     implementation 'com.github.ChristophKaser:PagerSlidingTabStrip:d924189a70'
-    implementation 'com.appyvet:materialrangebar:1.4.4'
+    implementation 'org.florescu.android.rangeseekbar:rangeseekbar-library:0.4.0'
 }
