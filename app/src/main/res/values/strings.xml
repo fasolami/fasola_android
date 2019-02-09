@@ -42,7 +42,7 @@
     </plurals>
     <plurals name="timesLed">
         <item quantity="one">Led %d time</item>
-        <item quantity="other">Led %d timess</item>
+        <item quantity="other">Led %d times</item>
     </plurals>
     <plurals name="coleads">
         <item quantity="one">%d Co-lead</item>
